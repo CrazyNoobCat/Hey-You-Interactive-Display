@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO Controller</title>
+    <style>
+
+        .text {
+          padding-top: 60px;
+          padding-bottom: 60px;
+          text-align: center;
+          width: 100%;
+          font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+          color: black;
+          font-size: 50px;
+          text-decoration: none;
+          background-color:cadetblue;
+        }
+
+        .outer {
+          width: auto;
+          height: 100%;
+          margin: auto;
+          /*padding-top: 40%;*/
+          display: block;
+          align-items: center;
+          justify-items: center;
+        }
+
+        html, body {
+          height: 100%;
+        }
+    </style>
+  </head>
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socketType = 'controller';
+        var url = window.location.host;
+        var socket = io(url , {
+          query: {
+            "data" : socketType
+          }
+        });
+
+        socket.on('reconnect', () => {
+          window.location.href = '/';
+        });
+
+        socket.on('select activity', () => {
+          window.location.href = 'selectActivity';
+        });
+    </script>
+    <div class="outer">
+      <h1 class="text">Waiting for Game to be selected</h1>
+    </div>
+  </body>
+</html>

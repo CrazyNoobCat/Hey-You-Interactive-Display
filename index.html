@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+        .button {
+            position: relative;
+            margin: auto;
+            margin-top: 5px;
+            padding: 10px;
+            text-align: center;
+            width: 400px;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            color: black;
+            font-size: 50px;
+            text-decoration: none;
+            background-color: burlywood;
+        }
+    </style>
+</head>
+<body>
+<h1 id="heading">Please connect and select a game</h1>
+<img src="qr-code">
+<h1>https://heyyou.sowemustthink.space/</h1>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socketType = 'display';
+    var url = window.location.host;
+    var socket = io(url , {
+        query: {
+            "data" : socketType
+        }
+    });
+
+    socket.on('reload', () => {
+        window.location.pathname = '/game';
+    });
+</script>
+</body>
+</html>

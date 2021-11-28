@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+        .button {
+            position: relative;
+            margin: auto;
+            margin-top: 5px;
+            padding: 10px;
+            text-align: center;
+            width: 400px;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            color: black;
+            font-size: 50px;
+            text-decoration: none;
+            background-color: burlywood;
+        }
+    </style>
+</head>
+<body>
+<button onclick="selectGame()">Quit game</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socketType = '';
+    var url = window.location.host;
+    var socket = io(url , {
+        query: {
+            "data" : socketType
+        }
+    });
+
+    function selectGame() {
+            socket.emit("selectGame", '', (response) => {
+                window.location.pathname = '';
+            });
+        }
+    
+        function selectGame() {
+            socket.emit("selectGame", '', (response) => {
+                window.location.pathname = '';
+            });
+        }
+</script>
+</body>
+</html>
