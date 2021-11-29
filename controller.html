@@ -34,25 +34,43 @@
   <body>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var socketType = 'controller';
-        var url = window.location.host;
-        var socket = io(url , {
-          query: {
-            "data" : socketType
-          }
-        });
+      // Get a unique ID
+        const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
+        .then(FingerprintJS => FingerprintJS.load())
+        var visitorID = "";
+        // Get the visitor identifier when you need it.
+        fpPromise
+          .then(fp => fp.get())
+          .then(result => {
+            // This is the visitor identifier:
+            visitorId = result.visitorId
+            console.log(visitorId)
+            
+            var socketType = 'controller';
+            var url = window.location.host;
+            var socket = io(url , {
+              query: {
+                "data" : socketType,
+                "clientID" : visitorId
+              }
+            });
 
-        socket.on('reconnect', () => {
-          window.location.href = '';
-        });
+            socket.on('reconnect', () => {
+              window.location.href = '';
+            });
 
-        socket.on('reload', () => {
-          window.location.href = '';
-        });
+            socket.on('reload', () => {
+              window.location.href = '';
+            });
 
-        socket.on('select activity', () => {
-          window.location.href = 'selectActivity';
-        });
+            socket.on('select activity', () => {
+              window.location.href = 'selectActivity';
+            });
+          })
+
+        
+
+        
     </script>
     <div class="outer">
       <h1 class="text">Waiting for Game to be selected</h1>

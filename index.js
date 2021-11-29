@@ -4,6 +4,7 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
+const cookie = require("cookie");
 
 var controllerSockets = [];
 var hostController;
@@ -33,10 +34,6 @@ app.get('/main.js', (req, res) => {
     res.sendFile(__dirname + activity + '/Scripts/main.js');
 });
 
-app.get('/qr-code', (req, res) => {
-    res.sendFile(__dirname + '/qr.png');
-});
-
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/dashboard.html');
 });
@@ -44,9 +41,12 @@ app.get('/dashboard', (req, res) => {
 io.on('connection', (socket, host) => {
     // Socket type (display or controller)
     var socketType = socket.handshake.query.data;
-    console.log(socket.id +' socket connection attempt: ' + socketType);
-    
+    var deviceID = socket.handshake.query.clientID;
+    var ipAddr = socket.handshake.address;
 
+    console.log("New connection attempt...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType + "\tIP: " + ipAddr);
+    //console.log("ip: "+socket.request.connection.remoteAddress);
+    //console.log("user-agent: "+socket.request.headers['user-agent']);
     // Add display
     if (socketType == "display"){
         displaySockets.push(socket.id);
