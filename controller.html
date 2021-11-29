@@ -43,7 +43,11 @@
         });
 
         socket.on('reconnect', () => {
-          window.location.href = '/';
+          window.location.href = '';
+        });
+
+        socket.on('reload', () => {
+          window.location.href = '';
         });
 
         socket.on('select activity', () => {

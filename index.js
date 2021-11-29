@@ -17,22 +17,12 @@ app.get('/activity', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-        res.sendFile(__dirname + activity + '/controller.html');
+    res.sendFile(__dirname + activity + '/controller.html');
 });
 
 app.get('/Sounds', (req, res) => {
     res.sendFile(__dirname + activity + '/Sounds');
 });
-
-app.get('/PongMultiplayer', (req, res) => {
-    res.sendFile(__dirname + activity + '/pongMultiplayer.html');
-});
-
-// Dont think this is used
-//app.get('/controllerInput.js', (req, res) => {
-//    var file = activity + '/controllerInput.js';
-//    res.sendFile(__dirname + file);
-//});
 
 app.get('/selectActivity', (req, res) => {
     res.sendFile(__dirname + '/hostController.html');
@@ -52,35 +42,46 @@ app.get('/dashboard', (req, res) => {
 });
 
 io.on('connection', (socket, host) => {
-    // getting the type from the socket (display or controller)
+    // Socket type (display or controller)
     var socketType = socket.handshake.query.data;
-    // Show the id of the new socket
-    console.log(socket.id +' socket connected: ' + socketType + ' ' + controllerSockets.length);
-    // if the socket is a display save it to the displaySockets variable (if there isn't already a display)
+    console.log(socket.id +' socket connection attempt: ' + socketType);
+    
+
+    // Add display
     if (socketType == "display"){
         displaySockets.push(socket.id);
-        // adds all the already existing controllers to the new display instance
+
+        // Add all existing controllers to the new display
         controllerSockets.forEach(control =>{
             io.to(socket.id).emit('controller connection', control);
         });
+        console.log(socket.id +' socket connected: ' + socketType + ' ' + displaySockets.length);
     }
-    // if the socket is a controller send it to the display socket
-    if (socketType == "controller"){
-        if (hostController == null) hostController = socket.id;
-        controllerSockets.push(socket.id);
-        if (activity == '') io.to(hostController).emit("select activity");
-        console.log("Triggering emit to controller with response");        
+    // Add controller
+    else if (socketType == "controller"){
+        // Make sure a host exists
+        if (hostController == null && activity == '')
+            io.to(socket.id).emit("select activity");
+        else{
+            // Add to array
+            controllerSockets.push(socket.id);
+
+            // Add the new controller to all displays   
+            displaySockets.forEach(displaySocket =>{
+                io.to(displaySocket).emit('controller connection', socket.id);
+            });
+            
+            console.log(socket.id +' socket connected: ' + socketType + ' ' + controllerSockets.length); 
+        }            
+    }
+
+    else if (socketType == "host"){
+        hostController = socket.id;
         displaySockets.forEach(displaySocket =>{
             io.to(displaySocket).emit('controller connection', socket.id);
         });
+        console.log(socket.id +' socket connected: ' + socketType);
     }
-
-    // if (host) {
-    //     if (hostController != null){
-    //         io.to(socket).emit('reconnect');
-    //         console.log("There is already a host controller");
-    //     }
-    // }
 
     socket.on('connection callback', (response) =>{
         if (response.orientation !== null) {
@@ -90,24 +91,26 @@ io.on('connection', (socket, host) => {
     })
 
     socket.on('disconnect', () => {
+        console.log('dc info: ' +   socket.id);
+
         // if the display disconnects, release the associated displaySocket variable
         if (displaySockets.includes(socket.id)){
-            console.log("Removed a display socket");
-            //io.emit('reconnect');
             try{
                 // remove it from the list of displaySockets
                 var index = displaySockets.indexOf(socket.id);
                 displaySockets.splice(index, 1);
+                
             }
             catch(e){
                 console.log("ERROR: " + e);
                 return;
             }
+            console.log(socketType + ' disconnected');
         }
 
         // if a controller disconnects
         // check it is in our list of controllers
-        if (controllerSockets.includes(socket.id)) {
+        else if (controllerSockets.includes(socket.id)) {
             try{
                 // remove it from the list of controllers
                 var index = controllerSockets.indexOf(socket.id);
@@ -115,21 +118,25 @@ io.on('connection', (socket, host) => {
                 // tell display to remove the controller
                 displaySockets.forEach(displaySocket =>{
                     io.to(displaySocket).emit('controller disconnection', socket.id);
-                });
-                
-                if (hostController == socket.id) {
-                    if (controllerSockets.length > 0) {
-                        hostController = controllerSockets[0];
-                    }
-                    else hostController = null;
-                }
+                });             
             }
             catch(e){
                 console.log("ERROR: " + e);
-                return;
+                return; 
             }
+            console.log(socketType + ' disconnected');
         }
-        console.log(socketType + ' user disconnected');
+
+        else if (hostController == socket.id){
+            hostController = null;
+            if (controllerSockets.length > 0 && activity == '') {
+                io.to(controllerSockets[0]).emit('select activity');
+                controllerSockets.shift();
+            }
+            console.log(socketType + ' disconnected');
+        }
+
+        
     });
 
     socket.onAny((event, ...args) => {
@@ -148,7 +155,10 @@ io.on('connection', (socket, host) => {
                 activity = selected;
                 displaySockets.forEach(displaySocket =>{
                     io.to(displaySocket).emit('reload');
-                });                
+                });         
+                controllerSockets.forEach(controllerSocket =>{
+                    io.to(controllerSocket).emit('reload');
+                });       
                 callback();
 
             default:

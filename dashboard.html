@@ -33,16 +33,10 @@
     });
 
     function selectGame() {
-            socket.emit("selectGame", '', (response) => {
-                window.location.pathname = '';
-            });
-        }
-    
-        function selectGame() {
-            socket.emit("selectGame", '', (response) => {
-                window.location.pathname = '';
-            });
-        }
+        socket.emit("selectGame", '', (response) => {
+            window.location.pathname = '';
+        });
+    }
 </script>
 </body>
 </html>

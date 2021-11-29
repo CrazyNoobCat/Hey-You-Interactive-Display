@@ -18,24 +18,44 @@
             background-color: burlywood;
         }
     </style>
+
+    
 </head>
 <body>
-<h1 id="heading">Please connect and select a game</h1>
-<img src="qr-code">
-<h1>https://heyyou.sowemustthink.space/</h1>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    var socketType = 'display';
-    var url = window.location.host;
-    var socket = io(url , {
-        query: {
-            "data" : socketType
-        }
-    });
+    <h1 id="heading">Please connect and select an activity</h1>
+    
+    <img id='barcode' 
+            src="https://api.qrserver.com/v1/create-qr-code/?data=HelloWorld&amp;size=100x100" 
+            alt="" 
+            title="HELLO" 
+            width="100" 
+            height="100" />
 
-    socket.on('reload', () => {
-        window.location.pathname = '/game';
-    });
-</script>
-</body>
+            
+    <h3 id='website'>Website: </h3>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript">
+
+            var nric = self.location.host;
+            console.log(nric);
+            var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '&amp;size=100x100';
+            $('#barcode').attr('src', url);
+    </script>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socketType = 'display';
+        var url = window.location.host;
+        var socket = io(url , {
+            query: {
+                "data" : socketType
+            }
+        });
+
+        socket.on('reload', () => {
+            window.location.pathname = '/activity';
+        });
+    </script>
+    </body>
 </html>

@@ -46,7 +46,7 @@
   <body>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var socketType = '';
+        var socketType = 'host';
         var url = window.location.host;
         var socket = io(url , {
           query: {
@@ -57,6 +57,7 @@
         function selectGame(game) {
             socket.emit("selectGame", game, (response) => {
                 console.log("Redirecting to " + game);
+                window.location.pathname = '/';
             });
         }
     </script>
