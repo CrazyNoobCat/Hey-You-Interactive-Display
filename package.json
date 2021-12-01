@@ -1,7 +1,7 @@
 {
-    "name": "socket-chat-example",
-    "version": "0.0.1",
-    "description": "my first socket.io app",
+    "name": "hey-you-interactive-display",
+    "version": "0.0.2",
+    "description": "Hey You Interactive Display",
     "dependencies": {
         "express": "^4.17.1",
         "socket.io": "^4.0.2"
