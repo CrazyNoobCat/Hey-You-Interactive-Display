@@ -3,6 +3,19 @@
   <head>
     <title>Socket.IO Controller</title>
     <style>
+        .button {
+          position: relative;
+          margin: auto;
+          margin-top: 5px;
+          padding: 10px;
+          text-align: center;
+          width: 400px;
+          font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+          color: black;
+          font-size: 50px;
+          text-decoration: none;
+          background-color: burlywood;
+        }
 
         .text {
           padding-top: 60px;
@@ -33,47 +46,56 @@
   </head>
   <body>
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-      // Get a unique ID
+    <script>      
+
+      var socket;
+      
+      // Get the visitor identifier when you need it.
+      function getVisitorID(){
         const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
-        .then(FingerprintJS => FingerprintJS.load())
-        var visitorID = "";
-        // Get the visitor identifier when you need it.
+        .then(FingerprintJS => FingerprintJS.load());
+        
         fpPromise
-          .then(fp => fp.get())
-          .then(result => {
-            // This is the visitor identifier:
-            visitorId = result.visitorId
-            console.log(visitorId)
-            
-            var socketType = 'controller';
-            var url = window.location.host;
-            var socket = io(url , {
-              query: {
-                "data" : socketType,
-                "clientID" : visitorId
-              }
-            });
-
-            socket.on('reconnect', () => {
-              window.location.href = '';
-            });
-
-            socket.on('reload', () => {
-              window.location.href = '';
-            });
-
-            socket.on('select activity', () => {
-              window.location.href = 'selectActivity';
-            });
-          })
-
+        .then(fp => fp.get())
+        .then(result => setupSocket(result.visitorId))    
+      }
+      
+      function setupSocket(visitorID){
+        console.log(visitorID);
+        var socketType = 'controller';
+        var url = window.location.host;
+        socket = io(url , {
+          query: {
+            "data" : socketType,
+            "clientID" : visitorID
+          }
+        });
         
+        socket.on('reconnect', () => {
+        window.location.href = '/';
+        });
 
-        
+        socket.on('reload', () => {
+          window.location.href = '/';
+        }); 
+      }           
+      
+
+      function selectGame(game) {
+        socket.emit("selectGame", game, (response) => {
+            console.log("Redirecting to " + game);
+            window.location.pathname = '/';
+        });
+      }
+      
+      // This causes a unique identifier to be created then sent to the socket for creation
+      getVisitorID();
     </script>
     <div class="outer">
-      <h1 class="text">Waiting for Game to be selected</h1>
+      <h1 class="text">Please Select an Activity</h1>
+      <a onclick="selectGame('/BullRush')" style="text-decoration: none"><div class="button">Bull Rush</div></a>
+      <a onclick="selectGame('/PongMultiplayer')" style="text-decoration: none"><div class="button">(not connected)Pong Multiplayer</div></a>
+      <a onclick="selectGame('/TestSite')" style="text-decoration: none"><div class="button">TestSite</div></a>
     </div>
   </body>
 </html>
