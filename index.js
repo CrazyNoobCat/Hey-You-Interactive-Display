@@ -7,7 +7,6 @@ const io = new Server(server);
 const cookie = require("cookie");
 
 var controllerSockets = [];
-var hostController;
 
 var displaySockets = [];
 var activity = '';
@@ -25,10 +24,6 @@ app.get('/Sounds', (req, res) => {
     res.sendFile(__dirname + activity + '/Sounds');
 });
 
-app.get('/selectActivity', (req, res) => {
-    res.sendFile(__dirname + '/hostController.html');
-});
-
 app.get('/main.js', (req, res) => {
     console.log(__dirname + activity + '/Scripts/main.js');
     res.sendFile(__dirname + activity + '/Scripts/main.js');
@@ -44,7 +39,7 @@ io.on('connection', (socket, host) => {
     var deviceID = socket.handshake.query.clientID;
     var ipAddr = socket.handshake.address;
 
-    console.log("New connection attempt...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType + "\tIP: " + ipAddr);
+    console.log("Connection attempt...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType + "\tIP: " + ipAddr);
     //console.log("ip: "+socket.request.connection.remoteAddress);
     //console.log("user-agent: "+socket.request.headers['user-agent']);
     // Add display
@@ -55,32 +50,20 @@ io.on('connection', (socket, host) => {
         controllerSockets.forEach(control =>{
             io.to(socket.id).emit('controller connection', control);
         });
-        console.log(socket.id +' socket connected: ' + socketType + ' ' + displaySockets.length);
+        console.log("Connection success...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType +'('+ displaySockets.length +')'+ "\tIP: " + ipAddr);
     }
     // Add controller
     else if (socketType == "controller"){
-        // Make sure a host exists
-        if (hostController == null && activity == '')
-            io.to(socket.id).emit("select activity");
-        else{
-            // Add to array
-            controllerSockets.push(socket.id);
+        // Add to array
+        controllerSockets.push(socket.id);
 
-            // Add the new controller to all displays   
-            displaySockets.forEach(displaySocket =>{
-                io.to(displaySocket).emit('controller connection', socket.id);
-            });
-            
-            console.log(socket.id +' socket connected: ' + socketType + ' ' + controllerSockets.length); 
-        }            
-    }
-
-    else if (socketType == "host"){
-        hostController = socket.id;
+        // Add the new controller to all displays   
         displaySockets.forEach(displaySocket =>{
             io.to(displaySocket).emit('controller connection', socket.id);
         });
-        console.log(socket.id +' socket connected: ' + socketType);
+        
+        console.log("Connection success...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType +'('+ controllerSockets.length +')'+ "\tIP: " + ipAddr); 
+        
     }
 
     socket.on('connection callback', (response) =>{
@@ -124,17 +107,18 @@ io.on('connection', (socket, host) => {
                 console.log("ERROR: " + e);
                 return; 
             }
+
             console.log(socketType + ' disconnected');
         }
 
-        else if (hostController == socket.id){
+        /*else if (hostController == socket.id){
             hostController = null;
             if (controllerSockets.length > 0 && activity == '') {
                 io.to(controllerSockets[0]).emit('select activity');
                 controllerSockets.shift();
             }
             console.log(socketType + ' disconnected');
-        }
+        }*/
 
         
     });
