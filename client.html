@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Socket.IO Controller</title>
+    <title>Socket.IO client</title>
     <style>
         .button {
           position: relative;
@@ -45,51 +45,19 @@
     </style>
   </head>
   <body>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="socketCreation.js"></script>
     <script>      
+      // Generic socket setup
+      setupConnection("client");  
 
-      var socket;
-      
-      // Get the visitor identifier when you need it.
-      function getVisitorID(){
-        const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
-        .then(FingerprintJS => FingerprintJS.load());
-        
-        fpPromise
-        .then(fp => fp.get())
-        .then(result => setupSocket(result.visitorId))    
-      }
-      
-      function setupSocket(visitorID){
-        console.log(visitorID);
-        var socketType = 'controller';
-        var url = window.location.host;
-        socket = io(url , {
-          query: {
-            "data" : socketType,
-            "clientID" : visitorID
-          }
-        });
-        
-        socket.on('reconnect', () => {
-        window.location.href = '/';
-        });
-
-        socket.on('reload', () => {
-          window.location.href = '/';
-        }); 
-      }           
-      
-
+      // page specific functions
       function selectGame(game) {
         socket.emit("selectGame", game, (response) => {
             console.log("Redirecting to " + game);
             window.location.pathname = '/';
         });
       }
-      
-      // This causes a unique identifier to be created then sent to the socket for creation
-      getVisitorID();
+
     </script>
     <div class="outer">
       <h1 class="text">Please Select an Activity</h1>

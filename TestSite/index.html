@@ -6,26 +6,12 @@
 <body onload="setBackground()">
     <canvas id="gameCanvas" width="1366" height="768">Your browser does not support the HTML5 canvas tag.
 
-        <script src="/socket.io/socket.io.js"></script>
+        <script src="/socketCreation.js"></script>
         <script>
-            var socketType = 'display';
-            var url = window.location.host;
-            var socket = io(url , {
-                query: {
-                    "data" : socketType
-                }
-            });
-    
-            socket.on('controller connection', (id)=>{
-                console.log("New Controller: " + id);
-                playerAdd(id);
-            });
+            // Generic socket setup
+            setupConnection("display");  
 
-            socket.onAny((event, id) =>{
-                //console.log("Recieved: " + event + " from: " + id);
-                socketUpdate(id, event);
-            });
-
+            // page specific functions
             function emitColour(id, playerColor){
                 socket.emit('playerColour', id, playerColor);
                 console.log("Emited colour " + playerColor + " to " + id);

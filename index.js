@@ -5,16 +5,31 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const fs = require('fs');
-const { type } = require('os');
 const publicDirectory = "/public";
 
 var clients = []; // An array containing all the clients. 
 var displays = []; // An array containing all displays.
 
-var controllerSockets = [];
-
-var displaySockets = [];
 var activity = '';
+
+/*app.get('*', (req, res) => {
+    switch(req.path){
+        case '/activity':
+
+            break;
+
+        default:
+            if(fs.existsSync(__dirname + publicDirectory +req.path)){
+                console.log("File sent: " + req.path);
+                res.sendFile(__dirname + publicDirectory +req.path);
+            }
+            else {
+                console.log("Failed file get request: " + req.path)
+                res.status(404).send("Requested file does not exist\nError: 404");
+            }
+            break;
+    }
+});*/
 
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to waiting screen
@@ -22,7 +37,7 @@ app.get('/activity', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + activity + '/controller.html');
+    res.sendFile(__dirname + activity + '/client.html');
 });
 
 app.get('/Sounds', (req, res) => {
@@ -35,6 +50,10 @@ app.get('/main.js', (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/dashboard.html');
+});
+
+app.get('/socketCreation.js', (req,res) => {
+    res.sendFile(__dirname + '/socketCreation.js');
 });
 
 app.get('*', (req, res) => {
@@ -52,25 +71,20 @@ io.on('connection', (socket, host) => {
 
     // Check if this new socket is already a recorded connection
 
-    if (socket.handshake.query.data == "controller"){
-        var clientTemp = null;
+    var newConnection = true;
+
+    if (socket.handshake.query.data == "client"){
         for (let index = 0; index < clients.length; index++) {
             if (clients[index].getDeviceID == socket.handshake.query.clientID){
-                clientTemp = clients[index];
-                break;
+                // Handle updating socket information for this reconnecting device
+
+                clients[index].setNewSocket = socket;
+                console.log(clientTemp.connectionInformation());
+                newConnection = false ;
             }
         }
 
-        if (clientTemp != null){
-            // Handle updating socket information for this reconnecting device
-
-            var index = clients.indexOf(clientTemp)
-
-            clients[index].setNewSocket = socket;
-
-            console.log(clientTemp.connectionInformation());
-
-        } else {
+        if (newConnection){
             // Handle creating a new Connection instance for this device
 
             var client = new Connection(socket,null);
@@ -82,76 +96,49 @@ io.on('connection', (socket, host) => {
 
             // TEMPORARY SHOULD BE USING rooms//////////////............
             displays.forEach(display =>{
-                io.to(display.getSocketID()).emit('controller connection', client.getSocketID());
+                io.to(display.getSocketID()).emit('client connection', client.getSocketID());
             });
         }
     } 
     else if (socket.handshake.query.data == "display"){
-        var displayTemp = null;
+        
         for (let index = 0; index < displays.length; index++) {
             if (displays[index].getDeviceID == socket.handshake.query.clientID){
-                displayTemp = displays[index];
+                // Handle updating socket information for this reconnecting device
+                displays[index].setNewSocket = socket;
+
+                console.log(displayTemp.connectionInformation());
                 break;
             }
         }
 
-        if (displayTemp != null){
-            // Handle updating socket information for this reconnecting device
-
-            var index = displays.indexOf(displayTemp)
-
-            displays[index].setNewSocket = socket;
-
-            console.log(displayTemp.connectionInformation());
-
-        } else {
+        if (newConnection){
             // Handle creating a new Connection instance for this device
 
-            var display = new Connection(socket,null);
+            var display = new Connection(socket,null,null);
 
             // Add the new display to the list of displays
             displays.push(display);
+
+            socket.join()
+
+            // Do displays get a choice of which room to join on first connection
+            // Create a new room//////////////////////////
+            /* Room identifiers:
+            device id
+            socket id (to displays even need a device id?)
+            Incrementing number kept as a count by the server
+            
+
+
+            */
+
 
             console.log(display.connectionInformation());
         }
     } else {
         console.log("Invalid connection request\t Type: " + socket.handshake.query.data + "\tReferer: " + socket.handshake.headers.referer);
     }
-    
-
-
-
-    // Socket type (display or controller)
-    //var socketType = socket.handshake.query.data;
-    //var deviceID = socket.handshake.query.clientID;
-    //var ipAddr = socket.handshake.address;
-
-    //console.log("Connection attempt...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType + "\tIP: " + ipAddr);
-    //console.log("ip: "+socket.request.connection.remoteAddress);
-    //console.log("user-agent: "+socket.request.headers['user-agent']);
-    // Add display
-    /*if (socketType == "display"){
-        displaySockets.push(socket.id);
-
-        // Add all existing controllers to the new display
-        controllerSockets.forEach(control =>{
-            io.to(socket.id).emit('controller connection', control);
-        });
-        console.log("Connection success...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType +'('+ displaySockets.length +')'+ "\tIP: " + ipAddr);
-    }
-    // Add controller
-    else if (socketType == "controller"){
-        // Add to array
-        controllerSockets.push(socket.id);
-
-        // Add the new controller to all displays   
-        displaySockets.forEach(displaySocket =>{
-            io.to(displaySocket).emit('controller connection', socket.id);
-        });
-        
-        console.log("Connection success...\t Device ID: " + deviceID + "\tSocket ID: " + socket.id +'\t    Type: ' + socketType +'('+ controllerSockets.length +')'+ "\tIP: " + ipAddr); 
-        
-    }*/
 
     socket.on('connection callback', (response) =>{
         if (response.orientation !== null) {
@@ -163,89 +150,114 @@ io.on('connection', (socket, host) => {
     socket.on('disconnect', () => {
         console.log('Device inactive: ' + socket.handshake.query.clientID);
 
-        for (let index = 0; index < clients.length; index++) {
-            if (clients[index].getSocketID == socket.id){
-                clients[index].updateLastInteractionTime();
-                // Remove from room //////////////////////////////
-
-                return;
-            }            
-        }
-
-        for (let index = 0; index < displays.length; index++) {
-            if (displays[index].getSocketID == socket.id){
-                displays[index].updateLastInteractionTime();
-                // Remove from room //////////////////////////////
-                // Remove all clients from room //////////////////
-                return;
-            }    
-        }
-
-
-
-        // if the display disconnects, release the associated displaySocket variable
-        /*if (displaySockets.includes(socket.id)){
-            try{
-                // remove it from the list of displaySockets
-                var index = displaySockets.indexOf(socket.id);
-                displaySockets.splice(index, 1);
-                
+        if (socket.handshake.query.data == "client"){
+            for (let index = 0; index < clients.length; index++) {
+                if (clients[index].getSocketID == socket.id){
+                    clients[index].updateLastInteractionTime();
+                    
+                    
+                    // Removes itself from room after disconnect is complete
+    
+                    return;
+                }            
             }
-            catch(e){
-                console.log("ERROR: " + e);
-                return;
+        } else if (socket.handshake.query.data == "display"){
+            for (let index = 0; index < displays.length; index++) {
+                if (displays[index].getSocketID == socket.id){
+                    displays[index].updateLastInteractionTime();
+    
+                    //
+    
+                    var foundNewHost = false;
+                    // Check if there is another display that can be made the host
+                    for (let y = 0; y < displays.length; y++) {
+                        if(displays[y].getRoom() == displays[index].getRoom() && displays[y].getSocketID() != socket.id){
+                            displays[y].setAsRoomHost();
+                            
+                            io.to(displays[y].getSocketID()).emit("new-host") ////////////////// This emit hasn't been added to anything
+                            foundNewHost = true;
+                            break;
+                        }                    
+                    }
+    
+                    if (!foundNewHost){
+                        
+                        //disconnect all clients from the display and send them back to another room (if sub room) ////////////////////
+                        // Otherwise drop connections and wait for 5min timeout to remove from connections
+    
+                    }
+                    return;
+                }    
             }
-            console.log(socketType + ' disconnected');
-        }
-
-        // if a controller disconnects
-        // check it is in our list of controllers
-        else if (controllerSockets.includes(socket.id)) {
-            try{
-                // remove it from the list of controllers
-                var index = controllerSockets.indexOf(socket.id);
-                controllerSockets.splice(index, 1);
-                // tell display to remove the controller
-                displaySockets.forEach(displaySocket =>{
-                    io.to(displaySocket).emit('controller disconnection', socket.id);
-                });             
-            }
-            catch(e){
-                console.log("ERROR: " + e);
-                return; 
-            }
-
-            console.log(socketType + ' disconnected');
-        } */       
+        }         
     });
 
     socket.onAny((event, ...args) => {
-        switch (event) {
-            case "playerColour":
-                var controller = args[0];
-                var colour = args[1];
-                console.log("Emitting colour: " + colour + " to: " + controller);
-                io.to(controller).emit('playerColour', colour);
-                break;
-            
-            case "selectGame":
-                var selected = args[0];
-                var callback = args[1];
-                console.log("New activity selected: " + selected);
-                activity = selected;
-                displays.forEach(displaySocket =>{
-                    io.to(displaySocket.getSocketID()).emit('reload');
-                });         
-                controllerSockets.forEach(controllerSocket =>{
-                    io.to(clients.getSocketID()).emit('reload');
-                });       
-                callback();
 
-            default:
-                console.log("Re-emitted event: " + event);
-                io.emit(event, socket.id);
+        // Check if socket is active (authorised)
+        var active = false;
+
+        for (let index = 0; index < clients.length; index++) {
+            if (clients[index].getSocketID() == socket.id){
+                active = true;
                 break;
+            }
         }
+
+        if (active){
+            switch (event) {
+                case "playerColour":
+                    var client = args[0];
+                    var colour = args[1];
+                    console.log("Emitting colour: " + colour + " to: " + client);
+                    io.to(client).emit('playerColour', colour);
+                    break;
+                
+                case "selectGame":
+                    var selected = args[0];
+                    var callback = args[1];
+                    console.log("New activity selected: " + selected);
+                    activity = selected;
+                    displays.forEach(displaySocket =>{
+                        io.to(displaySocket.getSocketID()).emit('reload');
+                    });         
+                    clients.forEach(client =>{
+                        io.to(client.getSocketID()).emit('reload');
+                    });       
+                    callback();
+    
+                case "displayEmit":          
+    
+                    // Find the display who sent this emit and send to all clients in the same room as that display
+                    for (let index = 0; index < displays.length; index++) {
+                        if (displays[index].getSocketID() == socket.id){
+                            // Only allow hosts to send to the room
+                            if (displays[index].isRoomHost()){
+                                console.log("Re-emitted display event: " + event + "\tRoom: " + displays[index].getRoom());
+                                socket.to(displays[index].getRoom()).emit(emit);
+                            } else {
+                                console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + displays[index].getRoom() + "\tDevice ID: " + displays[index].getDeviceID())
+                            }
+                            break;
+                        }                    
+                    }
+    
+                    break;
+    
+                default:
+                    console.log("Re-emitted event: " + event + "\tRooms: " + socket.rooms);
+    
+                    // Allow only sending to room displays which are the room host
+    
+                    displays.forEach(display => {
+                        if (socket.rooms.has(display.getRoom()) && display.isRoomHost()){
+                            io.to(display.getSocketID()).emit(event);
+                        }
+                    });
+    
+                    break;
+            }
+        }        
     })
 });
 
@@ -253,8 +265,27 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
+clientTimeoutCheck();
+
+// Checks every second to see if client is active
+async function clientTimeoutCheck(){
+    setTimeout(() => {
+        clients.forEach(function(client, index, object) {
+            if (client.timedOut()) {
+                object.splice(index, 1);
+
+                io.to(client.getSocketID()).emit('timeout');
+
+                console.log("Removed connection: " + client.getDeviceID());
+
+            }
+          });
+        clientTimeoutCheck();
+    }, 1000);   
+}
+
 class Connection{
-    static timeOutLimit = 300000 // 5 Minutes
+    static timeOutLimit = 60000; // 1 Minutes
 
     // # before a variable here indicates private
 
@@ -262,15 +293,20 @@ class Connection{
     #lastActivity;
     #currentActivity;
     #initalConnectionTime;
+    
 
     // Connection variables
     #socket;
+    #room;
+
+    #host = false;
     
     #lastInteractionTime;
     
-    constructor(socket, activity){
+    constructor(socket, activity, room){
         this.#socket = socket;
         this.#currentActivity = activity; // Connection class itself;
+        this.#room = room;
 
         this.#initalConnectionTime = Date.parse(socket.handshake.time);
         this.updateLastInteractionTime();
@@ -279,7 +315,7 @@ class Connection{
     //
 
     timedOut(){
-        if (Date.now() - this.#lastInteractionTime > timeOutLimit)
+        if (Date.now() - this.#lastInteractionTime > Connection.timeOutLimit)
             return true;
         else
             return false;        
@@ -294,6 +330,12 @@ class Connection{
         this.#socket = socket;
         this.#lastInteractionTime = Date.now();
     } // Occurs on connection change or region
+    setRoom(room){
+        this.#room = room;
+    }
+    setAsRoomHost(){this.#host = true;}
+
+    removeAsRoomHost(){this.#host = false;}
     
     updateLastInteractionTime(){ this.#lastInteractionTime = Date.now();}
 
@@ -307,6 +349,8 @@ class Connection{
     getLastActivity(){return this.#lastActivity;}
     getInitalConnection(){return this.#initalConnectionTime;}
     getLastInteraction(){return this.#lastInteractionTime;}
+    getRoom(){return this.#room;}
+    isRoomHost(){return this.#host;}
 
     // Debug information
 

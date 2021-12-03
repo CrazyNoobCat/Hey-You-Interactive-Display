@@ -78,16 +78,12 @@
       <div id="stick1" class="dot"></div>
     </div>
     
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socketCreation.js"></script>
     <script>
+      // Generic socket setup
+      setupConnection("client");  
 
-      var socketType = 'controller';
-      var url = window.location.href;
-      var socket = io(url , {
-          query: {
-            "data" : socketType
-          }
-        });
+      // page specific functions
       var form = document.getElementById('form');
       var input = document.getElementById('input');
 
@@ -97,14 +93,6 @@
       socket.on('playerColour', (colour) =>{
         console.log("Setting colour to: " + colour);
         document.getElementsByClassName("dot")[0].style.backgroundColor = colour;
-      });
-
-      socket.on('reload', () => {
-        window.location.href = '';
-      });
-
-      socket.on('reconnect', () => {
-        window.location.href = '/';
       });
 
       var left = document.getElementById('left');
