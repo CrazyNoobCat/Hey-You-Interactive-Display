@@ -5,6 +5,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const fs = require('fs');
+const { Console } = require('console');
 const publicDirectory = "/public";
 
 var clients = []; // An array containing all the clients. 
@@ -12,32 +13,20 @@ var displays = []; // An array containing all displays.
 
 var activity = '';
 
-/*app.get('*', (req, res) => {
-    switch(req.path){
-        case '/activity':
+app.get('/join/:roomID', (req, res) => {
+    // Set a cookie so that the device joins the room of the screen whos QR code was scanned
+    res.cookie('roomID', req.params.roomID);
+    res.redirect('/'); // Prevents making a second cookie for a js file
+});
 
-            break;
-
-        default:
-            if(fs.existsSync(__dirname + publicDirectory +req.path)){
-                console.log("File sent: " + req.path);
-                res.sendFile(__dirname + publicDirectory +req.path);
-            }
-            else {
-                console.log("Failed file get request: " + req.path)
-                res.status(404).send("Requested file does not exist\nError: 404");
-            }
-            break;
-    }
-});*/
+app.get('/', (req, res) => {
+    // Use cookies to get activity
+    res.sendFile(__dirname + activity + '/client.html');
+});
 
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to waiting screen
     res.sendFile(__dirname + activity + '/index.html');
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + activity + '/client.html');
 });
 
 app.get('/Sounds', (req, res) => {
@@ -53,6 +42,7 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/socketCreation.js', (req,res) => {
+    res.send
     res.sendFile(__dirname + '/socketCreation.js');
 });
 
@@ -63,7 +53,8 @@ app.get('*', (req, res) => {
     }
     else {
         console.log("Failed file get request: " + req.path)
-        res.status(404).send("Requested file does not exist\nError: 404");
+        res.sendStatus(404);
+        //res.status(404).send("Requested file does not exist\nError: 404");
     }
 });
 
@@ -75,11 +66,20 @@ io.on('connection', (socket, host) => {
 
     if (socket.handshake.query.data == "client"){
         for (let index = 0; index < clients.length; index++) {
-            if (clients[index].getDeviceID == socket.handshake.query.clientID){
+            const client = clients[index];
+            if (client.getDeviceID() == socket.handshake.query.clientID){
                 // Handle updating socket information for this reconnecting device
 
-                clients[index].setNewSocket = socket;
-                console.log(clientTemp.connectionInformation());
+                if (client.getRoom() != socket.handshake.query.roomID){
+                    client.setRoom(socket.handshake.query.roomID);
+                }
+
+                client.setNewSocket(socket);
+
+                socket.join(client.getRoom());
+                socket.join(client.getDeviceID());
+
+                console.log("Client rejoined: " + client.connectionInformation());
                 newConnection = false ;
             }
         }
@@ -92,22 +92,26 @@ io.on('connection', (socket, host) => {
             // Add the new client to the list of clients
             clients.push(client);
 
-            console.log(client.connectionInformation());
+            //Join client to room
+            socket.join(client.getRoom());
+            socket.join(client.getDeviceID())
 
-            // TEMPORARY SHOULD BE USING rooms//////////////............
-            displays.forEach(display =>{
-                io.to(display.getSocketID()).emit('client connection', client.getSocketID());
-            });
+            console.log("New Client: " + client.connectionInformation());
+
+
         }
     } 
     else if (socket.handshake.query.data == "display"){
         
         for (let index = 0; index < displays.length; index++) {
-            if (displays[index].getDeviceID == socket.handshake.query.clientID){
+            const display = displays[index];
+            if (display.getDeviceID() == socket.handshake.query.clientID){
                 // Handle updating socket information for this reconnecting device
-                displays[index].setNewSocket = socket;
+                display.setNewSocket(socket);
 
-                console.log(displayTemp.connectionInformation());
+                socket.join(display.getRoom());
+
+                console.log("Socket update for display (device id): " + display.getDeviceID());
                 break;
             }
         }
@@ -120,19 +124,11 @@ io.on('connection', (socket, host) => {
             // Add the new display to the list of displays
             displays.push(display);
 
-            socket.join()
+            // Using deviceID as the room identifier
+            socket.join(display.getDeviceID());
 
-            // Do displays get a choice of which room to join on first connection
-            // Create a new room//////////////////////////
-            /* Room identifiers:
-            device id
-            socket id (to displays even need a device id?)
-            Incrementing number kept as a count by the server
-            
-
-
-            */
-
+            display.setAsRoomHost();
+            display.setRoom(display.getDeviceID());
 
             console.log(display.connectionInformation());
         }
@@ -148,12 +144,13 @@ io.on('connection', (socket, host) => {
     })
 
     socket.on('disconnect', () => {
-        console.log('Device inactive: ' + socket.handshake.query.clientID);
+        console.log('Device disconnect: ' + socket.handshake.query.clientID);
 
         if (socket.handshake.query.data == "client"){
             for (let index = 0; index < clients.length; index++) {
-                if (clients[index].getSocketID == socket.id){
-                    clients[index].updateLastInteractionTime();
+                const client = clients[index];
+                if (client.getSocketID() == socket.id){
+                    client.updateLastInteractionTime();
                     
                     
                     // Removes itself from room after disconnect is complete
@@ -163,18 +160,20 @@ io.on('connection', (socket, host) => {
             }
         } else if (socket.handshake.query.data == "display"){
             for (let index = 0; index < displays.length; index++) {
-                if (displays[index].getSocketID == socket.id){
-                    displays[index].updateLastInteractionTime();
+                const display = displays[index];
+                if (display.getSocketID() == socket.id){
+                    display.updateLastInteractionTime();
     
                     //
     
                     var foundNewHost = false;
                     // Check if there is another display that can be made the host
                     for (let y = 0; y < displays.length; y++) {
-                        if(displays[y].getRoom() == displays[index].getRoom() && displays[y].getSocketID() != socket.id){
-                            displays[y].setAsRoomHost();
+                        const displayNew = displays[y];
+                        if(displayNew.getRoom() == display.getRoom() && displayNew.getSocketID() != socket.id){
+                            displayNew.setAsRoomHost();
                             
-                            io.to(displays[y].getSocketID()).emit("new-host") ////////////////// This emit hasn't been added to anything
+                            io.to(displayNew.getSocketID()).emit("new-host") ////////////////// This emit hasn't been added to anything
                             foundNewHost = true;
                             break;
                         }                    
@@ -194,49 +193,53 @@ io.on('connection', (socket, host) => {
 
     socket.onAny((event, ...args) => {
 
-        // Check if socket is active (authorised)
-        var active = false;
+        console.log("Socket event: " + event + "\tSocketID: " + socket.id + "Socket Rooms:");
+        socket.rooms.forEach(room => {
+            console.log(room);
+        });
 
+        // Check if socket is active (authorised)
+        var active = true;
+/*
         for (let index = 0; index < clients.length; index++) {
             if (clients[index].getSocketID() == socket.id){
                 active = true;
                 break;
             }
-        }
+        }*/
 
         if (active){
+            var room = args[0];
+
             switch (event) {
-                case "playerColour":
-                    var client = args[0];
+                case "playerColour": // Need to consolodate into displayEmit
                     var colour = args[1];
-                    console.log("Emitting colour: " + colour + " to: " + client);
-                    io.to(client).emit('playerColour', colour);
+                    console.log("Emitting colour: " + colour + " to: " + room);
+
+                    io.to(room).emit('playerColour', colour);
                     break;
                 
                 case "selectGame":
-                    var selected = args[0];
-                    var callback = args[1];
+                    var selected = args[1];
+                    var callback = args[2]
+
                     console.log("New activity selected: " + selected);
-                    activity = selected;
-                    displays.forEach(displaySocket =>{
-                        io.to(displaySocket.getSocketID()).emit('reload');
-                    });         
-                    clients.forEach(client =>{
-                        io.to(client.getSocketID()).emit('reload');
-                    });       
+                    io.to(room).emit('reload'); // This is relying on the trust that the clients room id is correct and not presaved???
+
+                    activity = selected;   
                     callback();
     
-                case "displayEmit":          
-    
+                case "displayEmit":    
                     // Find the display who sent this emit and send to all clients in the same room as that display
                     for (let index = 0; index < displays.length; index++) {
-                        if (displays[index].getSocketID() == socket.id){
+                        const display = displays[index];
+                        if (display.getSocketID() == socket.id){
                             // Only allow hosts to send to the room
-                            if (displays[index].isRoomHost()){
-                                console.log("Re-emitted display event: " + event + "\tRoom: " + displays[index].getRoom());
-                                socket.to(displays[index].getRoom()).emit(emit);
+                            if (display.isRoomHost()){
+                                console.log("Re-emitted display event: " + event + "\tRoom/Socket: " + room);
+                                socket.to(room).emit(emit);
                             } else {
-                                console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + displays[index].getRoom() + "\tDevice ID: " + displays[index].getDeviceID())
+                                console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + display.getRoom() + "\tDevice ID: " + displays[index].getDeviceID())
                             }
                             break;
                         }                    
@@ -245,15 +248,29 @@ io.on('connection', (socket, host) => {
                     break;
     
                 default:
-                    console.log("Re-emitted event: " + event + "\tRooms: " + socket.rooms);
-    
-                    // Allow only sending to room displays which are the room host
-    
-                    displays.forEach(display => {
-                        if (socket.rooms.has(display.getRoom()) && display.isRoomHost()){
-                            io.to(display.getSocketID()).emit(event);
+                    console.log("Re-emitted event: " + event + "\tRoom: " + room);
+
+                    // Allow clients only sending to room displays which are the room host    
+
+                    for (let index = 0; index < clients.length; index++) {
+                        const client = clients[index];
+                        if (client.getSocketID() == socket.id){
+                            if (client.getRoom() == room){                                
+                                for (let index = 0; index < displays.length; index++) {
+                                    const display = displays[index];
+                                    if (display.getRoom() == room && display.isRoomHost()){
+                                        console.log(display.getDeviceID());
+                                        io.to(display.getSocketID()).emit(event, client.getDeviceID()); // Send only to room host
+                                        client.updateLastInteractionTime();
+                                        break;
+                                    }                        
+                                }
+                            } else {
+                                console.log("Non room client attempted to send to room host. Room: " + room + "\tClient Device ID: " + client.getDeviceID());
+                            }
                         }
-                    });
+                        
+                    }
     
                     break;
             }
@@ -303,10 +320,10 @@ class Connection{
     
     #lastInteractionTime;
     
-    constructor(socket, activity, room){
+    constructor(socket, activity){
         this.#socket = socket;
         this.#currentActivity = activity; // Connection class itself;
-        this.#room = room;
+        this.#room = socket.handshake.query.roomID;
 
         this.#initalConnectionTime = Date.parse(socket.handshake.time);
         this.updateLastInteractionTime();
@@ -331,6 +348,7 @@ class Connection{
         this.#lastInteractionTime = Date.now();
     } // Occurs on connection change or region
     setRoom(room){
+        // Should probably have some logic for removing from the old room
         this.#room = room;
     }
     setAsRoomHost(){this.#host = true;}
@@ -355,7 +373,7 @@ class Connection{
     // Debug information
 
     connectionInformation(){
-        var debugText = "DeviceID: " + this.getDeviceID() + "\tType: " + this.getType() + "\tConnection start: " + Date(this.getInitalConnection()) + "\tLast Interaction: " + Date(this.getLastInteraction());
+        var debugText = "DeviceID: " + this.getDeviceID() + "\tType: " + this.getType() + "\tRoom ID: " + this.getRoom();
         return debugText;
     }
 

@@ -3,6 +3,7 @@ const script = document.createElement('script');
 script.src = "/socket.io/socket.io.js";
 document.head.appendChild(script);
 
+var roomID;
 var socket;
 
 // Get the visitor identifier when you need it.
@@ -16,12 +17,20 @@ function getVisitorID(type){
 }
 
 function startSocket(visitorID, type){
-    console.log(visitorID);
+    if (type == "display"){
+        setCookie('roomID',visitorID,10);
+        roomID = visitorID;
+    }
+
+    console.log("Device ID: " + visitorID);
+    console.log("Room ID: " + roomID);
+
     var url = window.location.host;
     socket = io(url , {
         query: {
             "data" : type,
-            "clientID" : visitorID
+            "clientID" : visitorID,
+            "roomID" : roomID
         }
     });
     
@@ -46,9 +55,35 @@ function startSocket(visitorID, type){
         // Could go to an HTML page instead
         alert("Connection timed out. Refresh to rejoin.");
     });
+
+    socketLoaded();
 }    
 
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+function setCookie(cname, cvalue, exmins) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exmins*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
 function setupConnection(type){
-    // Setup logic 
+    // Setup logic  
+    roomID = getCookie('roomID');
     getVisitorID(type);
 }

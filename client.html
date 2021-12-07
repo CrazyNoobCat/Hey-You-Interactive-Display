@@ -52,7 +52,7 @@
 
       // page specific functions
       function selectGame(game) {
-        socket.emit("selectGame", game, (response) => {
+        socket.emit("selectGame", roomID, game, (response) => {
             console.log("Redirecting to " + game);
             window.location.pathname = '/';
         });

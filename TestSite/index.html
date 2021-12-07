@@ -11,10 +11,10 @@
             // Generic socket setup
             setupConnection("display");  
 
-            // page specific functions
-            function emitColour(id, playerColor){
-                socket.emit('playerColour', id, playerColor);
-                console.log("Emited colour " + playerColor + " to " + id);
+            function socketLoaded(){
+                socket.onAny((event, ...args) => {
+                    console.log(event);
+                });
             }
         </script>
     </canvas> 

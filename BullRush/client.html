@@ -83,6 +83,9 @@
       // Generic socket setup
       setupConnection("client");  
 
+      console.log(roomID);
+      console.log(socket);
+
       // page specific functions
       var form = document.getElementById('form');
       var input = document.getElementById('input');
@@ -90,10 +93,15 @@
       document.addEventListener('keydown', buttondown, false);
       document.addEventListener('keyup', buttonup, false);
 
-      socket.on('playerColour', (colour) =>{
-        console.log("Setting colour to: " + colour);
-        document.getElementsByClassName("dot")[0].style.backgroundColor = colour;
-      });
+      function socketLoaded(){
+        socket.emit('clientConnected', roomID, )
+
+        socket.on('playerColour', (colour) =>{
+          console.log("Setting colour to: " + colour);
+          document.getElementsByClassName("dot")[0].style.backgroundColor = colour;
+        });
+      }
+      
 
       var left = document.getElementById('left');
       var right = document.getElementById('right');
@@ -226,41 +234,41 @@
         //Left and Right
         if(joystick1.xPlace < -0.25 && joystick1.left == false){
           joystick1.right = false;
-          socket.emit('leftOn');
-          socket.emit('rightOff');
+          socket.emit('leftOn', roomID);
+          socket.emit('rightOff', roomID);
           joystick1.left = true;
         }
         if(joystick1.xPlace > 0.25 && joystick1.right == false){
           joystick1.left = false;
-          socket.emit('rightOn');
-          socket.emit('leftOff');
+          socket.emit('rightOn', roomID);
+          socket.emit('leftOff', roomID);
           joystick1.right = true;
         }
         if(joystick1.xPlace > -0.25 && joystick1.xPlace < 0.25 && (joystick1.left == true || joystick1.right == true)){
           joystick1.left = false;
           joystick1.right = false;
-          socket.emit('rightOff');
-          socket.emit('leftOff');
+          socket.emit('rightOff', roomID);
+          socket.emit('leftOff', roomID);
         }
 
         //Up and down
         if(joystick1.yPlace < -0.25 && joystick1.up == false){
           joystick1.down = false;
-          socket.emit('upOn');
-          socket.emit('downOff');
+          socket.emit('upOn', roomID);
+          socket.emit('downOff', roomID);
           joystick1.up = true;
         }
         if(joystick1.yPlace > 0.25 && joystick1.down == false){
           joystick1.up = false;
-          socket.emit('downOn');
-          socket.emit('upOff');
+          socket.emit('downOn', roomID);
+          socket.emit('upOff', roomID);
           joystick1.down = true;
         }
         if(joystick1.yPlace > -0.25 && joystick1.yPlace < 0.25 && (joystick1.up == true || joystick1.down == true)){
           joystick1.up = false;
           joystick1.down = false;
-          socket.emit('upOff');
-          socket.emit('downOff');
+          socket.emit('upOff', roomID);
+          socket.emit('downOff', roomID);
         }
       }
 

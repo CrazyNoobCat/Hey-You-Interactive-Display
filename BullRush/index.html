@@ -41,17 +41,21 @@
         <script>
             // Generic socket setup
             setupConnection("display");  
+            function socketLoaded(){
+                socket.emit("Display socket loaded");
 
-            // page specific functions    
-            socket.on('client connection', (id)=>{
-                console.log("New client: " + id);
-                playerAdd(id);
-            });
+                // page specific functions    
+                socket.on('clientConnected', (id)=>{
+                    console.log("New client: " + id);
+                    playerAdd(id);
+                });
 
-            socket.onAny((event, id) =>{
-                //console.log("Recieved: " + event + " from: " + id);
-                socketUpdate(id, event);
-            });
+                socket.onAny((event, id) =>{
+                    //console.log("Recieved: " + event + " from: " + id);
+                    console.log(event);
+                    socketUpdate(id, event);
+                });
+            }            
 
             function emitColour(id, playerColor){
                 socket.emit('playerColour', id, playerColor);

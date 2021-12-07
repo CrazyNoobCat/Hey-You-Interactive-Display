@@ -13,6 +13,14 @@
       // Generic socket setup
       setupConnection("client");  
 
+      function socketLoaded(){
+        setTimeout(() => {
+          
+              socket.emit("Alive")
+          socketLoaded();
+        }, 5000); 
+      }
+
       // page specific functions      
     </script>
   </body>
