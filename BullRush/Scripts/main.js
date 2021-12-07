@@ -150,24 +150,32 @@ function drawSafeZone() {
 // Have to add the socket here
 function playerAdd(newSocket) {
     var socketID = String(newSocket);
-    if (taggers.length == 0 || players.length % 8 == 0 && players.length >= 1) {
-        console.log("Added tagger: " + newSocket);
-        taggers.push(new player(canvas.width / 4 + random(0, canvas.width / 2), random(30, canvas.height - 30), 1, socketID, canvas, safeZone, activeSafeZone));
-
-    } else {
-        console.log("Added player: " + newSocket);
-        if (activeSafeZone == 2 && tempSafeZone <= 25) {
-            var newX = random(canvas.width - tempSafeZone + 20, canvas.width - 20);
-            var newSafeZone = 2;
+    p = playerExist(socketID);
+    if (p == null){
+        if (taggers.length == 0 || players.length % 8 == 0 && players.length >= 1) {
+            console.log("Added tagger: " + newSocket);
+            taggers.push(new player(canvas.width / 4 + random(0, canvas.width / 2), random(30, canvas.height - 30), 1, socketID, canvas, safeZone, activeSafeZone));
+    
         } else {
-            var newX = random(20, tempSafeZone - 20);
-            var newSafeZone = 1;
+            console.log("Added player: " + newSocket);
+            if (activeSafeZone == 2 && tempSafeZone <= 25) {
+                var newX = random(canvas.width - tempSafeZone + 20, canvas.width - 20);
+                var newSafeZone = 2;
+            } else {
+                var newX = random(20, tempSafeZone - 20);
+                var newSafeZone = 1;
+            }
+            if (newSafeZone == activeSafeZone){
+                playersInSafeZone++;
+            }
+            players.push(new player(newX, random(20, canvas.height - 20), 0, socketID, canvas, safeZone, newSafeZone)); // 20 comes from max player radius
         }
-        if (newSafeZone == activeSafeZone){
-            playersInSafeZone++;
-        }
-        players.push(new player(newX, random(20, canvas.height - 20), 0, socketID, canvas, safeZone, newSafeZone)); // 20 comes from max player radius
+    } else {
+        console.log("New client already existed. Resent colour");
+        emitColour(socketID, p.colour);
     }
+
+    
 
     // Any other logic for adding a player
 }
@@ -214,6 +222,22 @@ function taggerMove() {
             taggers[i].move(canvas, activeSafeZone, safeZone, tempSafeZone);
         }
     }
+}
+
+function playerExist(socketID){
+    for (var i = 0; i < players.length; i++) {
+        const p = players[i];
+        if (p.socket == socketID){
+            return p;
+        }
+    }
+    for (var i = 0; i < taggers.length; i++) {
+        const p = taggers[i];
+        if (p.socket == socketID){
+            return p;
+        }
+    }
+    return null;
 }
 
 function updateTaggers() {
@@ -561,6 +585,8 @@ class player {
         emitColour(this.socket, this.colour);
 
     }
+
+
 
     setWinner(){
         // Emit to player they are the winner
