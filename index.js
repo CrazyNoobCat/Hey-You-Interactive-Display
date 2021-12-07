@@ -11,8 +11,6 @@ const publicDirectory = "/public";
 var clients = []; // An array containing all the clients. 
 var displays = []; // An array containing all displays.
 
-var activity = '';
-
 app.get('/join/:roomID', (req, res) => {
     // Set a cookie so that the device joins the room of the screen whos QR code was scanned
     res.cookie('roomID', req.params.roomID);
@@ -20,20 +18,44 @@ app.get('/join/:roomID', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    // Use cookies to get activity
+    // Use cookies to get room activity
+    var activity = '' ;
+
+    let display = findDisplay(getCookie(req,"roomID"));
+    if (display != undefined)
+        activity = display.getCurentActivity();
+
     res.sendFile(__dirname + activity + '/client.html');
 });
 
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to waiting screen
-    res.sendFile(__dirname + activity + '/index.html');
+    var activity = '' ;
+
+    let display = findDisplay(getCookie(req,"roomID"));
+    if (display != undefined)
+        activity = display.getCurentActivity();
+
+    res.sendFile(__dirname + activity +'/index.html');
 });
 
 app.get('/Sounds', (req, res) => {
+    var activity = '' ;
+
+    let display = findDisplay(getCookie(req,"roomID"));
+    if (display != undefined)
+        activity = display.getCurentActivity();
+
     res.sendFile(__dirname + activity + '/Sounds');
 });
 
 app.get('/main.js', (req, res) => {
+    var activity = '' ;
+
+    let display = findDisplay(getCookie(req,"roomID"));
+    if (display != undefined)
+        activity = display.getCurentActivity();
+
     res.sendFile(__dirname + activity + '/Scripts/main.js');
 });
 
@@ -87,7 +109,7 @@ io.on('connection', (socket, host) => {
         if (newConnection){
             // Handle creating a new Connection instance for this device
 
-            var client = new Connection(socket,null);
+            var client = new Connection(socket,'');
 
             // Add the new client to the list of clients
             clients.push(client);
@@ -119,7 +141,7 @@ io.on('connection', (socket, host) => {
         if (newConnection){
             // Handle creating a new Connection instance for this device
 
-            var display = new Connection(socket,null,null);
+            var display = new Connection(socket,'');
 
             // Add the new display to the list of displays
             displays.push(display);
@@ -220,13 +242,20 @@ io.on('connection', (socket, host) => {
                     break;
                 
                 case "selectGame":
-                    var selected = args[1];
+                    var activitySelected = args[1];
                     var callback = args[2]
 
-                    console.log("New activity selected: " + selected);
+                    console.log("New activity selected: " + activitySelected);
                     io.to(room).emit('reload'); // This is relying on the trust that the clients room id is correct and not presaved???
 
-                    activity = selected;   
+                    for (let index = 0; index < displays.length; index++) {
+                        const display = displays[index];
+                        if (display.getRoom() == room && display.isRoomHost()){
+                            display.activityChange(activitySelected);
+                            break;
+                        }
+                        
+                    } 
                     callback();
     
                 case "displayEmit":    
@@ -301,6 +330,28 @@ async function clientTimeoutCheck(){
     }, 1000);   
 }
 
+function getCookie(req,cookieName){
+    let cookie = req.headers.cookie; 
+    let splitCookie = cookie.split('; ');
+    for (let index = 0; index < splitCookie.length; index++) {
+        const current = splitCookie[index];
+        const content = current.split('=');
+        if (content[0] == cookieName){
+            return content[1];
+        }
+        
+    }
+}
+
+function findDisplay(roomID){
+    for (let index = 0; index < displays.length; index++) {
+        const display = displays[index];
+        if (display.getRoom() == roomID){
+            return display;
+        }
+    }
+}
+
 class Connection{
     static timeOutLimit = 60000; // 1 Minutes
 
@@ -363,7 +414,7 @@ class Connection{
     getDeviceID(){return this.#socket.handshake.query.clientID;}
     getSocketID(){return this.#socket.id;}
     getType(){return this.#socket.handshake.query.data;}
-    getCurentActivityType(){return this.#currentActivity.getType();} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
+    getCurentActivity(){return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
     getLastActivity(){return this.#lastActivity;}
     getInitalConnection(){return this.#initalConnectionTime;}
     getLastInteraction(){return this.#lastInteractionTime;}
