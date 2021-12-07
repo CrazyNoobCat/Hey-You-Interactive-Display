@@ -18,33 +18,27 @@ app.get('/join/:roomID', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    // Use cookies to get room activity
-    var activity = '' ;
+    // Need to handle hosts that directly navigate to this url isntead of through a room id
 
-    let display = findDisplay(getCookie(req,"roomID"));
-    if (display != undefined)
-        activity = display.getCurentActivity();
+    // Currently checking if the cookie is undefined in getCookie. If undefined then returns undefined
+
+
+
+    // Use cookies to get room activity
+    activity = getActivity(req);
 
     res.sendFile(__dirname + activity + '/client.html');
 });
 
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to waiting screen
-    var activity = '' ;
-
-    let display = findDisplay(getCookie(req,"roomID"));
-    if (display != undefined)
-        activity = display.getCurentActivity();
+    activity = getActivity(req);
 
     res.sendFile(__dirname + activity +'/index.html');
 });
 
 app.get('/Sounds', (req, res) => {
-    var activity = '' ;
-
-    let display = findDisplay(getCookie(req,"roomID"));
-    if (display != undefined)
-        activity = display.getCurentActivity();
+    activity = getActivity(req);
 
     res.sendFile(__dirname + activity + '/Sounds');
 });
@@ -332,6 +326,9 @@ async function clientTimeoutCheck(){
 
 function getCookie(req,cookieName){
     let cookie = req.headers.cookie; 
+    if (cookie == undefined)
+        return undefined;
+
     let splitCookie = cookie.split('; ');
     for (let index = 0; index < splitCookie.length; index++) {
         const current = splitCookie[index];
@@ -350,6 +347,16 @@ function findDisplay(roomID){
             return display;
         }
     }
+}
+
+function getActivity(req){
+    var activity = '' ;
+
+    let display = findDisplay(getCookie(req,"roomID"));
+    if (display != undefined)
+        activity = display.getCurentActivity();
+
+    return activity;
 }
 
 class Connection{
