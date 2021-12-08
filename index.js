@@ -244,11 +244,16 @@ io.on('connection', (socket, host) => {
 
                     for (let index = 0; index < displays.length; index++) {
                         const display = displays[index];
-                        if (display.getRoom() == room && display.isRoomHost()){
+                        if (display.getRoom() == room){
                             display.activityChange(activitySelected);
-                            break;
-                        }
-                        
+                        }                        
+                    } 
+
+                    for (let index = 0; index < clients.length; index++) {
+                        const client = clients[index];
+                        if (client.getRoom() == room){
+                            client.activityChange(activitySelected);
+                        }                        
                     } 
                     callback();
     
@@ -315,6 +320,10 @@ async function clientTimeoutCheck(){
                 object.splice(index, 1);
 
                 io.to(client.getSocketID()).emit('timeout');
+
+                let display = findDisplay(client.getRoom());
+                
+                io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
 
                 console.log("Removed connection: " + client.getDeviceID());
 

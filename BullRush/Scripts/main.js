@@ -368,7 +368,7 @@ class player {
                 case "downOff":
                     this.moveDown = false;
                     break;
-                case "controller disconnection":
+                case "clientDC":
                     console.log("Controller dc signal recieved for player: " + this.socket + " In team: " + this.type);
                     this.quit = true;
                     break;
