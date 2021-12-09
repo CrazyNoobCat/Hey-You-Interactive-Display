@@ -24,6 +24,9 @@ const randomColor = () => Math.floor(Math.random() * 1048576).toString(16); //On
     gameStart();
 
 function gameStart(timeout = 200) {
+
+    // Quit players aren't updated, only added players as dc players occurs in movement loop
+
     for (var i = 1; i <= 5; i++) {
         setTimeout(() => {
             updatePlayerDisplayAtGameStart();

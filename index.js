@@ -86,6 +86,14 @@ io.on('connection', (socket, host) => {
                 // Handle updating socket information for this reconnecting device
 
                 if (client.getRoom() != socket.handshake.query.roomID){
+
+                    console.log("here");
+
+                    let display = findDisplay(client.getRoom());
+
+                    if (display!= undefined)
+                        io.to(display.getRoom()).emit('clientDC', client.getDeviceID());
+
                     client.setRoom(socket.handshake.query.roomID);
                 }
 
@@ -275,7 +283,7 @@ io.on('connection', (socket, host) => {
                         if (display.getSocketID() == socket.id){
                             // Only allow hosts to send to the room
                             if (display.isRoomHost()){
-                                console.log("Re-emitted display event: " + event + "\tRoom/Socket: " + room);
+                                console.log("Re-emitted display event: " + event + "\t\tRoom/Socket: " + room);
                                 socket.to(room).emit(emit);
                             } else {
                                 console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + display.getRoom() + "\tDevice ID: " + displays[index].getDeviceID())
@@ -297,9 +305,10 @@ io.on('connection', (socket, host) => {
                                 for (let index = 0; index < displays.length; index++) {
                                     const display = displays[index];
                                     if (display.getRoom() == room && display.isRoomHost()){
+                                        console.log("event: " + event + "\tClient: " + client.getDeviceID());
                                         io.to(display.getSocketID()).emit(event, client.getDeviceID()); // Send only to room host
                                         client.updateLastInteractionTime();
-                                        console.log("Re-emitted event: " + event + "\tRoom: " + room);
+                                        console.log("Re-emitted event: " + event + "\t\tRoom: " + room + "\tDeviceID: " + client.getDeviceID());
 
                                         break;
                                     }                        
