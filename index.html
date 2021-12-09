@@ -17,17 +17,25 @@
             text-decoration: none;
             background-color: burlywood;
         }
+
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            }
     </style>
 
+    <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
     
 </head>
-<body>
-    <h1 id="heading">Please connect and select an activity</h1>
+<body style="color: white;">
+    <h1 id="heading" class="center">Please connect and select an activity</h1>
     
-    <img id='barcode' 
+    <img style="align-content: center;" id='barcode' 
             alt="" 
             width="100" 
-            height="100" />
+            height="100"
+            class="center" />
 
             
     <h3 id='website'>Website: </h3>
@@ -51,5 +59,8 @@
 
         
     </script>    
+    <footer>
+        <script src="receiver.js"></script>
+    </footer>
 </body>
 </html>

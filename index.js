@@ -58,7 +58,6 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/socketCreation.js', (req,res) => {
-    res.send
     res.sendFile(__dirname + '/socketCreation.js');
 });
 
@@ -128,6 +127,15 @@ io.on('connection', (socket, host) => {
                 socket.join(display.getRoom());
 
                 console.log("Socket update for display (device id): " + display.getDeviceID());
+
+                console.log(Date.now() - display.getLastInteraction());
+                if (Date.now() - display.getLastInteraction() > 10000){
+                    console.log("Jere");
+                    io.to(socket.id).emit("reload");
+                    display.updateLastInteractionTime();
+                } // 10 seconds
+
+                newConnection = false;
                 break;
             }
         }
@@ -146,6 +154,9 @@ io.on('connection', (socket, host) => {
             display.setAsRoomHost();
             display.setRoom(display.getDeviceID());
 
+            io.to(socket.id).emit("reload");
+            display.updateLastInteractionTime();
+            
             console.log(display.connectionInformation());
         }
     } else {
@@ -209,10 +220,10 @@ io.on('connection', (socket, host) => {
 
     socket.onAny((event, ...args) => {
 
-        console.log("Socket event: " + event + "\tSocketID: " + socket.id + "Socket Rooms:");
+        /*console.log("Socket event: " + event + "\tSocketID: " + socket.id + "Socket Rooms:");
         socket.rooms.forEach(room => {
             console.log(room);
-        });
+        });*/
 
         // Check if socket is active (authorised)
         var active = true;
@@ -276,7 +287,6 @@ io.on('connection', (socket, host) => {
                     break;
     
                 default:
-                    console.log("Re-emitted event: " + event + "\tRoom: " + room);
 
                     // Allow clients only sending to room displays which are the room host    
 
@@ -287,9 +297,10 @@ io.on('connection', (socket, host) => {
                                 for (let index = 0; index < displays.length; index++) {
                                     const display = displays[index];
                                     if (display.getRoom() == room && display.isRoomHost()){
-                                        console.log(display.getDeviceID());
                                         io.to(display.getSocketID()).emit(event, client.getDeviceID()); // Send only to room host
                                         client.updateLastInteractionTime();
+                                        console.log("Re-emitted event: " + event + "\tRoom: " + room);
+
                                         break;
                                     }                        
                                 }
@@ -322,8 +333,8 @@ async function clientTimeoutCheck(){
                 io.to(client.getSocketID()).emit('timeout');
 
                 let display = findDisplay(client.getRoom());
-                
-                io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
+                if (display != undefined)
+                    io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
 
                 console.log("Removed connection: " + client.getDeviceID());
 
