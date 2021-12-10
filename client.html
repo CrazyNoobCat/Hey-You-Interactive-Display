@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Socket.IO client</title>
+    <title>Client | Hey You Interactive Display</title>
     <style>
         .button {
           position: relative;
@@ -49,6 +49,9 @@
     <script>      
       // Generic socket setup
       setupConnection("client");  
+      function socketLoaded(){
+        console.log("Socket finished loading");
+      }
 
       // page specific functions
       function selectGame(game) {

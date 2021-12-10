@@ -16,6 +16,9 @@ var playersInSafeZone = 0;
 var gameOver = false; // Set to true when game needs to be restarted
 var gameReady = false;
 
+var displayResetThreshold = 10; // This is how many retry attemtps it takes before emiting a displayReset
+var retryCount = 0;
+
 const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 const randomColor = () => Math.floor(Math.random() * 1048576).toString(16); //Only prints out max of 5 bits of the 6 colours
 
@@ -36,7 +39,13 @@ function gameStart(timeout = 200) {
     setTimeout(() => {
         if (players.length <= 0) {//minimum players
             updatePlayerDisplayAtGameStart();
+            retryCount++;
             console.log("Waiting for enough players to join. Will retry in 5 seconds");
+
+            if (retryCount >= displayResetThreshold){
+                reset();
+            }
+
             gameStart(5000);
         } else {
             decreaseSafeZone();
@@ -82,7 +91,7 @@ function draw() {
         ctx.fillStyle = "black";
         ctx.font = "100px Arial";
         ctx.fillText('GAME OVER - RELOADING', canvas.width / 10, canvas.height / 2);
-        setTimeout(() => { document.location.reload(); }, 6000);
+        setTimeout(() => { reset(); }, 1500);
         // Will need to add logic for keeping sockets conected???
     } else {
         //Clear screen

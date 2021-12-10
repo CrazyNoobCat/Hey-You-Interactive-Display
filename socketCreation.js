@@ -51,9 +51,17 @@ function startSocket(visitorID, type){
         }); 
     }    
 
-    socket.on('timeout', () => {
+    socket.on('error', (message)=> {
         // Could go to an HTML page instead
-        alert("Connection timed out. Refresh to rejoin.");
+        console.log("Error: " + message);
+        setCookie('roomID','',0); // Cookie expiers instantly
+        window.location.href = '/error/'+ message;
+    });
+
+    socket.on('extendRoomID', () => {
+        console.log("Cookie duration extended");
+        let cookieContent = getCookie('roomID');
+        setCookie('roomID',cookieContent, 1);
     });
 
     socketLoaded();
