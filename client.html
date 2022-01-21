@@ -2,49 +2,8 @@
 <html>
   <head>
     <title>Client | Hey You Interactive Display</title>
-    <style>
-        .button {
-          position: relative;
-          margin: auto;
-          margin-top: 5px;
-          padding: 10px;
-          text-align: center;
-          width: 400px;
-          font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-          color: black;
-          font-size: 50px;
-          text-decoration: none;
-          background-color: burlywood;
-        }
+    <link rel="stylesheet" href="client.css">
 
-        .text {
-          padding-top: 60px;
-          padding-bottom: 60px;
-          text-align: center;
-          width: 100%;
-          font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-          color: black;
-          font-size: 50px;
-          text-decoration: none;
-          background-color:cadetblue;
-        }
-
-        .outer {
-          width: auto;
-          height: 100%;
-          margin: auto;
-          /*padding-top: 40%;*/
-          display: block;
-          align-items: center;
-          justify-items: center;
-        }
-
-        html, body {
-          height: 100%;
-        }
-    </style>
-  </head>
-  <body>
     <script src="socketCreation.js"></script>
     <script>      
       // Generic socket setup
@@ -54,19 +13,36 @@
       }
 
       // page specific functions
-      function selectGame(game) {
-        socket.emit("selectGame", roomID, game, (response) => {
-            console.log("Redirecting to " + game);
-            window.location.pathname = '/';
-        });
-      }
-
+      
     </script>
-    <div class="outer">
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous">
+    </script>
+    <script> 
+      $(function(){
+        $("#header").load("header.html"); 
+        $("#footer").load("footer.html"); 
+      });
+      </script> 
+  </head>
+  <body>
+    <div class="container">
+      <div id="header"></div>
       <h1 class="text">Please Select an Activity</h1>
-      <a onclick="selectGame('/BullRush')" style="text-decoration: none"><div class="button">Bull Rush</div></a>
-      <a onclick="selectGame('/PongMultiplayer')" style="text-decoration: none"><div class="button">(not connected)Pong Multiplayer</div></a>
-      <a onclick="selectGame('/TestSite')" style="text-decoration: none"><div class="button">TestSite</div></a>
-    </div>
+
+      <div class="voting"></div>
+  
+      <div class="activitySelectionGrid">
+        <a onclick="selectActivity('/BullRush')"><object data="bullrush.svg" class="grid-item"></object></a>
+        <a onclick="selectActivity('/SlideshowTest')"><object data="Info-Button.svg" class="grid-item"> </object></a>
+        <object data="Info-Button.svg" class="grid-item"> </object>
+        <object data="Info-Button.svg" class="grid-item"> </object>
+        <object data="Info-Button.svg" class="grid-item"> </object>
+        <object data="Info-Button.svg" class="grid-item"> </object>
+      </div>
+      <div id="footer"></div>
+    </div>   
   </body>
 </html>

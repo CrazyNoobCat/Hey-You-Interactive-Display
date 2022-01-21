@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="255.973 2.048 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <filter id="outline-filter-0" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="outline 1 3 #bada55">
+      <feMorphology in="SourceAlpha" result="dilated" operator="dilate" radius="3"/>
+      <feFlood flood-color="#bada55" result="flood"/>
+      <feComposite in="flood" in2="dilated" operator="in" result="outline"/>
+      <feMerge>
+        <feMergeNode in="outline"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <text style="fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 123px; text-transform: capitalize; white-space: pre; filter: url(#outline-filter-0);" x="0" y="256.925" transform="matrix(1.00006, 0, 0, 1, 283.771397, 37.783871)">Bullrush</text>
+</svg>

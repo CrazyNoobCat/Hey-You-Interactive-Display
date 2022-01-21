@@ -3,52 +3,16 @@
 <head>
     <meta charset="utf-8" />
     <title>Activity | Hey You Interactive Display</title>
-    <style>
-        .button {
-            position: relative;
-            margin: auto;
-            margin-top: 5px;
-            padding: 10px;
-            text-align: center;
-            width: 400px;
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-            color: black;
-            font-size: 50px;
-            text-decoration: none;
-            background-color: burlywood;
-        }
-
-        .center {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            }
-    </style>
-
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-    
-</head>
-<body style="background-color: white;">
-    <div class="center" style="width: 50%;">
-        <h1 id="heading">Please connect and select an activity</h1>
-        
-        <img style="align-content: center;" id='barcode' 
-                alt="" 
-                width="400" 
-                height="400"
-                class="center"/>
-
-                
-        <h3 id='website'>Website: </h3>
-    </div>
-    
-
+    <!-- Cast Debug Logger -->
+    <!-- <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script> -->
+    <link rel="stylesheet" href="index.css">
     <script src="socketCreation.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script>
         // Generic socket setup
         setupConnection("display"); 
-        function socketLoaded(){
+        function socketLoaded(anyListener){
             var nric = self.location.host;
             console.log("nric: " + nric);
             console.log("Room ID: " + getCookie('roomID'));
@@ -58,10 +22,14 @@
         }   
 
         // page specific functions
-
-
-        
-    </script>    
+    </script>
+</head>
+<body style="background-color: white;">
+    <div class="center" style="width: 50%;">
+        <h1 id="heading">Please connect and select an activity</h1>        
+        <img style="align-content: center;" id='barcode' width="400" height="400" class="center"/>                
+        <h3 id='website'>Website: </h3>
+    </div>
     <footer>
         <script src="receiver.js"></script>
     </footer>

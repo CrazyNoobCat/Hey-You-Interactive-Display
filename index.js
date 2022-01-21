@@ -12,11 +12,12 @@ var clients = []; // An array containing all the clients.
 var displays = []; // An array containing all displays.
 
 const defaultActivity = '';
+const defaultCookieTimeout = 1 * 60 * 1000; // Number of minutes a cookie will last for
 
 app.get('/join/:roomID', (req, res) => {
     if (findHostDisplayByRoomID(req.params.roomID) != undefined){
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
-        res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (1 * 60 * 1000))}); // Create a cookie which only works on this site and lasts 1 minute (default timeout)
+        res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
         res.redirect('/'); // Prevents making a second cookie for a js file
     } else { // If room doesn't exit
         res.redirect("/error/Room doesn't exist, rescan QR code");
@@ -30,19 +31,23 @@ app.get('/', (req, res) => {
     let activity = getActivity(req);
 
     if(activity != undefined){
-        res.sendFile(__dirname + activity + '/client.html');
+        // Check if there is a unique client file in activity otherwise provide default
+        if(fs.existsSync(__dirname + activity + '/client.html'))
+            res.sendFile(__dirname + activity + '/client.html');
+        else 
+            res.sendFile(__dirname + defaultActivity + '/client.html')
     } else {
         res.redirect("/error/No valid RoomID found, rescan QR code")
     }    
 });
 
 app.get('/activity', (req, res) => {
-    // If there is a valid activity then direct display to that activity else go to waiting screen
+    // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
     if (activity != undefined)
-        res.sendFile(__dirname + activity +'/index.html') // This is for new displays
+        res.sendFile(__dirname + activity +'/index.html') // This is for reconecting displays
     else 
-        res.sendFile(__dirname + defaultActivity +'/index.html'); // This is for reconecting displays
+        res.sendFile(__dirname + defaultActivity +'/index.html'); // This is for new displays
 });
 
 app.get('/scripts/:fileName', (req, res) => {
@@ -105,10 +110,23 @@ io.on('connection', (socket, host) => {
 
                     let display = findHostDisplayByRoomID(client.getRoom());
 
-                    if (display!= undefined)
+                    if (display!= undefined){
                         io.to(display.getRoom()).emit('clientDC', client.getDeviceID());
+                        display.numOfClients--; // Reduce client count by one for old room.
+                    } else {
+                        // Error
+                    }
 
-                    client.setRoom(socket.handshake.query.roomID);
+                    display = findHostDisplayByRoomID(client.getRoom());
+
+                    if (display!= undefined){
+                        client.setRoom(socket.handshake.query.roomID);
+                        display.numOfClients++; // Increase client count for new room by one.
+                    } else {
+                        // Error 
+                    }
+
+                    
                 }
 
                 client.setNewSocket(socket);
@@ -136,6 +154,9 @@ io.on('connection', (socket, host) => {
                 //Join client to room
                 socket.join(client.getRoom());
                 socket.join(client.getDeviceID())
+
+                display = findHostDisplayByRoomID(client.getRoom());
+                display.numOfClients++; // Increase client count for new room by one.
 
                 console.log("New Client: " + client.connectionInformation());
             } else {
@@ -276,11 +297,15 @@ io.on('connection', (socket, host) => {
                     io.to(room).emit('playerColour', colour);
                     break;
                 
-                case "selectGame":
+                case "selectActivity":
+                    // Client has indicated an activity change
                     var activitySelected = args[1];
                     var callback = args[2]
 
-                    console.log("New activity selected: " + activitySelected);
+                    if (activitySelected == "/")
+                        activitySelected = defaultActivity;                    
+
+                    console.log("New activity: " + activitySelected + "\tRoom: " + room);
                     io.to(room).emit('reload'); // This is relying on the trust that the clients room id is correct and not presaved???
 
                     display = findHostDisplayByRoomID(room);
@@ -317,6 +342,9 @@ io.on('connection', (socket, host) => {
                     break;
     
                 case "displayEmit":    
+                    // Indicate an event that the display wants to send to all clients/displays in room
+
+                    // Hasn't been used with other displays yet, may run into issues
                     display = findHostDisplayByRoomID(room);
 
                     if (display != undefined) {
@@ -328,11 +356,24 @@ io.on('connection', (socket, host) => {
                     break;
 
                 case "displayReset":
-                        display = findDisplayBySocketID(socket.id);
-                        if (display != undefined){
-                            display.activityChange(defaultActivity); // Set to default
-                            io.to(display.getRoom()).emit('reload'); // Tell all devices to reload
-                        }
+                    // Reset the display back to the default activity and get clients to reload
+                    display = findDisplayBySocketID(socket.id);
+                    if (display != undefined){
+                        display.activityChange(defaultActivity); // Set to default
+                        io.to(display.getRoom()).emit('reload'); // Tell all devices to reload
+                    }
+                    break;
+
+                case 'vote':
+                    // Increase vote counter
+
+                    // Someone starts a vote
+                    // Server needs to register this against the activity/hostDisplay
+                    // Display needs a voteRunning boolean
+                    // Display needs 
+
+
+
                     break;
 
                 default:
@@ -386,8 +427,10 @@ async function clientTimeoutCheck(){
                 io.to(client.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
 
                 let display = findHostDisplayByRoomID(client.getRoom());
-                if (display != undefined)
+                if (display != undefined){
                     io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
+                    display.numOfClients--; // Reduce client count for room by one
+                }
 
                 console.log("Removed connection: " + client.getDeviceID());
 
@@ -460,7 +503,7 @@ function getActivity(req){
 }
 
 class Connection{
-    static timeOutLimit = 60000; // 1 Minutes
+    static timeOutLimit = defaultCookieTimeout;
 
     // # before a variable here indicates private
 
@@ -478,6 +521,7 @@ class Connection{
     #host = false;
     ready = false;
     #messages = []; // All messages which the display hasn't recieved due to it not being ready 
+    numOfClients = 0;
     
     // Only used for clients
     #lastInteractionTime;

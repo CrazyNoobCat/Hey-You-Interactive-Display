@@ -33,23 +33,20 @@ function startSocket(visitorID, type){
             "roomID" : roomID
         }
     });
-    
-    if (type == "display"){
-        socket.on('reload', () => {
-            window.location.href = '/activity';
-        }); 
 
-        socket.on('reconnect', () => {
+    socket.on('reload', () => {
+        if (type == "display")
             window.location.href = '/activity';
-        }); 
-    } else if (type == "client"){
-        socket.on('reload', () => {
+        else
             window.location.href = '/';
-        }); 
-        socket.on('reconnect', () => {
+    }); 
+
+    socket.on('reconnect', () => {
+        if (type == "display")
             window.location.href = '/activity';
-        }); 
-    }    
+        else
+            window.location.href = '/';
+    }); 
 
     socket.on('error', (message)=> {
         // Could go to an HTML page instead
@@ -64,8 +61,20 @@ function startSocket(visitorID, type){
         setCookie('roomID',cookieContent, 1);
     });
 
-    socketLoaded();
+    const anyListener = (event, ...args) => {
+        console.log(event, args);
+        socketUpdate(event, args[0]); // Bull rush currently can only accept one arg
+    } // Off by default
+
+    socketLoaded(anyListener);
 }    
+
+function selectActivity(activity) {
+    socket.emit("selectActivity", roomID, activity, (response) => {
+        console.log("Redirecting to " + activity);
+        window.location.pathname = '/';
+    });
+  }
 
 function getCookie(cname) {
     let name = cname + "=";
@@ -94,4 +103,8 @@ function setupConnection(type){
     // Setup logic  
     roomID = getCookie('roomID');
     getVisitorID(type);
+}
+
+function vote(userDecision){
+    socket.emit('vote')
 }

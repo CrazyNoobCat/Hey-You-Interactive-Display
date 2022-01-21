@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bull Rush Activity | Hey You Interactive Display</title>
+    <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+    <script src="/socketCreation.js"></script>
+    <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
+    <script>
+        // Generic socket setup
+        setupConnection("display");  
+        function socketLoaded(anyListener){
+            socket.emit("displayLoaded");            
+        }        
+    </script>
+
+</head>
+<body>      
+
+    <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTY4no8CYlRv7WvSRAZ01r1b3SR9GhQB4f0-djjd0Q-coWWGDO3WzQZuaOgtlx5tPz6prwkoKa-i84D/embed?start=true&loop=true&delayms=5000" frameborder="0" width="1440" height="839" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+    <footer>
+        <script src="receiver.js"></script>
+    </footer>
+</body>
+</html>

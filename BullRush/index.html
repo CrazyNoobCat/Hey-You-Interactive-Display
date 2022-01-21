@@ -44,20 +44,16 @@
         <script>
             // Generic socket setup
             setupConnection("display");  
-            function socketLoaded(){
+            function socketLoaded(anyListener){
                 socket.emit("displayLoaded");
 
                 // page specific functions    
                 socket.on('clientConnected', (id)=>{
                     console.log("New client: " + id);
                     playerAdd(id);
-                });
-
-                socket.onAny((event, id) =>{
-                    //console.log("Recieved: " + event + " from: " + id);
-                    console.log(event);
-                    socketUpdate(id, event);
-                });
+                });        
+                
+                socket.onAny(anyListener);
             }            
 
             function emitColour(id, playerColor){
