@@ -63,7 +63,7 @@ function startSocket(visitorID, type){
 
     const anyListener = (event, ...args) => {
         console.log(event, args);
-        socketUpdate(event, args[0]); // Bull rush currently can only accept one arg
+        socketUpdate(event, args); // Bull rush currently can only accept one arg ///////////////// NOw
     } // Off by default
 
     socketLoaded(anyListener);

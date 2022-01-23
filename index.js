@@ -81,15 +81,25 @@ app.get('/socketCreation.js', (req,res) => {
 });
 
 app.get('*', (req, res) => {
-    if(fs.existsSync(__dirname + publicDirectory +req.path)){
-        console.log("File sent: " + req.path);
-        res.sendFile(__dirname + publicDirectory +req.path);
+    let activity = getActivity(req);
+    if (activity != undefined){
+        if (fs.existsSync(__dirname + activity + publicDirectory +req.path)){
+            console.log("File sent: " + req.path);
+            res.sendFile(__dirname + activity + publicDirectory +req.path);
+        }
+        else if(fs.existsSync(__dirname + publicDirectory +req.path)){
+            console.log("File sent: " + req.path);
+            res.sendFile(__dirname + publicDirectory +req.path);
+        } // public inside application folder
+        else {
+            console.log("Failed file get request: " + req.path)
+            res.sendStatus(404);
+            //res.status(404).send("Requested file does not exist\nError: 404");
+        }
+    } else {
+        res.redirect("/error/No valid RoomID found, rescan QR code");
     }
-    else {
-        console.log("Failed file get request: " + req.path)
-        res.sendStatus(404);
-        //res.status(404).send("Requested file does not exist\nError: 404");
-    }
+    
 });
 
 io.on('connection', (socket, host) => {
@@ -269,34 +279,15 @@ io.on('connection', (socket, host) => {
 
     socket.onAny((event, ...args) => {
 
-        /*console.log("Socket event: " + event + "\tSocketID: " + socket.id + "Socket Rooms:");
-        socket.rooms.forEach(room => {
-            console.log(room);
-        });*/
-
         // Check if socket is active (authorised)
         let active = true;
         let display = undefined;
         let client = undefined;
-/*
-        for (let index = 0; index < clients.length; index++) {
-            if (clients[index].getSocketID() == socket.id){
-                active = true;
-                break;
-            }
-        }*/
 
         if (active){
             var room = args[0];
 
-            switch (event) {
-                case "playerColour": // Need to consolodate into displayEmit
-                    var colour = args[1];
-                    console.log("Emitting colour: " + colour + " to: " + room);
-
-                    io.to(room).emit('playerColour', colour);
-                    break;
-                
+            switch (event) {                
                 case "selectActivity":
                     // Client has indicated an activity change
                     var activitySelected = args[1];
@@ -306,13 +297,16 @@ io.on('connection', (socket, host) => {
                         activitySelected = defaultActivity;                    
 
                     console.log("New activity: " + activitySelected + "\tRoom: " + room);
-                    io.to(room).emit('reload'); // This is relying on the trust that the clients room id is correct and not presaved???
 
                     display = findHostDisplayByRoomID(room);
                     if (display != undefined){
                         display.activityChange(activitySelected);
+
+                        // Nothing is done for any subdisplays who are apart of this room.. Should this be assumed as part of the reload?
+
+                        io.to(room).emit('reload'); // This is relying on the trust that the clients room id is correct and not presaved???
                     } else {
-                        console.log("Display was undefined based on roomID for activity change");
+                        console.log("Display was undefined based on roomID for activity change. No change occured");
                     }                
 
                     callback();
@@ -344,14 +338,21 @@ io.on('connection', (socket, host) => {
                 case "displayEmit":    
                     // Indicate an event that the display wants to send to all clients/displays in room
 
-                    // Hasn't been used with other displays yet, may run into issues
-                    display = findHostDisplayByRoomID(room);
+                    // Format ('displayEmit',room/socket to send to,event,args for event...)
+                    //              event          0                 1       2
+                    eventToSend = args[1];
+                    eventArgs = args[2];
 
-                    if (display != undefined) {
-                        console.log("Re-emitted display event: " + event + "\t\tRoom/Socket: " + room);
-                        socket.to(room).emit(emit);
+                    // Hasn't been used with other displays yet, may run into issues
+                    display = findDisplayBySocketID(socket.id); // using socket.id as no gaurantee room will be display
+
+                    if (display != undefined && display.isRoomHost()) {
+                        console.log("Re-emitted display event: " + eventToSend + "\t With args: "+ eventArgs + "\t\tRoom/Socket: " + room);
+                        socket.to(room).emit(eventToSend,eventArgs);
                     } else {
-                        console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + display.getRoom() + "\tDevice ID: " + displays[index].getDeviceID());
+
+                        // New logic has to be written to retrieve who the request was suppoesdly made
+                        //console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + room + "\tDevice ID: " + findClientBySocketID);
                     }    
                     break;
 

@@ -46,6 +46,7 @@
             setupConnection("display");  
             function socketLoaded(anyListener){
                 socket.emit("displayLoaded");
+                socket.onAny(anyListener); // Turns on the any listener
 
                 // page specific functions    
                 socket.on('clientConnected', (id)=>{
@@ -53,12 +54,11 @@
                     playerAdd(id);
                 });        
                 
-                socket.onAny(anyListener);
             }            
 
             function emitColour(id, playerColor){
                 console.log("Emited colour " + playerColor + " to " + id);
-                socket.emit('playerColour', id, playerColor);
+                socket.emit('displayEmit', id, 'playerColour', playerColor);
             }
             
             function reset(){
