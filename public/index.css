@@ -27,6 +27,15 @@ html,body {
     flex-direction:column;
 }
 
+#uni_logo {
+    position:absolute;
+    z-index:9999;
+    left:0;
+    top:0;
+    width:35vmin;
+    margin:2vmin;
+}
+
 .button {
     position: relative;
     margin: auto;
