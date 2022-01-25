@@ -19,6 +19,7 @@
             var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&amp;size=100x100';
             $('#barcode').attr('src', url);
             console.log("URL: " + url);
+            $('#website').text("Website: " + nric + '/join/' + getCookie('roomName'));
         }   
 
         // page specific functions

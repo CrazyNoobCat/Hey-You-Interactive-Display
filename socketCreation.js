@@ -61,6 +61,10 @@ function startSocket(visitorID, type){
         setCookie('roomID',cookieContent, 1);
     });
 
+    socket.on('setNewCookie', (cName, cContent, cDurationMins) => {        
+        setCookie(cName,cContent, cDurationMins);
+    });
+
     const anyListener = (event, ...args) => {
         console.log(event, args);
         socketUpdate(event, args); // This function must exist otherwise sockets will not work

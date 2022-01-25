@@ -19,7 +19,11 @@ app.get('/join/:roomID', (req, res) => {
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
         res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
         res.redirect('/'); // Prevents making a second cookie for a js file
-    } else { // If room doesn't exit
+    } else if ((display = findHostDisplayByName(req.params.roomID)) != undefined) {
+        res.cookie('roomID', display.getDeviceID(), {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
+        res.redirect('/'); // Prevents making a second cookie for a js file
+    }  
+    else { // If room doesn't exit
         res.redirect("/error/Room doesn't exist, rescan QR code");
     }    
 });
@@ -208,13 +212,17 @@ io.on('connection', (socket, host) => {
             // Add the new display to the list of displays
             displays.push(display);
 
+            // Assign the shortname to the display
+            assignShortName(display);
+
             // Using deviceID as the room identifier
             socket.join(display.getDeviceID());
 
             display.setAsRoomHost();
             display.setRoom(display.getDeviceID());
+            display.setCookie('roomID',display.getDeviceID(),1440) // 1 day
 
-            io.to(socket.id).emit("reload");
+            //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
             
             console.log(display.connectionInformation());
@@ -449,6 +457,20 @@ async function clientTimeoutCheck(){
     }, 1000);   
 }
 
+async function assignShortName(display){
+    fs.readFile('shortURLnames.txt', 'utf8', (err, data) => {
+        if (err){
+            console.error(err);
+            return;
+        }
+        let names = data.split('\n');    
+        if (displays.length < names.length)
+            display.setShortName(names[displays.length -1]);
+        else
+            display.setShortName(displays.length - 1);
+    })
+}
+
 function getCookie(req,cookieName){
     let cookies = req.headers.cookie; 
     if (cookies == undefined)
@@ -471,6 +493,15 @@ function findHostDisplayByRoomID(roomID){
         if (display.getRoom() == roomID && display.isRoomHost()){
             return display;
         }
+    }
+}
+
+function findHostDisplayByName(name){
+    for (let index = 0; index < displays.length; index++) {
+        const display = displays[index];
+        if (display.getShortName() == name){
+            return display;
+        }                    
     }
 }
 
@@ -531,6 +562,7 @@ class Connection{
     ready = false;
     #messages = []; // All messages which the display hasn't recieved due to it not being ready 
     numOfClients = 0;
+    #shortName = null;
     
     // Only used for clients
     #lastInteractionTime;
@@ -574,7 +606,10 @@ class Connection{
     updateLastInteractionTime(){
         this.#lastInteractionTime = Date.now();
         console.log("socket id: " + this.#socket.id);
-        io.to(this.#socket.id).emit('extendRoomID'); // Informs the socket to extend it's cookie validty
+        if (this.#host == true || this.#shortName != null || this.numOfClients > 0) // Characteristics of a display
+            return;
+        else
+            io.to(this.#socket.id).emit('extendRoomID'); // Informs the socket to extend it's cookie validty
     }
 
     addMessage(event, clientDeviceID){
@@ -582,6 +617,16 @@ class Connection{
     }
     
     clearMessages(){this.#messages = []};
+
+    setShortName(name){
+        this.#shortName = name
+        this.setCookie('roomName',name,1440); // 1 day
+        io.to(this.#socket.id).emit('reload');
+    };
+
+    setCookie(cName, cContent, cDurationMins){
+        io.to(this.#socket.id).emit('setNewCookie', cName, cContent, cDurationMins);
+    }
 
 
     // Getters
@@ -596,6 +641,7 @@ class Connection{
     getRoom(){return this.#room;}
     isRoomHost(){return this.#host;}
     getMessages(){return this.#messages;}
+    getShortName(){return this.#shortName;}
 
     // Debug information
 
