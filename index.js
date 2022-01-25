@@ -81,20 +81,21 @@ app.get('/socketCreation.js', (req,res) => {
 });
 
 app.get('*', (req, res) => {
+    // Send a file if it can be found inside either the public folder for the activity for the client or generic public folder
+    // Requests from nonclients will be redirected to an error page
     let activity = getActivity(req);
     if (activity != undefined){
-        if (fs.existsSync(__dirname + activity + publicDirectory +req.path)){
-            console.log("File sent: " + req.path);
-            res.sendFile(__dirname + activity + publicDirectory +req.path);
+        if (fs.existsSync(__dirname + activity + publicDirectory + req.path)){
+            console.log("File sent: " + activity + publicDirectory + req.path);
+            res.sendFile(__dirname + activity + publicDirectory + req.path);
         }
         else if(fs.existsSync(__dirname + publicDirectory +req.path)){
-            console.log("File sent: " + req.path);
+            console.log("File sent: " + publicDirectory + req.path);
             res.sendFile(__dirname + publicDirectory +req.path);
-        } // public inside application folder
+        }
         else {
             console.log("Failed file get request: " + req.path)
             res.sendStatus(404);
-            //res.status(404).send("Requested file does not exist\nError: 404");
         }
     } else {
         res.redirect("/error/No valid RoomID found, rescan QR code");
@@ -293,21 +294,28 @@ io.on('connection', (socket, host) => {
                     var activitySelected = args[1];
                     var callback = args[2]
 
-                    if (activitySelected == "/")
-                        activitySelected = defaultActivity;                    
-
-                    console.log("New activity: " + activitySelected + "\tRoom: " + room);
-
-                    display = findHostDisplayByRoomID(room);
-                    if (display != undefined){
-                        display.activityChange(activitySelected);
-
-                        // Nothing is done for any subdisplays who are apart of this room.. Should this be assumed as part of the reload?
-
-                        io.to(room).emit('reload'); // This is relying on the trust that the clients room id is correct and not presaved???
-                    } else {
-                        console.log("Display was undefined based on roomID for activity change. No change occured");
-                    }                
+                    client = findClientBySocketID(socket.id);
+                    if (client != undefined) {
+                        client.updateLastInteractionTime();
+                        if (client.getRoom() == room){
+                            if (activitySelected == "/")
+                            activitySelected = defaultActivity;                    
+    
+                            console.log("New activity: " + activitySelected + "\tRoom: " + room);
+    
+                            display = findHostDisplayByRoomID(room);
+                            if (display != undefined){
+                                display.activityChange(activitySelected);
+    
+                                // Nothing is done for any subdisplays who are apart of this room.. Should this be assumed as part of the reload?
+    
+                                io.to(room).emit('reload');
+                            } else {
+                                console.log("Display was undefined based on roomID for activity change. No change occured");
+                            }        
+                        }  
+                    }
+                                              
 
                     callback();
 
@@ -389,7 +397,7 @@ io.on('connection', (socket, host) => {
                             if (display != undefined){
                                 if(display.ready){
                                     console.log("event: " + event + "\tClient: " + client.getDeviceID());
-                                    io.to(display.getSocketID()).emit(event, client.getDeviceID()); // Send only to room host
+                                    io.to(display.getSocketID()).emit(event, client.getDeviceID(), args[0]); // Send only to room host
                                     client.updateLastInteractionTime();
                                     console.log("Re-emitted event: " + event + "\t\tRoom: " + room + "\tDeviceID: " + client.getDeviceID());
                                 } else {
@@ -416,7 +424,7 @@ server.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
-clientTimeoutCheck();
+clientTimeoutCheck(); // Call the next function and then let it loop
 
 // Checks every second to see if client is active
 async function clientTimeoutCheck(){
