@@ -12,7 +12,7 @@ var clients = []; // An array containing all the clients.
 var displays = []; // An array containing all displays.
 
 const defaultActivity = '';
-const defaultCookieTimeout = 1 * 60 * 1000; // Number of minutes a cookie will last for
+const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
 
 app.get('/join/:roomID', (req, res) => {
     if (findHostDisplayByRoomID(req.params.roomID) != undefined){

@@ -58,7 +58,7 @@ function startSocket(visitorID, type){
     socket.on('extendRoomID', () => {
         console.log("Cookie duration extended");
         let cookieContent = getCookie('roomID');
-        setCookie('roomID',cookieContent, 1);
+        setCookie('roomID',cookieContent, 1000);
     });
 
     socket.on('setNewCookie', (cName, cContent, cDurationMins) => {        

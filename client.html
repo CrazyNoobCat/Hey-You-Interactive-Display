@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>Client | Hey You Interactive Display</title>
-    <link rel="stylesheet" href="client.css">
-
+    <link rel="stylesheet" media="screen and (max-device-width: 800px)" href="client_min.css">
+    <link rel="stylesheet" href="client.css" media="screen and (min-device-width: 800px)" />
     <script src="socketCreation.js"></script>
     <script>      
       // Generic socket setup
@@ -20,29 +20,34 @@
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymous">
     </script>
-    <script> 
-      $(function(){
-        $("#header").load("header.html"); 
-        $("#footer").load("footer.html"); 
-      });
-      </script> 
   </head>
   <body>
-    <div class="container">
-      <div id="header"></div>
-      <h1 class="text">Please Select an Activity</h1>
-
-      <div class="voting"></div>
-  
-      <div class="activitySelectionGrid">
-        <a onclick="selectActivity('/BullRush')"><object data="bullrush.svg" class="grid-item"></object></a>
-        <a onclick="selectActivity('/SlideshowTest')"><object data="projector.svg" class="grid-item"> </object></a>
-        <a onclick="selectActivity('/Navigation')"><object data="navigation.svg" class="grid-item"> </object></a>
-        <object data="Info-Button.svg" class="grid-item"> </object>
-        <object data="Info-Button.svg" class="grid-item"> </object>
-        <object data="Info-Button.svg" class="grid-item"> </object>
+      <div class="message">
+        <h1>Please switch to a mobile device to use this site :)</h1>
       </div>
-      <div id="footer"></div>
-    </div>   
+      <div id="mobile_page">
+        <div id="client_header" class="header">
+          <button onclick="selectActivity('/')" type="button"><img class="home-img" src="Home.svg"></button>
+          <h1 class="text">Hey There!</h1>
+        </div>
+        <div id="client_body" class="body">
+          <div class="activitySelectionGrid">
+            <a class="grid-item" onclick="selectActivity('/Navigation')">
+              <img class="item_image" src="navigation.svg">
+              <p class="item_name">Navigation</p>
+            </a>
+            <a class="grid-item" onclick="selectActivity('/BullRush')">
+              <img class="item_image" src="bullrush.svg">
+              <p class="item_name">Bull Rush</p>
+            </a>
+            <a class="grid-item" onclick="selectActivity('/SlideshowTest')">
+              <img class="item_image" src="projector.svg">
+              <p class="item_name">Slideshow</p>
+            </a>
+          </div> 
+      </div>
+      <footer>
+        <button id="footer_button" onclick="selectActivity('/')" type="button">Return Home</button>
+      </footer>
   </body>
 </html>
