@@ -28,8 +28,11 @@ html, body {
     /*get target color here https://codepen.io/sosuke/pen/Pjoqqp */
 }
 
+.uni_img {
+    width:20vw;
+}
+
 button {
-    webkit-appearence:none;
     background-color:transparent;
     border:0;
 }
@@ -37,7 +40,7 @@ button {
 .text {
     font-family:monospace;
     text-align:center;
-    margin-right:10vw;
+    /*margin-right:10vw;*/
     width:100%;
     font-size:2.5vw;
 }
