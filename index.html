@@ -1,40 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8" />
-    <title>Activity | Hey You Interactive Display</title>
-    <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-    <!-- Cast Debug Logger -->
-    <!-- <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script> -->
-    <link rel="stylesheet" href="index.css">
-    <script src="socketCreation.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script>
-        // Generic socket setup
-        setupConnection("display"); 
-        function socketLoaded(anyListener){
-            var nric = self.location.host;
-            console.log("nric: " + nric);
-            console.log("Room ID: " + getCookie('roomID'));
-            var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&amp;size=100x100';
-            $('#barcode').attr('src', url);
-            console.log("URL: " + url);
-            $('#website').text("Website: " + nric + '/join/' + getCookie('roomName'));
-        }   
+    <head>
+        <meta charset="utf-8" />
+        <title>Activity | Hey You Interactive Display</title>
 
-        // page specific functions
-    </script>
-</head>
-<body style="background-color: white;">
-    <div class="center" style="width: 50%;">
-        <h1 id="heading">Please connect and select an activity</h1>
-        <div id="frame" class="frame">
-            <img style="align-content: center;" id='barcode' class="center"/> 
-        </div>                        
-        <h3 id='website'>Website: </h3>
-    </div>
-    <footer>
-        <script src="receiver.js"></script>
-    </footer>
-</body>
+        <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" sizes="any"><!-- 32×32 -->
+        <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY"><!-- 180×180 -->
+        <!--<link rel="manifest" href="/manifest.webmanifest">-->
+
+        <!-- Cast Debug Logger -->
+        <!-- <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script> -->
+
+        <link rel="stylesheet" href="index.css">
+        <script src="socketCreation.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+        <script>
+            // Generic socket setup
+            setupConnection("display"); 
+            function socketLoaded(anyListener){
+                var nric = self.location.host;
+                console.log("nric: " + nric);
+                console.log("Room ID: " + getCookie('roomID'));
+                var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&amp;size=100x100';
+                $('#barcode').attr('src', url);
+                console.log("URL: " + url);
+                $('#website').text("Website: " + nric + '/join/' + getCookie('roomName'));
+            }   
+
+            // page specific functions
+        </script>
+    </head>
+    <body style="background-color: white;">
+        <div class="center" style="width: 50%;">
+            <h1 id="heading">Scan me and select an activity!</h1>
+            <div id="frame" class="frame">
+                <img style="align-content: center;" id='barcode' class="center"/> 
+            </div>                        
+            <h3 id='website'>Alternatively: </h3>
+        </div>
+        <footer>
+            <script src="receiver.js"></script>
+        </footer>
+    </body>
 </html>
