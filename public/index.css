@@ -30,8 +30,8 @@ html,body {
 #uni_logo {
     position:absolute;
     z-index:9999;
-    left:0;
-    top:0;
+    left:48px;
+    top:27px;
     width:35vmin;
     margin:2vmin;
 }
