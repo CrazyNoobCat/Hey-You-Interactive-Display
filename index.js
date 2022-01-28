@@ -93,6 +93,7 @@ app.get('/join/:roomID', (req, res) => {
 app.get('/', (req, res) => {
     // Currently checking if the cookie is undefined in getCookie. If undefined then returns undefined
     let activity = getActivity(req);
+    console.log(activity);
 
     if(activity != undefined){
         // Check if there is a unique client file in activity otherwise provide default
@@ -100,8 +101,19 @@ app.get('/', (req, res) => {
             res.sendFile(__dirname + activity + '/client.html');
         else 
             res.sendFile(__dirname + defaultActivity + '/client.html')
-    } else {
-        res.redirect("/error/No valid RoomID found, rescan QR code")
+    } 
+    else {
+        // Check that there is no static Cookie
+        activity = getStaticActivity(req);
+        console.log(activity);
+        if (activity != undefined){
+            if(fs.existsSync(__dirname + activity + '/static.html'))
+                res.sendFile(__dirname + activity + '/static.html');
+            else 
+                res.sendFile(__dirname + defaultActivity + '/static.html')
+        } else {
+            res.redirect("/error/No valid RoomID or Static Activity found, rescan QR code")
+        }
     }    
 });
 
@@ -127,7 +139,7 @@ app.get('/scripts/:fileName', (req, res) => {
 
     let display = findHostDisplayByRoomID(getCookie(req,"roomID"));
     if (display != undefined)
-        activity = display.getCurentActivity();
+        activity = display.getCurrentActivity();
 
 });
 
@@ -450,6 +462,24 @@ io.on('connection', (socket, host) => {
 
                     break;
 
+                case 'static':
+                    // Set staticActivity cookie
+                    client = findClientBySocketID(socket.id);
+                    display = findHostDisplayByRoomID(client.getRoom());
+                    client.setCookie('staticActivity',display.getCurrentActivity(),60); // Only valid for an hour
+                    client.setCookie("roomID",'',0.0001); // Invalidate old cookie
+
+                    // Remove client
+                    clients.forEach(function(clientTemp, index, object) {
+                        if (clientTemp == client){
+                            object.splice(index,1);
+                        }
+                    });
+
+                    // Reload
+                    io.to(socket.id).emit("reload");
+                    break;
+
                 default:
 
                     // Allow clients only sending to room displays which are the room host    
@@ -542,6 +572,7 @@ function getCookie(req,cookieName){
         }
         
     }
+    return undefined;
 }
 
 function findHostDisplayByRoomID(roomID){
@@ -596,12 +627,21 @@ function findClientBySocketID(socketID){
     }
 }
 
+function getStaticActivity(req){
+    let activity = getCookie(req,"staticActivity");
+    console.log("Static Activity: " + activity);
+    if (fs.existsSync(__dirname + activity))
+        return activity;    
+
+    return undefined;
+}
+
 function getActivity(req){
     let display = findHostDisplayByRoomID(getCookie(req,"roomID"));
     if (display != undefined)
-        return display.getCurentActivity();
-    else 
-        return undefined;
+        return display.getCurrentActivity();
+    
+    return undefined;
 }
 
 class Connection{
@@ -696,7 +736,7 @@ class Connection{
     getDeviceID(){return this.#socket.handshake.query.clientID;}
     getSocketID(){return this.#socket.id;}
     getType(){return this.#socket.handshake.query.data;}
-    getCurentActivity(){return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
+    getCurrentActivity(){return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
     getLastActivity(){return this.#lastActivity;}
     getInitalConnection(){return this.#initalConnectionTime;}
     getLastInteraction(){return this.#lastInteractionTime;}

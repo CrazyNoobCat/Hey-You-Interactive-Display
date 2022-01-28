@@ -110,5 +110,9 @@ function setupConnection(type){
 }
 
 function vote(userDecision){
-    socket.emit('vote')
+    socket.emit('vote');
+}
+
+function static(){
+    socket.emit('static');
 }
