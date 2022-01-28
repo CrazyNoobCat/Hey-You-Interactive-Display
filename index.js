@@ -14,6 +14,68 @@ var displays = []; // An array containing all displays.
 const defaultActivity = '';
 const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
 
+const rl = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+
+function consoleInput() { // Console Commands
+    var exitCode = 0;
+    return new Promise(function(resolve, reject) {
+        rl.setPrompt('');
+        rl.prompt();
+        rl.on('line', function(line) {
+            line = line.toLowerCase();
+
+            if (line === "exit") {
+                exitCode = 1; // User initiated
+                rl.close();
+                return; // bail here, so rl.prompt() isn't called again
+            } 
+            else if (line === "help" || line === '?') {
+                console.log(`Commands:\n\tclients {roomName}\n\texit\n\tclear\n`);
+            } 
+            else if (line.startsWith("clients",0)) {
+                console.log("Clients: ")
+                let identifier = line.split(" ")[1]; // Get the 2nd parsed value
+
+                if (identifier.length > 15){ // For roomIDs
+                    findAllClientsByRoomID(identifier).forEach(client => {
+                        console.log(client.getDeviceID());
+                    });
+                } 
+                else { // For roomNames
+                    findAllClientsByRoomName(identifier).forEach(client => {
+                        console.log(client.getDeviceID());
+                    });
+                }  
+            } 
+            else if (line === "clear"){
+                console.clear();              
+            } 
+            else {
+                console.log(`unknown command: "${line}"`);
+            }
+            rl.prompt();
+        }).on('close',function(){
+            resolve(exitCode) // this is the final result of the function
+        });
+    })
+}
+  
+async function enableConsole() {
+    try {
+        let result = await consoleInput()
+        console.log('Exit Code: ', result)
+        process.exit(result);
+
+    } catch(e) {
+        console.log('failed:', e)
+    }
+}
+
+enableConsole()
+
 app.get('/join/:roomID', (req, res) => {
     if (findHostDisplayByRoomID(req.params.roomID) != undefined){
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
@@ -29,8 +91,6 @@ app.get('/join/:roomID', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    // Need to handle hosts that directly navigate to this url isntead of through a room id
-
     // Currently checking if the cookie is undefined in getCookie. If undefined then returns undefined
     let activity = getActivity(req);
 
@@ -245,8 +305,7 @@ io.on('connection', (socket, host) => {
             for (let index = 0; index < clients.length; index++) {
                 const client = clients[index];
                 if (client.getSocketID() == socket.id){
-                    client.updateLastInteractionTime();
-                    
+                    client.updateLastInteractionTime();                    
                     
                     // Removes itself from room after disconnect is complete
     
@@ -258,8 +317,6 @@ io.on('connection', (socket, host) => {
                 const display = displays[index];
                 if (display.getSocketID() == socket.id){
                     display.updateLastInteractionTime();
-    
-                    //
     
                     var foundNewHost = false;
                     // Check if there is another display that can be made the host
@@ -525,6 +582,11 @@ function findAllClientsByRoomID(roomID){
     return foundClients;
 }
 
+function findAllClientsByRoomName(roomName){
+    let roomID = findHostDisplayByName(roomName).getRoom();
+    return findAllClientsByRoomID(roomID);
+}
+
 function findClientBySocketID(socketID){
     for (let index = 0; index < clients.length; index++) {
         const client = clients[index];
@@ -620,7 +682,7 @@ class Connection{
 
     setShortName(name){
         this.#shortName = name
-        this.setCookie('roomName',name,1440); // 1 day
+        this.setCookie('roomName',name,1440 * 365); // 1 year
         io.to(this.#socket.id).emit('reload');
     };
 
