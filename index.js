@@ -652,7 +652,7 @@ function getActivity(req){
 }
 
 class Connection{
-    timeOutLimit = defaultCookieTimeout;
+    static timeOutLimit = defaultCookieTimeout;
 
     // # before a variable here indicates private
 
