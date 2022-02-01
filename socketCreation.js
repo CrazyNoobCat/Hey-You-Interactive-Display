@@ -48,6 +48,10 @@ function startSocket(visitorID, type){
             window.location.href = '/';
     }); 
 
+    socket.on('loadPage', (page) => {
+        window.location.href = page;
+    }); 
+
     socket.on('error', (message)=> {
         // Could go to an HTML page instead
         console.log("Error: " + message);

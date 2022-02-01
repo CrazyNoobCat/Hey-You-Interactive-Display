@@ -23,3 +23,6 @@ Steps:
 All emit requests which don't fit one of the above values will be treated as a message which must be sent to the display.
 The display will be sent (event, deviceID, args)
 
+**Notes**
+
+Folders cannot be named z. This is due to static pages defaulting to /stiatic/z so that it is refered to the default static page

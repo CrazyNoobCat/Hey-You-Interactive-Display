@@ -25,15 +25,13 @@ function consoleInput() { // Console Commands
         rl.setPrompt('');
         rl.prompt();
         rl.on('line', function(line) {
-            line = line.toLowerCase();
-
             if (line === "exit") {
                 exitCode = 1; // User initiated
                 rl.close();
                 return; // bail here, so rl.prompt() isn't called again
             } 
             else if (line === "help" || line === '?') {
-                console.log(`Commands:\n\tclients {roomName}\n\texit\n\tclear\n`);
+                console.log(`Commands:\n\tclients {roomName}\n\texit\n\tclear\n\tchangeActivity {roomName} {folder}\n`);
             } 
             else if (line.startsWith("clients",0)) {
                 console.log("Clients: ")
@@ -53,6 +51,12 @@ function consoleInput() { // Console Commands
             else if (line === "clear"){
                 console.clear();              
             } 
+            else if (line.startsWith("changeActivity",0)){
+                let roomName = line.split(" ")[1];
+                let folder = line.split(" ")[2];
+                let display = findHostDisplayByName(roomName);
+                display.activityChange(display);
+            }
             else {
                 console.log(`unknown command: "${line}"`);
             }
@@ -120,8 +124,12 @@ app.get('/', (req, res) => {
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
-    if (activity != undefined)
-        res.sendFile(__dirname + activity +'/index.html') // This is for reconecting displays
+    if (activity != undefined){
+        if (fs.existsSync(__dirname + activity +'/index.html'))
+            res.sendFile(__dirname + activity +'/index.html') // This is for reconecting displays
+        else
+            res.sendFile(__dirname + defaultActivity +'/index.html'); // This is for new displays  
+    }
     else 
         res.sendFile(__dirname + defaultActivity +'/index.html'); // This is for new displays
 });
@@ -386,7 +394,6 @@ io.on('connection', (socket, host) => {
     
                                 // Nothing is done for any subdisplays who are apart of this room.. Should this be assumed as part of the reload?
     
-                                io.to(room).emit('reload');
                             } else {
                                 console.log("Display was undefined based on roomID for activity change. No change occured");
                             }        
@@ -645,7 +652,7 @@ function getActivity(req){
 }
 
 class Connection{
-    static timeOutLimit = defaultCookieTimeout;
+    timeOutLimit = defaultCookieTimeout;
 
     // # before a variable here indicates private
 
@@ -692,6 +699,7 @@ class Connection{
         this.ready = false; // Allows time for the ready status to be set to true and enables saving of messages.   
         this.#lastActivity = this.#currentActivity;
         this.#currentActivity = activity;
+        io.to(this.#room).emit('reload');
     }
     setNewSocket(socket){
         this.#socket = socket;

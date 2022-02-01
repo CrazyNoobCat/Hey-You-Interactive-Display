@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Remote Commands | Hey You Interactive Display</title>
+    <script src="socketCreation.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script>
+        // Generic socket setup
+        setupConnection("managment");  
+        function socketLoaded(anyListener){
+            socket.onAny(anyListener); // Turns on the any listener must have socketUpdate(event, args) in main script
+
+            // page specific functions    
+            
+            
+        }
+        
+
+        function sendCommand(){
+            var text = document.getElementsByName('commandInput')[0].text;
+            alert(text);
+        }
+        
+        function socketUpdate(event, args){
+
+        }
+
+    </script>
+    
+</head>
+<body>
+    <form on="sendCommand()">
+        <label for="cmdInput">Command:</label>
+        <input type="text" id="cmdInput" name="cmdInput"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    <p name="serverOutput"></p>
+</body>
+</html>
