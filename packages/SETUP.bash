@@ -1,9 +1,9 @@
 
 os=$(uname -s)
 
-if [ "x$os" = "xLinux" ] ; then
+if [[ "x$os" =~ "xLinux" ]] ; then
     export PATH=$PWD/node-v16.13.2-linux-x64/bin:$PATH
-elif [ "x${os%%_*}" = "xCygwin" ] ; then    
+elif [[ "x${os%%_*}" =~ "xCYGWIN" ]] ; then    
     export PATH=$PWD/node-v16.13.1-win-x64:$PATH
 else
     echo "Unrecognized Operating System: $os" >&2
