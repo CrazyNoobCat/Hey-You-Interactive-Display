@@ -31,13 +31,17 @@ function consoleInput() { // Console Commands
                 return; // bail here, so rl.prompt() isn't called again
             } 
             else if (line === "help" || line === '?') {
-                console.log(`Commands:\n\tclients {roomName}\n\texit\n\tclear\n\tchangeActivity {roomName} {folder}\n`);
+                console.log(`Commands:\n\tclients {roomName/ID}/all\n\texit\n\tclear\n\tchangeActivity {roomName} {folder}\n\tdisplays\n`);
             } 
             else if (line.startsWith("clients",0)) {
                 console.log("Clients: ")
                 let identifier = line.split(" ")[1]; // Get the 2nd parsed value
-
-                if (identifier.length > 15){ // For roomIDs
+                if (identifier === "all"){
+                    clients.forEach(client => {
+                        console.log("DeviceID: " + client.getDeviceID() +"\tRoom: " + client.getRoom());
+                    });
+                }
+                else if (identifier.length > 15){ // For roomIDs
                     findAllClientsByRoomID(identifier).forEach(client => {
                         console.log(client.getDeviceID());
                     });
@@ -56,6 +60,11 @@ function consoleInput() { // Console Commands
                 let folder = line.split(" ")[2];
                 let display = findHostDisplayByName(roomName);
                 display.activityChange(display);
+            }
+            else if (line === "displays"){                
+                displays.forEach(display => {
+                    console.log("DeviceID: " + display.getDeviceID() +"\tRoomName: " + display.getShortName());
+                });
             }
             else {
                 console.log(`unknown command: "${line}"`);
@@ -206,7 +215,8 @@ io.on('connection', (socket, host) => {
                     let display = findHostDisplayByRoomID(client.getRoom());
 
                     if (display!= undefined){
-                        io.to(display.getRoom()).emit('clientDC', client.getDeviceID());
+                        display.message('clientDC', client.getDeviceID());
+                        //io.to(display.getRoom()).emit('clientDC', client.getDeviceID());
                         display.numOfClients--; // Reduce client count by one for old room.
                     } else {
                         // Error
@@ -345,7 +355,8 @@ io.on('connection', (socket, host) => {
                         if(displayNew.getRoom() == display.getRoom() && displayNew.getSocketID() != socket.id){
                             displayNew.setAsRoomHost();
                             
-                            io.to(displayNew.getSocketID()).emit("new-host") ////////////////// This emit hasn't been added to anything
+                            displayNew.message("host",true);
+                            //io.to(displayNew.getSocketID()).emit("host",true) ////////////////// This emit hasn't been added to anything
                             foundNewHost = true;
                             break;
                         }                    
@@ -417,9 +428,8 @@ io.on('connection', (socket, host) => {
                         if (messages != null){
                             console.log("Forwarding saved messages for display host to room: " + display.getRoom());
                             messages.forEach(message => {
-                                let event = message[0];
-                                let clientDeviceID = message[1];    
-                                io.to(display.getSocketID()).emit(event, clientDeviceID);
+                                display.message(message);
+                                //io.to(display.getSocketID()).emit(event, clientDeviceID);
                             });
                             display.clearMessages();
                         }
@@ -428,7 +438,7 @@ io.on('connection', (socket, host) => {
                     break;
     
                 case "displayEmit":    
-                    // Indicate an event that the display wants to send to all clients/displays in room
+                    // Indicate an event that the display wants to send to a client or the whole room
 
                     // Format ('displayEmit',room/socket to send to,event,args for event...)
                     //              event          0                 1       2
@@ -440,6 +450,7 @@ io.on('connection', (socket, host) => {
 
                     if (display != undefined && display.isRoomHost()) {
                         console.log("Re-emitted display event: " + eventToSend + "\t With args: "+ eventArgs + "\t\tRoom/Socket: " + room);
+                        
                         socket.to(room).emit(eventToSend,eventArgs);
                     } else {
 
@@ -453,7 +464,8 @@ io.on('connection', (socket, host) => {
                     display = findDisplayBySocketID(socket.id);
                     if (display != undefined){
                         display.activityChange(defaultActivity); // Set to default
-                        io.to(display.getRoom()).emit('reload'); // Tell all devices to reload
+                        display.messageRoom('reload');
+                        //io.to(display.getRoom()).emit('reload'); // Tell all devices to reload
                     }
                     break;
 
@@ -497,15 +509,8 @@ io.on('connection', (socket, host) => {
                         if (client.getRoom() == room){
                             display = findHostDisplayByRoomID(room);
                             if (display != undefined){
-                                if(display.ready){
-                                    console.log("event: " + event + "\tClient: " + client.getDeviceID());
-                                    io.to(display.getSocketID()).emit(event, client.getDeviceID(), args[0]); // Send only to room host
-                                    client.updateLastInteractionTime();
-                                    console.log("Re-emitted event: " + event + "\t\tRoom: " + room + "\tDeviceID: " + client.getDeviceID());
-                                } else {
-                                    // When display is not ready save the messages to it
-                                    display.addMessage(event,client.getDeviceID());
-                                }   
+                                display.message(event, client.getDeviceID(), args[0]);
+                                client.updateLastInteractionTime();                                
                             } else {
                                 console.log("Undefined display for RoomID: " + room + '\tEvent: ' + event);
                             }
@@ -535,11 +540,13 @@ async function clientTimeoutCheck(){
             if (client.timedOut()) {
                 object.splice(index, 1);
 
-                io.to(client.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
+                client.message('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
+                //io.to(client.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
 
                 let display = findHostDisplayByRoomID(client.getRoom());
                 if (display != undefined){
-                    io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
+                    display.message('clientDC', client.getDeviceID());
+                    //io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
                     display.numOfClients--; // Reduce client count for room by one
                 }
 
@@ -665,10 +672,10 @@ class Connection{
     // Connection variables
     #socket;
     #room;
+    ready = false;
 
     // Only used for displays
     #host = false;
-    ready = false;
     #messages = []; // All messages which the display hasn't recieved due to it not being ready 
     numOfClients = 0;
     #shortName = null;
@@ -699,7 +706,8 @@ class Connection{
         this.ready = false; // Allows time for the ready status to be set to true and enables saving of messages.   
         this.#lastActivity = this.#currentActivity;
         this.#currentActivity = activity;
-        io.to(this.#room).emit('reload');
+        this.messageRoom('reload');
+        //io.to(this.#room).emit('reload');
     }
     setNewSocket(socket){
         this.#socket = socket;
@@ -719,11 +727,12 @@ class Connection{
         if (this.#host == true || this.#shortName != null || this.numOfClients > 0) // Characteristics of a display
             return;
         else
-            io.to(this.#socket.id).emit('extendRoomID'); // Informs the socket to extend it's cookie validty
+            this.message('extendRoomID');
+            //io.to(this.#socket.id).emit('extendRoomID'); // Informs the socket to extend it's cookie validty
     }
 
-    addMessage(event, clientDeviceID){
-        this.#messages.push([event, clientDeviceID]);
+    addMessage(...args){
+        this.#messages.push([...args]);
     }
     
     clearMessages(){this.#messages = []};
@@ -731,11 +740,11 @@ class Connection{
     setShortName(name){
         this.#shortName = name
         this.setCookie('roomName',name,1440 * 365); // 1 year
-        io.to(this.#socket.id).emit('reload');
+        this.message('reload');
     };
 
     setCookie(cName, cContent, cDurationMins){
-        io.to(this.#socket.id).emit('setNewCookie', cName, cContent, cDurationMins);
+        this.message('setNewCookie', cName, cContent, cDurationMins);
     }
 
 
@@ -758,6 +767,22 @@ class Connection{
     connectionInformation(){
         var debugText = "DeviceID: " + this.getDeviceID() + "\tType: " + this.getType() + "\tRoom ID: " + this.getRoom();
         return debugText;
+    }
+
+    // Functions
+    message(...args){ // Handles sending socket updates to device
+        if(this.ready){
+            console.log("Message sent to: " + this.getDeviceID() + "\tArgs: " + args);
+            io.to(this.getSocketID()).emit(...args);
+            //io.to(display.getSocketID()).emit(event, client.getDeviceID(), args[0]); // Send only to room host
+        } else {
+            // When device is not ready save the messages to it
+            this.addMessage(args);
+        }   
+    }
+
+    messageRoom(...args){
+        io.to(this.getRoom()).emit(...args);
     }
 
 }
