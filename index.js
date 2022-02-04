@@ -672,7 +672,7 @@ class Connection{
     // Connection variables
     #socket;
     #room;
-    ready = false;
+    ready = true;
 
     // Only used for displays
     #host = false;
