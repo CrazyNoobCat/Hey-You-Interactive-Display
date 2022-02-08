@@ -69,9 +69,9 @@ function startSocket(visitorID, type){
         setCookie(cName,cContent, cDurationMins);
     });
 
-    const anyListener = (event, ...args) => {
-        console.log(event, args);
-        socketUpdate(event, args); // This function must exist otherwise sockets will not work
+    const anyListener = (...args) => {
+        console.log(...args);
+        socketUpdate(...args); // This function must exist otherwise sockets will not work
     } // Off by default
 
     socketLoaded(anyListener);

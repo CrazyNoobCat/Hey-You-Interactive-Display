@@ -294,7 +294,7 @@ function include(file) {
     document.getElementsByTagName('head').item(0).appendChild(script);
 }
 
-function socketUpdate(e, args) {
+function socketUpdate(e, ...args) {
     // Itterate through every player until the socket number matches
     var num = args[0];
     if (!loopTeamSocketUpdate(num, e, players))
