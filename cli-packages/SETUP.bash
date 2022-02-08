@@ -6,9 +6,10 @@ os=$(uname -s)
 
 if [[ "x$os" =~ "xLinux" ]] ; then
     nodejs_package=$nodejs_package-linux-x64
-
+    export PATH=$PWD/$nodejs_package/bin:$PATH
 elif [[ "x${os%%_*}" =~ "xCYGWIN" ]] ; then
     nodejs_package=$nodejs_package-win-x64
+    export PATH=$PWD/$nodejs_package:$PATH
 else
     echo "Unrecognized Operating System: $os" >&2
     echo "Failed to update PATH to include node, npm and npx"
@@ -29,7 +30,6 @@ if [ ! -d $nodejs_package ] ; then
     return
 fi
     
-export PATH=$PWD/$nodejs_package/bin:$PATH
 
 echo "Updated PATH to include node, npm and npx"
 
