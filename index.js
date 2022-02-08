@@ -14,12 +14,11 @@ var displays = []; // An array containing all displays.
 const defaultActivity = '';
 const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
 
-const rl = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
-
 function consoleInput() { // Console Commands
+    const rl = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    })
     var exitCode = 0;
     return new Promise(function(resolve, reject) {
         rl.setPrompt('');
@@ -86,7 +85,6 @@ async function enableConsole() {
         console.log('failed:', e)
     }
 }
-
 
 const cmdline_args = process.argv.slice(2);
 
@@ -533,8 +531,8 @@ io.on('connection', (socket, host) => {
     })
 });
 
-server.listen(4000, () => {
-    console.log('listening on *:4000');
+server.listen(3000, () => {
+    console.log('listening on *:3000');
 });
 
 clientTimeoutCheck(); // Call the next function and then let it loop
