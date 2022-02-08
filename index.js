@@ -87,7 +87,12 @@ async function enableConsole() {
     }
 }
 
-enableConsole()
+
+const cmdline_args = process.argv.slice(2);
+
+if (cmdline_args[0] == "-console") {
+    enableConsole()
+}
 
 app.get('/join/:roomID', (req, res) => {
     if (findHostDisplayByRoomID(req.params.roomID) != undefined){
@@ -528,8 +533,8 @@ io.on('connection', (socket, host) => {
     })
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
+server.listen(4000, () => {
+    console.log('listening on *:4000');
 });
 
 clientTimeoutCheck(); // Call the next function and then let it loop

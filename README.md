@@ -1,12 +1,21 @@
 # Hey-You-Interactive-Display
 
+If you do not already have NodeJS installed at the command-line, for
+convenience you can find packaged up binaries in 'cli-packages' for
+64-bit Linux and Windows.  Untar (Linux) or unzip (Cygwin) the
+relevant file, and then 'source ./SETUP.bash'
+
 Steps:
 
-1. run in terminal: node index.js.
+1. run in terminal: 'node index.js -console'.
 2. in broswer for display navigate to: localhost:3000/activity.
 3. scan the QR code and paste the url into the browser to join as a client to that session
 4. alternatively navigate to localhost:3000/join/roomID. Replace the roomID with the deviceID of the display you wish to join. 
 
+
+If you want to run the server in the background, this can be accomplished with:
+
+    nohup node index.js </dev/null  2>&1 &
 
 
 **Display Emit Codes**
