@@ -213,9 +213,6 @@ io.on('connection', (socket, host) => {
                 // Handle updating socket information for this reconnecting device
 
                 if (client.getRoom() != socket.handshake.query.roomID){
-
-                    console.log("here");
-
                     let display = findHostDisplayByRoomID(client.getRoom());
 
                     if (display!= undefined){
@@ -711,7 +708,6 @@ class Connection{
         this.#lastActivity = this.#currentActivity;
         this.#currentActivity = activity;
         this.messageRoom('reload');
-        //io.to(this.#room).emit('reload');
     }
     setNewSocket(socket){
         this.#socket = socket;
@@ -727,12 +723,10 @@ class Connection{
     
     updateLastInteractionTime(){
         this.#lastInteractionTime = Date.now();
-        console.log("socket id: " + this.#socket.id);
         if (this.#host == true || this.#shortName != null || this.numOfClients > 0) // Characteristics of a display
             return;
         else
-            this.message('extendRoomID');
-            //io.to(this.#socket.id).emit('extendRoomID'); // Informs the socket to extend it's cookie validty
+            this.message('extendRoomID');// Informs the socket to extend it's cookie validty 
     }
 
     addMessage(...args){
@@ -778,7 +772,6 @@ class Connection{
         if(this.ready){
             console.log("Message sent to: " + this.getDeviceID() + "\tArgs: " + args);
             io.to(this.getSocketID()).emit(...args);
-            //io.to(display.getSocketID()).emit(event, client.getDeviceID(), args[0]); // Send only to room host
         } else {
             // When device is not ready save the messages to it
             this.addMessage(args);
