@@ -177,10 +177,11 @@ app.get('*', (req, res) => {
     // Send a file if it can be found inside either the public folder for the activity for the client or generic public folder
     // Requests from nonclients will be redirected to an error page
     let activity = getActivity(req);
-    if (activity != undefined){
+    if (activity != undefined || req.params.roomName != undefined){
         if (fs.existsSync(__dirname + activity + publicDirectory + req.path)){
             console.log("File sent: " + activity + publicDirectory + req.path);
             res.sendFile(__dirname + activity + publicDirectory + req.path);
+            return;
         }
         else if(fs.existsSync(__dirname + publicDirectory +req.path)){
             console.log("File sent: " + publicDirectory + req.path);
@@ -191,7 +192,7 @@ app.get('*', (req, res) => {
             res.sendStatus(404);
         }
     } else {
-        res.redirect("/error/No valid RoomID found, rescan QR code");
+        res.redirect("/error/No valid activity found, rescan QR code");
     }
     
 });
@@ -449,7 +450,7 @@ io.on('connection', (socket, host) => {
                     display = findDisplayBySocketID(socket.id); // using socket.id as no gaurantee room will be display
 
                     if (display != undefined && display.isRoomHost()) {
-                        console.log("Re-emitted display event: " + eventToSend + "\t With args: "+ eventArgs + "\t\tRoom/Socket: " + room);
+                        console.log("Re-emitted display event: " + eventToSend + "\t Args: "+ eventArgs + "\t\tRoom/Socket: " + room);
                         
                         socket.to(room).emit(eventToSend,eventArgs);
                     } else {
@@ -779,7 +780,7 @@ class Connection{
             // When device is not ready save the messages to it
             this.addMessage(args);
         }   
-    }
+    }   
 
     messageRoom(...args){
         io.to(this.getRoom()).emit(...args);
