@@ -45,7 +45,6 @@
             // Generic socket setup
             setupConnection("display");  
             function socketLoaded(anyListener){
-                socket.emit("displayLoaded");
                 socket.onAny(anyListener); // Turns on the any listener
 
                 // page specific functions    
@@ -53,7 +52,8 @@
                     console.log("New client: " + id);
                     playerAdd(id);
                 });        
-                
+
+                socket.emit("displayLoaded");                
             }            
 
             function emitColour(id, playerColor){
