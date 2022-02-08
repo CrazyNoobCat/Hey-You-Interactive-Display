@@ -12,8 +12,8 @@ if [ "x$os_root" = "xlinux" ] ; then
     export PATH=$PWD/$nodejs_package/bin:$PATH
     echo "Updated PATH to include node, npm and npx"
 
-    export NODE_PATH=$PWD/$nodejs_package/node_modules
-    echo "Set NODE_PATH to include $nodejs_package 'node_modules'"
+    export NODE_PATH=$PWD/$nodejs_package/lib/node_modules
+    echo "Set NODE_PATH to include $nodejs_package/lib/node_modules"
     
 elif [ "x$os_root" = "xcygwin" ] ; then
     nodejs_package=$nodejs_package-win-x64
