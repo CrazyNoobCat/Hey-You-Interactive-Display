@@ -28,10 +28,15 @@ If you want to run the server in the background, this can be accomplished with:
 
 - selectActivity --> Tells the rooms activity to be changed to the requested activity... Format: ('selectActivity', room, activity folder name, callback function)
 
-- default --> Format: (event, args)
+- default --> Format: (event, ...args)
 All emit requests which don't fit one of the above values will be treated as a message which must be sent to the display.
 The display will be sent (event, deviceID, args)
 
 **Notes**
 
 Folders cannot be named z. This is due to static pages defaulting to /stiatic/z so that it is refered to the default static page
+
+Displays or clients expecting custom messages should have a function called socketUpdate(...args) and enable the any listener inside of the relevant html page (e.g. index.html for displays and client.html for clients) using the line: 
+
+    socket.onAny(anyListener); // Turns on the any istener
+
