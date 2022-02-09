@@ -1,0 +1,8 @@
+
+echo ""
+echo "SETUP.bash has been moved/renamed to:"
+echo "  ../heyyou-setup.bash"
+echo ""
+echo "Update your scripts to source this file in its new location with its new filename"
+echo ""
+
