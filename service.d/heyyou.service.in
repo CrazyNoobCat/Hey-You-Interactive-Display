@@ -1,0 +1,28 @@
+# For more details on writing a service, see:
+#  https://linuxconfig.org/how-to-create-systemd-service-unit-in-linux
+#
+[Unit]
+Description=Hey You, Interact With Me web server
+After=network.target
+
+[Service]
+Type=forking
+User=@HEYYOU_SERVICE_USERNAME@
+# Uncomment (and adjust) the following if the startup/shutdown cost is computationally high
+#TimeoutStartSec=180
+#TimeoutStopSec=240
+ExecStart=/usr/bin/env bash @HEYYOU_HOME@/service.d/heyyou-start.sh
+#ExecStop=/usr/bin/env bash @HEYYOU_HOME@/service.d/heyyou-stop.sh
+
+#
+# If using 'Restart' directive, read the following to avoid some common pitfalls
+#   https://medium.com/@benmorel/creating-a-linux-service-with-systemd-611b5c8b91d6
+# Restart=on-failure
+#   Other restart options: always, on-abort, etc
+
+# The install section is needed to use `systemctl enable` to start on boot
+# For a user service that you want to enable and start automatically, use `default.target`
+# For system level services, use `multi-user.target`
+#
+[Install]
+WantedBy=multi-user.target
