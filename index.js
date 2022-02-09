@@ -1,12 +1,18 @@
 const express = require('express');
 const app = express();
+
 const http = require('http');
 const server = http.createServer(app);
+
 const { Server } = require("socket.io");
 const io = new Server(server);
+
 const fs = require('fs');
+
 const { Console } = require('console');
 const publicDirectory = "/public";
+
+var port = process.env.PORT || 3000;
 
 var clients = []; // An array containing all the clients. 
 var displays = []; // An array containing all displays.
@@ -528,8 +534,8 @@ io.on('connection', (socket, host) => {
     })
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
+server.listen(port, () => {
+    console.log('listening on *:' + port);
 });
 
 clientTimeoutCheck(); // Call the next function and then let it loop
