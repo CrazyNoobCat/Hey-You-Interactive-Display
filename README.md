@@ -31,23 +31,29 @@ Putting this all together, for a 'localhost' setup, running say
 Debian ...
 
 **Setup**
-  1. cd cli-packages
-  2. tar xvf node-v16.13.2-linux-x64.tar.xz
-  3. cd ..
+    cd cli-packages
+    tar xvf node-v16.13.2-linux-x64.tar.xz
+    cd ..
 
 **Start up the web server**
-  * ./heyyou-start-server.sh &
+    ./heyyou-start-server.sh &
 
 **Display an Activity Home Page**
 
-  * In a desktop browser, navigate to http://localhost:3000/activiy which will display a page with a QR code on it
-  * Note: using the desktop browser here is just a test.  Typically the Activity Home Page is launched on a display
-    screen through ChromeCast
+  * In a desktop browser, navigate to _http://localhost:3000/activiy_
+    which will display a page with a QR code on it
+
+  * Note: we are using a desktop browser here just for testing
+    purposes.  Typically the Hey You Activity Home Page is launched on a
+    display screen through ChromeCast
   
 Connect as an end-user to try out the install:
 
-  * On a phone, scan the QR code (or paste the url shown below it into a browser) to join as a client to that session
-  * Alternatively navigate to localhost:3000/join/roomID. Replace the roomID with the deviceID of the display you wish to join. 
+  * On a phone, scan the QR code (or paste the url shown below it into
+    a browser) to join as a client to that session
+
+  * Alternatively navigate to localhost:3000/join/roomID. Replace the
+    roomID with the deviceID of the display you wish to join.
 
 
 
