@@ -302,7 +302,7 @@ function socketUpdate(e, ...args) {
         playerAdd(id);
     }
     else {
-        var num = args[1];
+        var num = args[0];
         if (!loopTeamSocketUpdate(num, e, players))
             loopTeamSocketUpdate(num, e, taggers);
     }
