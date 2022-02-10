@@ -35,21 +35,25 @@ function consoleInput() { // Console Commands
             else if (line.startsWith("clients",0)) {
                 console.log("Clients: ")
                 let identifier = line.split(" ")[1]; // Get the 2nd parsed value
-                if (identifier === "all"){
-                    clients.forEach(client => {
-                        console.log("DeviceID: " + client.getDeviceID() +"\tRoom: " + client.getRoom());
-                    });
-                }
-                else if (identifier.length > 15){ // For roomIDs
-                    findAllClientsByRoomID(identifier).forEach(client => {
-                        console.log(client.getDeviceID());
-                    });
-                } 
-                else { // For roomNames
-                    findAllClientsByRoomName(identifier).forEach(client => {
-                        console.log(client.getDeviceID());
-                    });
-                }  
+                if (identifier != undefined){
+                    if (identifier === "all"){
+                        clients.forEach(client => {
+                            console.log("DeviceID: " + client.getDeviceID() +"\tRoom: " + client.getRoom());
+                        });
+                    }
+                    else if (identifier.length > 15){ // For roomIDs
+                        findAllClientsByRoomID(identifier).forEach(client => {
+                            console.log(client.getDeviceID());
+                        });
+                    } 
+                    else { // For roomNames
+                        findAllClientsByRoomName(identifier).forEach(client => {
+                            console.log(client.getDeviceID());
+                        });
+                    }  
+                } else {
+                    console.log("Missing command arguments. Use help for more information");
+                }                
             } 
             else if (line === "clear"){
                 console.clear();              
@@ -97,9 +101,11 @@ app.get('/join/:roomID', (req, res) => {
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
         res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
         res.redirect('/'); // Prevents making a second cookie for a js file
+        console.log("New device joined with roomID: ")
     } else if ((display = findHostDisplayByName(req.params.roomID)) != undefined) {
         res.cookie('roomID', display.getDeviceID(), {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
         res.redirect('/'); // Prevents making a second cookie for a js file
+        console.log("New device joined with roomName: ")
     }  
     else { // If room doesn't exit
         res.redirect("/error/Room doesn't exist, rescan QR code");
@@ -109,41 +115,54 @@ app.get('/join/:roomID', (req, res) => {
 app.get('/', (req, res) => {
     // Currently checking if the cookie is undefined in getCookie. If undefined then returns undefined
     let activity = getActivity(req);
-    console.log(activity);
 
     if(activity != undefined){
         // Check if there is a unique client file in activity otherwise provide default
         if(fs.existsSync(__dirname + activity + '/client.html'))
-            res.sendFile(__dirname + activity + '/client.html');
+            sendFile(res,__dirname + activity + '/client.html','/client.html',activity)
         else 
-            res.sendFile(__dirname + defaultActivity + '/client.html')
+            sendFile(res,__dirname + defaultActivity + '/client.html','/client.html',activity)
     } 
     else {
         // Check that there is no static Cookie
         activity = getStaticActivity(req);
-        console.log(activity);
         if (activity != undefined){
             if(fs.existsSync(__dirname + activity + '/static.html'))
-                res.sendFile(__dirname + activity + '/static.html');
+                sendFile(res, __dirname + activity + '/static.html', "/static.html", activity)
             else 
-                res.sendFile(__dirname + defaultActivity + '/static.html')
+                sendFile(res, __dirname + defaultActivity + '/static.html', "static.html", defaultActivity)
         } else {
             res.redirect("/error/No valid RoomID or Static Activity found, rescan QR code")
         }
     }    
 });
 
+function sendFile(res, path, fileName, activity){
+    if (fs.existsSync(path)) {
+        res.sendFile(path);
+        console.log("File sent: " + fileName + "\t\tActivity: " + activity);
+    } 
+    else {
+        res.sendStatus(404);
+        console.log("Failed file retrival: " + fileName + "(File not found) \t\tActivity: " + activity);
+    }
+    
+}
+
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
     if (activity != undefined){
         if (fs.existsSync(__dirname + activity +'/index.html'))
-            res.sendFile(__dirname + activity +'/index.html') // This is for reconecting displays
-        else
-            res.sendFile(__dirname + defaultActivity +'/index.html'); // This is for new displays  
+            sendFile(res,__dirname + activity +'/index.html','/index.html',activity); // This is for reconecting displays
+        else{
+            sendFile(res,__dirname + defaultActivity +'/index.html','/index.html',activity); // This is for activities not existing  
+            console.log("File Error: Activity (" + activity +") didn't exist so default was sent to device: " + req.params.roomID);
+        }
     }
-    else 
-        res.sendFile(__dirname + defaultActivity +'/index.html'); // This is for new displays
+    else {
+        sendFile(res, __dirname + defaultActivity +'/index.html', '/index.html', "Default"); // This is for new displays
+    }   
 });
 
 app.get('/scripts/:fileName', (req, res) => {
@@ -151,10 +170,10 @@ app.get('/scripts/:fileName', (req, res) => {
     let activity = getActivity(req)
 
     if (activity != undefined){
-        console.log("File sent Activity: " + activity + "\tFile: " + req.params.fileName);
-        res.sendFile(__dirname + activity + '/scripts/' + req.params.fileName);
+        sendFile(res,__dirname + activity + '/scripts/' + req.params.fileName, req.params.fileName, activity);
     } else {
-        res.redirect("/error/No valid RoomID found, rescan QR code");
+        res.sendStatus(403); //
+        console.log("Failed file retrival: " + req.params.fileName + "(Not associated with an activity) \treq roomID: " + req.params.roomID);
     }
 
     let display = findHostDisplayByRoomID(getCookie(req,"roomID"));
@@ -181,21 +200,17 @@ app.get('*', (req, res) => {
     // Requests from nonclients will be redirected to an error page
     let activity = getActivity(req);
     if (activity != undefined || req.params.roomName != undefined){
-        if (fs.existsSync(__dirname + activity + publicDirectory + req.path)){
-            console.log("File sent: " + activity + publicDirectory + req.path);
-            res.sendFile(__dirname + activity + publicDirectory + req.path);
-            return;
-        }
-        else if(fs.existsSync(__dirname + publicDirectory +req.path)){
-            console.log("File sent: " + publicDirectory + req.path);
-            res.sendFile(__dirname + publicDirectory +req.path);
-        }
+        if (fs.existsSync(__dirname + activity + publicDirectory + req.path))
+            sendFile(res,__dirname + activity + publicDirectory + req.path, req.path, activity);
+        else if(fs.existsSync(__dirname + publicDirectory + req.path))
+            sendFile(res,__dirname + publicDirectory +req.path, req.path, activity);
         else {
-            console.log("Failed file get request: " + req.path)
+            console.log("Failed file retrival: " + req.path + "(File not found) \tActivity: " + activity);
             res.sendStatus(404);
         }
     } else {
-        res.redirect("/error/No valid activity found, rescan QR code");
+        res.sendStatus(403);
+        console.log("Failed file retrival: " + req.params.fileName + "(Not associated with an activity) \treq roomID: " + req.params.roomID);
     }
     
 });
@@ -240,7 +255,7 @@ io.on('connection', (socket, host) => {
                 socket.join(client.getRoom());
                 socket.join(client.getDeviceID());
 
-                console.log("Client rejoined: " + client.connectionInformation());
+                console.log("Client rejoined: \t" + client.connectionInformation());
                 newConnection = false ;
             }
         }
@@ -264,7 +279,7 @@ io.on('connection', (socket, host) => {
                 display = findHostDisplayByRoomID(client.getRoom());
                 display.numOfClients++; // Increase client count for new room by one.
 
-                console.log("New Client: " + client.connectionInformation());
+                console.log("New Client: \t" + client.connectionInformation());
             } else {
                 // Could send error since there is no valid display for the client //////////////////////////
             }
@@ -284,7 +299,7 @@ io.on('connection', (socket, host) => {
 
                 console.log("Socket update for display (device id): " + display.getDeviceID());
 
-                console.log(Date.now() - display.getLastInteraction());
+                //console.log(Date.now() - display.getLastInteraction());
                 if (Date.now() - display.getLastInteraction() > 10000){
                     io.to(socket.id).emit("reload");
                     display.updateLastInteractionTime();
@@ -316,7 +331,7 @@ io.on('connection', (socket, host) => {
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
             
-            console.log(display.connectionInformation());
+            console.log("New Display: \t" + display.connectionInformation());
         }
     } else {
         console.log("Invalid connection request\t Type: " + socket.handshake.query.data + "\tReferer: " + socket.handshake.headers.referer);
@@ -429,7 +444,7 @@ io.on('connection', (socket, host) => {
                         if (messages != null){
                             console.log("Forwarding saved messages for display host to room: " + display.getRoom());
                             messages.forEach(message => {
-                                display.message(message);
+                                display.message(...message);
                                 //io.to(display.getSocketID()).emit(event, clientDeviceID);
                             });
                             display.clearMessages();
@@ -507,16 +522,12 @@ io.on('connection', (socket, host) => {
                     client = findClientBySocketID(socket.id);
 
                     if (client != undefined){
-                        if (client.getRoom() == room){
-                            display = findHostDisplayByRoomID(room);
-                            if (display != undefined){
-                                display.message(event, client.getDeviceID(), args[0]);
-                                client.updateLastInteractionTime();                                
-                            } else {
-                                console.log("Undefined display for RoomID: " + room + '\tEvent: ' + event);
-                            }
+                        display = findHostDisplayByRoomID(client.getRoom());
+                        if (display != undefined){
+                            display.message(event, client.getDeviceID(), ...args);
+                            client.updateLastInteractionTime();                                
                         } else {
-                            console.log("Non room client attempted to send to room host. Room: " + room + "\tClient Device ID: " + client.getDeviceID());
+                            console.log("Undefined display for RoomID: " + client.getRoom() + '\tEvent: ' + event);
                         }
                     } else {
                         console.log("Couldn't find client from SocketID: " + socket.id + "\tEvent: " + event);
@@ -730,6 +741,7 @@ class Connection{
     }
 
     addMessage(...args){
+
         this.#messages.push([...args]);
     }
     
@@ -763,7 +775,7 @@ class Connection{
     // Debug information
 
     connectionInformation(){
-        var debugText = "DeviceID: " + this.getDeviceID() + "\tType: " + this.getType() + "\tRoom ID: " + this.getRoom();
+        var debugText = "DeviceID: " + this.getDeviceID() + "\tRoom ID: " + this.getRoom();
         return debugText;
     }
 
@@ -774,7 +786,7 @@ class Connection{
             io.to(this.getSocketID()).emit(...args);
         } else {
             // When device is not ready save the messages to it
-            this.addMessage(args);
+            this.addMessage(...args);
         }   
     }   
 

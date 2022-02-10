@@ -64,7 +64,7 @@
       document.addEventListener('keyup', buttonup, false);
 
       function socketLoaded(){
-        socket.emit('clientConnected', roomID, )
+        socket.emit('clientConnected')
 
         socket.on('playerColour', (colour) =>{
           console.log("Setting colour to: " + colour);

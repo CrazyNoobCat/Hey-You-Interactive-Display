@@ -47,12 +47,6 @@
             function socketLoaded(anyListener){
                 socket.onAny(anyListener); // Turns on the any listener
 
-                // page specific functions    
-                socket.on('clientConnected', (id)=>{
-                    console.log("New client: " + id);
-                    playerAdd(id);
-                });        
-
                 socket.emit("displayLoaded");                
             }            
 

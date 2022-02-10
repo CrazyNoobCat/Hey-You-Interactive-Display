@@ -296,9 +296,17 @@ function include(file) {
 
 function socketUpdate(e, ...args) {
     // Itterate through every player until the socket number matches
-    var num = args[0];
-    if (!loopTeamSocketUpdate(num, e, players))
-        loopTeamSocketUpdate(num, e, taggers);
+    if (e == 'clientConnected'){
+        var id = args[0];
+        console.log("New client: " + id);
+        playerAdd(id);
+    }
+    else {
+        var num = args[1];
+        if (!loopTeamSocketUpdate(num, e, players))
+            loopTeamSocketUpdate(num, e, taggers);
+    }
+        
 }
 
 function loopTeamSocketUpdate(num, e, team) {
