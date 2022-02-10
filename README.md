@@ -2,20 +2,51 @@
 
 If you do not already have NodeJS installed at the command-line, for
 convenience you can find packaged up binaries in 'cli-packages' for
-64-bit Linux and Windows.  Untar (Linux) or unzip (Cygwin) the
-relevant file, and then 'source ./SETUP.bash'
+64-bit Linux and Windows.  The 'cli-packages' directory approach has
+the added advantage that it captures the version of NodeJS that the
+development work was done using.
 
-Steps:
+In 'cli-packagtes' untar (Linux) or unzip (Cygwin) the relevant file,
+and then back in the top-level directory of the project:
 
-1. run in terminal: 'node index.js -console'.
-2. in broswer for display navigate to: localhost:3000/activity.
-3. scan the QR code and paste the url into the browser to join as a client to that session
-4. alternatively navigate to localhost:3000/join/roomID. Replace the roomID with the deviceID of the display you wish to join. 
+    source ./heyyou-setup.bash
+Or
+    . ./heyyou-setup.bash
 
+The sourced script is designed to check for a few, common-place issues.
 
-If you want to run the server in the background, this can be accomplished with:
+With 'node' in your PATH, you can set the Hey You server with:
 
-    nohup node index.js </dev/null  2>&1 &
+  ./heyyou-start-server.sh
+
+This automatically sources the setup.bash file, and logs output to:
+
+    heyyou-server.log
+
+For production use, 'heyyou' can be setup to run as a service using
+'systemctl'.  See the README file in the 'service.d' directory for
+more details.
+
+Putting this all together, for a 'localhost' setup, running say
+Debian ...
+
+Setup:
+  1. cd cli-packages
+  2. tar xvf node-v16.13.2-linux-x64.tar.xz
+  3. cd ..
+
+Start up the web server:
+  * ./heyyou-start-server.sh &
+
+Initiate a starting activity (akin to a home page for your installation)
+
+  * In a desktop browser, navigate to http://localhost:3000/activiy which will display a page with a QR code on it
+
+Connect as an end-user to try out the install:
+
+  * On a phone, scan the QR code (or paste the url shown below it into a browser) to join as a client to that session
+  * Alternatively navigate to localhost:3000/join/roomID. Replace the roomID with the deviceID of the display you wish to join. 
+
 
 
 **Display Emit Codes**
