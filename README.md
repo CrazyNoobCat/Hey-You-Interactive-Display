@@ -31,11 +31,13 @@ Putting this all together, for a 'localhost' setup, running say
 Debian ...
 
 **Setup**
+
     cd cli-packages
     tar xvf node-v16.13.2-linux-x64.tar.xz
     cd ..
 
 **Start up the web server**
+
     ./heyyou-start-server.sh &
 
 **Display an Activity Home Page**
