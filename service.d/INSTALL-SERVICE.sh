@@ -1,13 +1,9 @@
 #!/bin/bash
 
-full_progname="$PWD/${BASH_SOURCE}"
+full_progname="$PWD/${BASH_SOURCE#./}"
 heyyou_home=${full_progname%/*/*}
 
 if [ -d "/etc/systemd/system/" ] ; then
-
-#    if [ "x$heyyou_home" = "x" ] ; then
-#	cd .. && source ./heyyou-setup.sh && cd service.d
-#    fi
 
 #    heyyour_service_username=${1-www-data}
     heyyour_service_username=${1-heyyou}

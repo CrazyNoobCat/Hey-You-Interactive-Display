@@ -1,12 +1,14 @@
 #!/bin/bash
 
-full_progname=`pwd`/${BASH_SOURCE}
-heyyou_home=${full_progname%/*}
+# Work out where we are on the filesystem:
+#   https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
+
+HEYYOU_HOME=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 echo "Logging output to:"
-echo "  heyyou-server.log"
+echo "  $PWD/heyyou-server.log"
 
-cd "$heyyou_home" \
+cd "$HEYYOU_HOME" \
     && . ./heyyou-setup.bash \
     && node index.js </dev/null >heyyou-server.log 2>&1
 
