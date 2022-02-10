@@ -17,7 +17,7 @@ The sourced script is designed to check for a few, common-place issues.
 
 With 'node' in your PATH, you can set the Hey You server with:
 
-  ./heyyou-start-server.sh
+    ./heyyou-start-server.sh
 
 This automatically sources the setup.bash file, and logs output to:
 
@@ -30,18 +30,20 @@ more details.
 Putting this all together, for a 'localhost' setup, running say
 Debian ...
 
-Setup:
+**Setup**
   1. cd cli-packages
   2. tar xvf node-v16.13.2-linux-x64.tar.xz
   3. cd ..
 
-Start up the web server:
+**Start up the web server**
   * ./heyyou-start-server.sh &
 
-Initiate a starting activity (akin to a home page for your installation)
+**Display an Activity Home Page**
 
   * In a desktop browser, navigate to http://localhost:3000/activiy which will display a page with a QR code on it
-
+  * Note: using the desktop browser here is just a test.  Typically the Activity Home Page is launched on a display
+    screen through ChromeCast
+  
 Connect as an end-user to try out the install:
 
   * On a phone, scan the QR code (or paste the url shown below it into a browser) to join as a client to that session
