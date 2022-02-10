@@ -1,23 +1,21 @@
-const express = require('express');
-const app = express();
-
-const http = require('http');
-const server = http.createServer(app);
-
-const { Server } = require("socket.io");
-const io = new Server(server);
-
-const fs = require('fs');
-
+const express     = require('express');
+const http        = require('http');
+const { Server }  = require("socket.io");
+const fs          = require('fs');
 const { Console } = require('console');
+
+const app    = express();
+const server = http.createServer(app);
+const io     = new Server(server);
+
+
 const publicDirectory = "/public";
+const httpPort = process.env.PORT || 3000;
 
-var port = process.env.PORT || 3000;
-
-var clients = []; // An array containing all the clients. 
+var clients  = []; // An array containing all the clients. 
 var displays = []; // An array containing all displays.
 
-const defaultActivity = '';
+const defaultActivity      = '';
 const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
 
 function consoleInput() { // Console Commands
@@ -545,8 +543,8 @@ io.on('connection', (socket, host) => {
     })
 });
 
-server.listen(port, () => {
-    console.log('listening on *:' + port);
+server.listen(httpPort, () => {
+    console.log('listening on *:' + httpPort);
 });
 
 clientTimeoutCheck(); // Call the next function and then let it loop
