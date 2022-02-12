@@ -8,11 +8,7 @@ After=network.target
 [Service]
 Type=forking
 User=@HEYYOU_SERVICE_USERNAME@
-# Uncomment (and adjust) the following if the startup/shutdown cost is computationally high
-#TimeoutStartSec=180
-#TimeoutStopSec=240
 ExecStart=/usr/bin/env bash @HEYYOU_HOME@/service.d/heyyou-start.sh
-#ExecStop=/usr/bin/env bash @HEYYOU_HOME@/service.d/heyyou-stop.sh
 
 #
 # If using 'Restart' directive, read the following to avoid some common pitfalls
