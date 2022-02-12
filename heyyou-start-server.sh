@@ -10,5 +10,5 @@ echo "  $PWD/heyyou-server.log"
 
 cd "$HEYYOU_HOME" \
     && . ./heyyou-setup.bash \
-    && node index.js </dev/null >heyyou-server.log 2>&1
+    && node app-launcher.js </dev/null >heyyou-server.log 2>&1
 
