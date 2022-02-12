@@ -6,8 +6,7 @@ const http        = require('http');
 const { Server }  = require("socket.io");
 const { Console } = require('console');
 
-const { Connection } = require('./connection');
-
+const Connection    = require('./connection');
 
 const app    = express();
 const server = http.createServer(app);
@@ -225,7 +224,6 @@ app.get('*', (req, res) => {
 });
 
 io.on('connection', (socket, host) => {
-
     // Check if this new socket is already a recorded connection
 
     var newConnection = true;
@@ -272,8 +270,8 @@ io.on('connection', (socket, host) => {
         if (newConnection){
             // Handle creating a new Connection instance for this device
 
-            var client = new Connection(socket,defaultActivity,defaultCookieTimeout);  
-
+            var client = new Connection(io,socket,defaultActivity,defaultCookieTimeout);
+	    
             // Add the new client to the list of clients
 
             let display = findHostDisplayByRoomID(client.getRoom());
@@ -321,8 +319,8 @@ io.on('connection', (socket, host) => {
 
         if (newConnection){
             // Handle creating a new Connection instance for this device
-
-            let display = new Connection(socket,defaultActivity);
+	    
+            let display = new Connection(io,socket,defaultActivity,defaultCookieTimeout);
 
             // Add the new display to the list of displays
             displays.push(display);
@@ -677,5 +675,134 @@ function getActivity(req){
         return display.getCurrentActivity();
     
     return undefined;
+}
+
+class ConnectionXXX
+{
+    timeoutLimit;
+
+    // # before a variable here indicates private
+
+    // Analytics variables
+    #lastActivity;
+    #currentActivity;
+    #initalConnectionTime;
+    
+
+    // Connection variables
+    #socket;
+    #room;
+    ready = true;
+
+    // Only used for displays
+    #host = false;
+    #messages = []; // All messages which the display hasn't recieved due to it not being ready 
+    numOfClients = 0;
+    #shortName = null;
+    
+    // Only used for clients
+    #lastInteractionTime;
+    
+    constructor(socket, activity, timeoutLimit) {
+        this.#socket          = socket;
+        this.#currentActivity = activity; // Connection class itself;
+	this.timeoutLimit     = timeoutLimit;
+	
+        this.#room = socket.handshake.query.roomID;
+
+        this.#initalConnectionTime = Date.parse(socket.handshake.time);
+        this.updateLastInteractionTime();
+    }
+
+    //
+
+    timedOut(){
+        if (Date.now() - this.#lastInteractionTime > Connection.timeoutLimit)
+            return true;
+        else
+            return false;        
+    }
+
+    // Setters
+    activityChange(activity){
+        this.ready = false; // Allows time for the ready status to be set to true and enables saving of messages.   
+        this.#lastActivity = this.#currentActivity;
+        this.#currentActivity = activity;
+        this.messageRoom('reload');
+    }
+    setNewSocket(socket){
+        this.#socket = socket;
+        this.#lastInteractionTime = Date.now();
+    } // Occurs on connection change or region
+    setRoom(room){
+        // Should probably have some logic for removing from the old room
+        this.#room = room;
+    }
+    setAsRoomHost(){this.#host = true;}
+
+    removeAsRoomHost(){this.#host = false;}
+    
+    updateLastInteractionTime(){
+        this.#lastInteractionTime = Date.now();
+        if (this.#host == true || this.#shortName != null || this.numOfClients > 0) // Characteristics of a display
+            return;
+        else
+            this.message('extendRoomID');// Informs the socket to extend it's cookie validty 
+    }
+
+    addMessage(...args){
+
+        this.#messages.push([...args]);
+    }
+    
+    clearMessages(){this.#messages = []};
+
+    setShortName(name){
+        this.#shortName = name
+        this.setCookie('roomName',name,1440 * 365); // 1 year
+        this.message('reload');
+    };
+
+    setCookie(cName, cContent, cDurationMins){
+        this.message('setNewCookie', cName, cContent, cDurationMins);
+    }
+
+
+    // Getters
+
+    getDeviceID(){return this.#socket.handshake.query.clientID;}
+    getSocketID(){return this.#socket.id;}
+    getType(){return this.#socket.handshake.query.data;}
+    getCurrentActivity(){return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
+    getLastActivity(){return this.#lastActivity;}
+    getInitalConnection(){return this.#initalConnectionTime;}
+    getLastInteraction(){return this.#lastInteractionTime;}
+    getRoom(){return this.#room;}
+    isRoomHost(){return this.#host;}
+    getMessages(){return this.#messages;}
+    getShortName(){return this.#shortName;}
+
+    // Debug information
+
+    connectionInformation(){
+        var debugText = "DeviceID: " + this.getDeviceID() + "\tRoom ID: " + this.getRoom();
+        return debugText;
+    }
+
+    // Functions
+    message(...args){ // Handles sending socket updates to device
+        if(this.ready){
+            console.log("Message sent to: " + this.getDeviceID() + "\tArgs: " + args);
+            io.to(this.getSocketID()).emit(...args);
+        } else {
+            // When device is not ready save the messages to it
+            this.addMessage(...args);
+        }   
+    }   
+
+    messageRoom(...args){
+        io.to(this.getRoom()).emit(...args);
+    }
+
 }
 

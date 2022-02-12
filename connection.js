@@ -11,6 +11,7 @@ class Connection
     
 
     // Connection variables
+    #io;
     #socket;
     #room;
     ready = true;
@@ -24,7 +25,8 @@ class Connection
     // Only used for clients
     #lastInteractionTime;
     
-    constructor(socket, activity, timeoutLimit) {
+    constructor(io, socket, activity, timeoutLimit) {
+	this.#io              = io;
         this.#socket          = socket;
         this.#currentActivity = activity; // Connection class itself;
 	this.timeoutLimit     = timeoutLimit;
@@ -114,7 +116,7 @@ class Connection
     message(...args){ // Handles sending socket updates to device
         if(this.ready){
             console.log("Message sent to: " + this.getDeviceID() + "\tArgs: " + args);
-            io.to(this.getSocketID()).emit(...args);
+            this.#io.to(this.getSocketID()).emit(...args);
         } else {
             // When device is not ready save the messages to it
             this.addMessage(...args);
@@ -122,7 +124,7 @@ class Connection
     }   
 
     messageRoom(...args){
-        io.to(this.getRoom()).emit(...args);
+        this.#io.to(this.getRoom()).emit(...args);
     }
 
 }
