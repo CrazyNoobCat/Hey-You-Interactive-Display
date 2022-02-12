@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Activity | Hey You Interactive Display</title>
+        <title>App Launcher | Hey You Interactive Display</title>
 
         <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" sizes="any"><!-- 32×32 -->
         <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" type="image/svg+xml">
@@ -14,7 +14,7 @@
 
         <link rel="stylesheet" href="index.css">
         <script src="socketCreation.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
         <script>
             // Generic socket setup
@@ -26,16 +26,15 @@
                 var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&amp;size=100x100';
                 $('#barcode').attr('src', url);
                 console.log("URL: " + url);
-                $('#website').text("Website: " + nric + '/join/' + getCookie('roomName'));
+                $('#website').text("Or visit on your phone: " + nric + '/join/' + getCookie('roomName'));
             }   
 
             // page specific functions
         </script>
     </head>
     <body style="background-color: white;">
-        <div id="uni_logo"><img id="uni_img" src="uni_logo.svg"></div>
         <div class="center" style="width: 50%;">
-            <h1 id="heading">Scan me and select an activity!</h1>
+            <h1 id="heading" >Scan me to select an interactive app!</h1>
             <div id="frame" class="frame">
                 <img style="align-content: center;" id='barcode' class="center"/> 
             </div>                        
