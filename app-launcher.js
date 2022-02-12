@@ -16,8 +16,25 @@ const io     = new Server(server);
 const publicDirectory = "/public";
 const httpPort = process.env.PORT || 3000;
 
-var clients  = []; // An array containing all the clients. 
-var displays = []; // An array containing all displays.
+// The general setup of Hey You is as follows:
+//  
+//   1. A 'display' starts by showing the home page to the app-launcher
+//
+//   2. When a 'client' (phone-based user) connects via the QR code
+//      (or else by entering the URL the app-launcher displays) they
+//      are shown (on their phone) a list of apps that can be launched
+//
+//   3. Upon selecting an app from the list, the display is then sent
+//      the necessary files (.html, .css, .js) to run that app, and
+//      the client page changes to the controller for the app
+//
+//   4. If another client joins a display while it us running an app,
+//      then then that client is directly provided the controller for
+//      that app
+
+
+var displays = []; // An array containing all displays
+var clients  = []; // An array containing all the clients
 
 const defaultActivity      = '';
 const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
