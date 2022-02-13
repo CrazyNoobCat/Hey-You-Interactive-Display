@@ -9,6 +9,14 @@ echo "Logging output to:"
 echo "  $PWD/heyyou-server.log"
 
 cd "$HEYYOU_HOME" \
-    && . ./heyyou-setup.bash \
-    && node app-launcher.js </dev/null >heyyou-server.log 2>&1
+    && . ./heyyou-setup.bash
 
+if [ $? = "0" ] ; then
+    echo ""
+    echo "Launching node app-laucher as a background process"
+    echo ""
+    node app-launcher.js </dev/null >heyyou-server.log 2>&1 &
+    echo $! >heyyou-server.pid
+else
+    echo "Failed to successfully source 'heyyou-setup.bash'" >&2
+fi
