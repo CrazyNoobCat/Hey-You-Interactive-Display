@@ -40,6 +40,9 @@
                 document.getElementById("slideshow").src = "/Slide" + currentSlide + ".JPG";    
             } else if (e === "max"){
                 maxSlides = args[0];
+            } else if (e ==="download"){
+                console.log(args);
+                socket.emit('displayEmit', args[0], 'download', document.getElementById("slideshow").src );
             }
         }
     </script>
