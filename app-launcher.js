@@ -38,6 +38,7 @@ var clients  = []; // An array containing all the clients
 
 const defaultActivity      = '';
 const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
+const activityLocation = __dirname + '/activities';
 
 function consoleInput() { // Console Commands
     const rl = require('readline').createInterface({
@@ -143,17 +144,17 @@ app.get('/', (req, res) => {
 
     if(activity != undefined){
         // Check if there is a unique client file in activity otherwise provide default
-        if(fs.existsSync(__dirname + activity + '/client.html'))
-            sendFile(res,__dirname + activity + '/client.html','/client.html',activity)
+        if(fs.existsSync(activityLocation + activity + '/client.html'))
+            sendFile(res, activityLocation + activity + '/client.html','/client.html',activity)
         else 
-            sendFile(res,__dirname + defaultActivity + '/client.html','/client.html',activity)
+            sendFile(res, __dirname + defaultActivity + '/client.html','/client.html',activity)
     } 
     else {
         // Check that there is no static Cookie
         activity = getStaticActivity(req);
         if (activity != undefined){
-            if(fs.existsSync(__dirname + activity + '/static.html'))
-                sendFile(res, __dirname + activity + '/static.html', "/static.html", activity)
+            if(fs.existsSync(activityLocation + activity + '/static.html'))
+                sendFile(res, activityLocation + activity + '/static.html', "/static.html", activity)
             else 
                 sendFile(res, __dirname + defaultActivity + '/static.html', "static.html", defaultActivity)
         } else {
@@ -178,8 +179,8 @@ app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
     if (activity != undefined){
-        if (fs.existsSync(__dirname + activity +'/index.html'))
-            sendFile(res,__dirname + activity +'/index.html','/index.html',activity); // This is for reconecting displays
+        if (fs.existsSync(activityLocation + activity +'/index.html'))
+            sendFile(res, activityLocation + activity +'/index.html','/index.html',activity); // This is for reconecting displays
         else{
             sendFile(res,__dirname + defaultActivity +'/index.html','/index.html',activity); // This is for activities not existing  
             console.log("File Error: Activity (" + activity +") didn't exist so default was sent to device: " + req.params.roomID);
@@ -195,7 +196,7 @@ app.get('/scripts/:fileName', (req, res) => {
     let activity = getActivity(req)
 
     if (activity != undefined){
-        sendFile(res,__dirname + activity + '/scripts/' + req.params.fileName, req.params.fileName, activity);
+        sendFile(res, activityLocation + activity + '/scripts/' + req.params.fileName, req.params.fileName, activity);
     } else {
         res.sendStatus(403); //
         console.log("Failed file retrival: " + req.params.fileName + "(Not associated with an activity) \treq roomID: " + req.params.roomID);
@@ -225,8 +226,8 @@ app.get('*', (req, res) => {
     // Requests from nonclients will be redirected to an error page
     let activity = getActivity(req);
     if (activity != undefined || req.params.roomName != undefined){
-        if (fs.existsSync(__dirname + activity + publicDirectory + req.path))
-            sendFile(res,__dirname + activity + publicDirectory + req.path, req.path, activity);
+        if (fs.existsSync(activityLocation + activity + publicDirectory + req.path))
+            sendFile(res, activityLocation + activity + publicDirectory + req.path, req.path, activity);
         else if(fs.existsSync(__dirname + publicDirectory + req.path))
             sendFile(res,__dirname + publicDirectory +req.path, req.path, activity);
         else {
@@ -680,7 +681,7 @@ function findClientBySocketID(socketID){
 function getStaticActivity(req){
     let activity = getCookie(req,"staticActivity");
     console.log("Static Activity: " + activity);
-    if (fs.existsSync(__dirname + activity))
+    if (fs.existsSync(activityLocation + activity))
         return activity;    
 
     return undefined;

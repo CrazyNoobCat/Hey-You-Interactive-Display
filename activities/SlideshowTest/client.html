@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SlideshowTest Controller</title>
+    <link rel="stylesheet" media="screen and (max-device-width: 800px)" href="client_min.css">
+    <link rel="stylesheet" href="client.css" media="screen and (min-device-width: 800px)" />
+
+    <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" sizes="any"><!-- 32×32 -->
+    <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY"><!-- 180×180 -->
+    
+    <script src="/socketCreation.js"></script>
+    <script>
+      // Generic socket setup
+      setupConnection("client");  
+      var audio = new Audio('/Slide16.mp3');
+
+      function socketLoaded(){
+        socket.on('download', (url) => {
+          console.log(url);
+          download(url);
+        });   
+
+        socket.on('audio', (state) => {
+          playAudio(state);
+        }); 
+      }
+
+      function send(e){
+        socket.emit(e);
+      }
+
+      function playAudio(state){
+        if (state =='play')
+          audio.play();
+        else {
+          audio.load();
+        }
+      }
+
+      function download(imageSrc) {
+        const link = document.createElement('a');
+        link.href = imageSrc;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // page specific functions      
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous">
+    </script>
+  </head>
+  <body>
+    <div class="message">
+      <h1>Please switch to a mobile device to use this site :)</h1>
+    </div>
+    <div id="mobile_page">
+      <div id="client_header" class="header">
+        <button onclick="selectActivity('/')" type="button"><img class="home-img" src="Home.svg"></button>
+        <h1 class="text">Hey There!</h1>
+        <img class="uni_img" src="uni_logo.svg">
+      </div>
+      <div id="client_body" class="body">
+        <div class="activitySelectionGrid">
+          <a class="grid-item" onclick="send('next')">
+            <p class="item_name">Next</p>
+          </a>
+          <a class="grid-item" onclick="send('back')">
+            <p class="item_name">Back</p>
+          </a>
+          <a class="grid-item" onclick="send('download')">
+            <p class="item_name">Download</p>
+          </a>
+        </div>
+    </div>
+    <footer>
+      <button id="footer_button" onclick="selectActivity('/')" type="button">Return Home</button>
+    </footer>
+    <!-- Next -->
+    <button onclick="send('next')" type="button">Next</button>
+
+    <!-- Back -->
+    <button onclick="send('back')" type="button">Back</button>
+
+    <!-- DownloadSlide -->
+    <button onclick="send('download')" type="button">Download</button>    
+    
+  </body>
+</html>
