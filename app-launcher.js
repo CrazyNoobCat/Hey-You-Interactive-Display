@@ -39,6 +39,7 @@ var clients  = []; // An array containing all the clients
 const defaultActivity      = '';
 const defaultActivityLabel = 'Activity-Launcher (Default)';
 const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
+const activityLocation = __dirname + '/activities';
 
 
 
@@ -255,17 +256,17 @@ app.get('/', (req, res) => {
 
     if(activity != undefined){
         // Check if there is a unique client file in activity otherwise provide default
-        if(fs.existsSync(__dirname + activity + '/client.html'))
-            sendActivityFile(res,__dirname + activity + '/client.html','/client.html',activity)
+        if(fs.existsSync(activityLocation + activity + '/client.html'))
+            sendActivityFile(res, activityLocation + activity + '/client.html','/client.html',activity)
         else 
-            sendActivityFile(res,__dirname + defaultActivity + '/client.html','/client.html',activity)
+            sendActivityFile(res, __dirname + defaultActivity + '/client.html','/client.html',activity)
     } 
     else {
         // Check that there is no static Cookie
         activity = getStaticActivity(req);
         if (activity != undefined){
-            if(fs.existsSync(__dirname + activity + '/static.html'))
-                sendActivityFile(res, __dirname + activity + '/static.html', "/static.html", activity)
+            if(fs.existsSync(activityLocation + activity + '/static.html'))
+                sendActivityFile(res, activityLocation + activity + '/static.html', "/static.html", activity)
             else 
                 sendActivityFile(res, __dirname + defaultActivity + '/static.html', "static.html", defaultActivityLabel)
         } else {
@@ -280,8 +281,8 @@ app.get('/activity', (req, res) => {
     let activity = getActivity(req);
     
     if (activity != undefined){
-        if (fs.existsSync(__dirname + activity +'/index.html'))
-            sendActivityFile(res,__dirname + activity +'/index.html','/index.html',activity); // This is for reconecting displays
+        if (fs.existsSync(activityLocation + activity +'/index.html'))
+            sendActivityFile(res, activityLocation + activity +'/index.html','/index.html',activity); // This is for reconecting displays
         else{
             sendActivityFile(res,__dirname + defaultActivity +'/index.html','/index.html',activity); // This is for activities not existing  
             console.log("File Error: Activity (" + activity +") didn't exist so default was sent to device: " + req.params.roomID);
@@ -297,7 +298,7 @@ app.get('/scripts/:fileName', (req, res) => {
     let activity = getActivity(req)
 
     if (activity != undefined){
-        sendActivityFile(res,__dirname + activity + '/scripts/' + req.params.fileName, req.params.fileName, activity);
+        sendActivityFile(res, activityLocation + activity + '/scripts/' + req.params.fileName, req.params.fileName, activity);
     } else {
         res.sendStatus(403); //
         console.log("Failed file retrival: " + req.params.fileName + "(Not associated with an activity) \treq roomID: " + req.params.roomID);
@@ -328,8 +329,8 @@ app.get('*', (req, res) => {
     let activity = getActivity(req);
     
     if (activity != undefined || req.params.roomName != undefined){
-        if (fs.existsSync(__dirname + activity + publicDirectory + req.path))
-            sendActivityFile(res,__dirname + activity + publicDirectory + req.path, req.path, activity);
+        if (fs.existsSync(activityLocation + activity + publicDirectory + req.path))
+            sendActivityFile(res, activityLocation + activity + publicDirectory + req.path, req.path, activity);
         else if(fs.existsSync(__dirname + publicDirectory + req.path))
             sendActivityFile(res,__dirname + publicDirectory +req.path, req.path, activity);
         else {
