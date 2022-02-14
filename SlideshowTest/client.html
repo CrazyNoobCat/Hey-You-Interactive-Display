@@ -13,16 +13,29 @@
     <script>
       // Generic socket setup
       setupConnection("client");  
+      var audio = new Audio('/Slide16.mp3');
 
       function socketLoaded(){
         socket.on('download', (url) => {
           console.log(url);
           download(url);
         });   
+
+        socket.on('audio', (state) => {
+          playAudio(state);
+        }); 
       }
 
       function send(e){
         socket.emit(e);
+      }
+
+      function playAudio(state){
+        if (state =='play')
+          audio.play();
+        else {
+          audio.load();
+        }
       }
 
       function download(imageSrc) {
@@ -63,7 +76,7 @@
           <a class="grid-item" onclick="send('download')">
             <p class="item_name">Download</p>
           </a>
-        </div> 
+        </div>
     </div>
     <footer>
       <button id="footer_button" onclick="selectActivity('/')" type="button">Return Home</button>

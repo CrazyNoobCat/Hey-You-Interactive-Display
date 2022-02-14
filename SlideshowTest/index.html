@@ -8,6 +8,14 @@
             justify-content: center;
         }
 
+        video {
+            display: none;
+        }
+
+        img {
+            display: block;
+        }
+
     </style>
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
     <script src="/socketCreation.js"></script>
@@ -21,9 +29,18 @@
 
         } 
 
+        window.addEventListener('load', function() {
+            vid = document.getElementById("video");
+            slide = document.getElementById("slideshow");
+            vid.src = '/Slide16.mp4';
+            vid.load();
+        })
         
         var currentSlide = 1;
-        var maxSlides = 15;
+        var maxSlides = 16;
+
+        var vid;
+        var slide;
         
         function socketUpdate(e, ...args){
             if (e === "next"){
@@ -31,18 +48,53 @@
                     currentSlide++;
                 else 
                     currentSlide = 1;
-                document.getElementById("slideshow").src = "/Slide" + currentSlide + ".JPG";
+
+                if (currentSlide == 16){
+                    slide.style.display = 'none';
+                    vid.style.display = 'block';
+                    socket.emit('displayEmit', getCookie('roomID'), 'audio', 'play');
+                    vid.play();
+                } else{
+                    if (vid.style.display === 'block'){
+                        vid.style.display = 'none';
+                        slide.style.display = 'block'
+                        socket.emit('displayEmit', getCookie('roomID'), 'audio', 'reset');
+                        vid.load();
+                    }
+                    slide.src = "/Slide" + currentSlide + '.JPG'; 
+                } 
+
             } else if (e ==="back"){
                 if (currentSlide > 1)
                     currentSlide--;
                 else 
                     currentSlide = maxSlides;
-                document.getElementById("slideshow").src = "/Slide" + currentSlide + ".JPG";    
+
+                if (currentSlide == 16){
+                    slide.style.display = 'none';
+                    vid.style.display = 'block';
+                    socket.emit('displayEmit', getCookie('roomID'), 'playAudio');
+                    vid.play();
+                } else{
+                    if (vid.style.display === 'block'){
+                        vid.style.display = 'none';
+                        slide.style.display = 'block'
+                        socket.emit('displayEmit', getCookie('roomID'), 'audio', 'reset');
+                        vid.load();
+                    }
+                    slide.src = "/Slide" + currentSlide + '.JPG';  
+
+                }
+                
+
             } else if (e === "max"){
                 maxSlides = args[0];
             } else if (e ==="download"){
                 console.log(args);
-                socket.emit('displayEmit', args[0], 'download', document.getElementById("slideshow").src );
+                if (currentSlide == 16)
+                    socket.emit('displayEmit', args[0], 'download', vid.src );
+                else
+                    socket.emit('displayEmit', args[0], 'download', slide.src );
             }
         }
     </script>
@@ -53,6 +105,12 @@
     <!--<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTY4no8CYlRv7WvSRAZ01r1b3SR9GhQB4f0-djjd0Q-coWWGDO3WzQZuaOgtlx5tPz6prwkoKa-i84D/embed?start=true&loop=true&delayms=5000" frameborder="0" width="1440" height="839" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>-->
 
     <img id="slideshow" src="/Slide1.JPG">
+    <video id='video' width="500px" height="500px" 
+        muted > 
+          
+        <source id='video'
+            type="video/mp4"> 
+    </video> 
 
 
     <footer>
