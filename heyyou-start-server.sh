@@ -13,7 +13,7 @@ cd "$HEYYOU_HOME" \
 
 if [ $? = "0" ] ; then
     echo ""
-    echo "Launching node app-laucher as a background process"
+    echo "Launching node app-launcher as a background process"
     echo ""
     node app-launcher.js </dev/null >heyyou-server.log 2>&1 &
     echo $! >heyyou-server.pid
