@@ -73,7 +73,7 @@
                 if (currentSlide == 16){
                     slide.style.display = 'none';
                     vid.style.display = 'block';
-                    socket.emit('displayEmit', getCookie('roomID'), 'playAudio');
+                    socket.emit('displayEmit', getCookie('roomID'), 'audio', 'play');
                     vid.play();
                 } else{
                     if (vid.style.display === 'block'){
