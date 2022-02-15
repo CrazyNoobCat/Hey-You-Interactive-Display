@@ -1,7 +1,3 @@
-const context = cast.framework.CastReceiverContext.getInstance();
-const playerManager = context.getPlayerManager();
-const settings = new cast.framework.CastReceiverOptions();
-
 //const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
 
 /*castDebugLogger.loggerLevelByEvents = {
@@ -15,11 +11,26 @@ const settings = new cast.framework.CastReceiverOptions();
 // Show debug overlay
 //castDebugLogger.showDebugLogs(true);
 
-//castDebugLogger.debug('before',settings.disableIdleTimeout);
+//castDebugLogger.debug('before',chromecastSettings.disableIdleTimeout);
+
+//castDebugLogger.debug('useragent',ua);
 
 
-settings.disableIdleTimeout = true;
+// Based on:
+//  https://modernweb.com/using-media-queries-in-javascript/
+//var mq = window.matchMedia('@media tv');
 
-//castDebugLogger.debug('after',settings.disableIdleTimeout)
+var ua = navigator.userAgent;
 
-context.start(settings);
+if(ua.includes("CrKey")) {
+    const chromecastContext = cast.framework.CastReceiverContext.getInstance(); 
+    const chromecastSettings = new cast.framework.CastReceiverOptions();
+
+    chromecastSettings.disableIdleTimeout = true;
+    
+    chromecastContext.start(chromecastSettings);
+
+} else {
+    console.log("UserAgent doesn't containt CrKey' so skipping ChromeCast Reciever start()")
+}
+
