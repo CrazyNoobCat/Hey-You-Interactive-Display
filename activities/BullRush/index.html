@@ -34,6 +34,7 @@
 
     </style>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>    
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
 </head>
@@ -47,20 +48,31 @@
             function socketLoaded(anyListener){
                 socket.onAny(anyListener); // Turns on the any listener
 
-                socket.emit("displayLoaded");                
+                socket.emit("displayLoaded");   
+
+                var nric = self.location.host;
+                var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=250x250';
+                var $img = $('<img>').attr('src',url);
+                $('#barcode').html($img)             
             }            
 
             function emitColour(id, playerColor){
                 console.log("Emited colour " + playerColor + " to " + id);
                 socket.emit('displayEmit', id, 'playerColour', playerColor);
             }
+
+            
             
             function reset(){
                 console.log("Display Reset Sent");
                 socket.emit('displayReset');                
             }
         </script>
+
+
     </canvas> 
+    <div id="barcode" style="height: 250px; display: block; position: absolute; left: 50%; right: 50%; bottom: 50%; top: 50%;"></div>
+
     <footer>
         <script src="receiver.js"></script>
     </footer>

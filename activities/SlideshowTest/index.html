@@ -17,15 +17,21 @@
         }
 
     </style>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>    
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
     <script src="/socketCreation.js"></script>
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
     <script>
         // Generic socket setup
-        setupConnection("display");  
         function socketLoaded(anyListener){
             socket.onAny(anyListener); // Turns on the any listener
-            socket.emit("displayLoaded");     
+            socket.emit("displayLoaded"); 
+            
+            var nric = self.location.host;
+            var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=250x250';
+	        var $img = $('<img>').attr('src',url);
+            $('#barcode').html($img)
 
         } 
 
@@ -34,6 +40,7 @@
             slide = document.getElementById("slideshow");
             vid.src = '/Slide16.mp4';
             vid.load();
+            setupConnection("display");  
         })
         
         var currentSlide = 1;
@@ -101,9 +108,6 @@
 
 </head>
 <body>      
-
-    <!--<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTY4no8CYlRv7WvSRAZ01r1b3SR9GhQB4f0-djjd0Q-coWWGDO3WzQZuaOgtlx5tPz6prwkoKa-i84D/embed?start=true&loop=true&delayms=5000" frameborder="0" width="1440" height="839" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>-->
-
     <img id="slideshow" src="/Slide1.JPG">
     <video id='video' width="500px" height="500px" 
         muted > 
@@ -112,6 +116,7 @@
             type="video/mp4"> 
     </video> 
 
+    <div id="barcode" style="height: 250px; display: block; position: absolute; right: 7px; top: 7px;"></div>
 
     <footer>
         <script src="receiver.js"></script>
