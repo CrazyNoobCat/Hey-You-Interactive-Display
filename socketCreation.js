@@ -66,7 +66,6 @@ function startSocket(visitorID, type){
     });
 
     socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
-	console.log("#### default setNewCookie callback");
         setCookie(cName,cContent, cDurationMins);
     });
 
