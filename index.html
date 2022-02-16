@@ -2,14 +2,19 @@
 <html lang="en">
     <head>
         <title>App Launcher | Hey You Interactive Display</title>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css">
-	
-        <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" sizes="any"><!-- 32×32 -->
+	<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
+
+	<!--
+        <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" sizes="any">
         <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY"><!-- 180×180 -->
+        <link rel="apple-touch-icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY"> < ! - - 180×180 - - > apparently!
+	  -->
+	  
+	<link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+	
         <!--<link rel="manifest" href="/manifest.webmanifest">-->
 
         <!-- Cast Debug Logger -->
@@ -20,24 +25,23 @@
         <script src="socketCreation.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+
         <script>
-          // Generic socket setup
+          // Custom socketLoaded() for top-level activity launcher
           function socketLoaded(anyListener) {
 
-	      socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
-		  //console.log("******* my own setNewCookie callback");
-		  //setCookie(cName,cContent, cDurationMins);
+	      var display_host = self.location.host;
+              console.log("Display hostname: " + display_host);
+              console.log("Room ID: " + getCookie('roomID'));
 
+
+	      socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
 		  if (cName == "roomName") {
-		      $('#website').text("Or visit on your phone: " + nric_host + '/join/' + cContent);
+		      $('#website').text("Or visit on your phone: " + display_host + '/join/' + cContent);
 		  }
 	      });
 
-              var nric_host = self.location.host;
-              console.log("nric hostname: " + nric_host);
-              console.log("Room ID: " + getCookie('roomID'));
-
-	      var full_room_id = nric_host + '/join/' + getCookie('roomID')
+	      var full_room_id = display_host + '/join/' + getCookie('roomID')
 	      
               var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=250x250';
 	      var $img = $('<img>').attr('src',url);
@@ -46,77 +50,14 @@
               console.log("QR code URL: " + url);
 
 	      if (getCookie('roomName') != "") {
-		  $('#website').text("Or visit on your phone: " + nric_host + '/join/' + getCookie('roomName'));
+		  $('#website').text("Or visit on your phone: " + display_host + '/join/' + getCookie('roomName'));
 	      }
 	      
           }
 	  	  
-	  setupConnection("display"); 	      
-	  
-
-          // page specific functions
-/*
-	  var bgImageArray = [
-	      "uow-background--ko-te-tangata-red.png",
-	      "uow-background--ko-te-tangata-yellow.png",
-	      "uow-background--for-the-people-yellow.png",
-	      "uow-background--for-the-people-red.png"
-	  ];
-
-	  var bgImageBaseUrl = "/"; // For images from another domain, set this val in the form "//other.domain/my-backgrounds/"
-	  var bgImageCrossFadeSecs = 12;
-	  var bgImageCrossFadeMSecs = 1000 * bgImageCrossFadeSecs;
-
-	  // Create a JS Image object for each, as this will cause the browser to
-	  // to cache the images, thus avoiding white flash between background replacements
-	  // Images need to be store in a persistent variable, otherwise they can be garbage collected
-	  
-	  var bgImagePreloadCache = [];
-	  
-	  for (i=0; i<bgImageArray.length; i++) {
-	      var img = new Image();
-	      img.src = bgImageBaseUrl + bgImageArray[i];
-	      bgImagePreloadCache.push(img);
-	  }
-
-	  function backgroundSequenceXX() {
-	      window.clearTimeout();
-	      var k = 0;
-	      for (i=0; i<bgImageArray.length; i++) {
-		  console.log("setup backgrounSequece i = " + i);
-		  setTimeout(function() {
-		      console.log("timeout: k = " + k);
-			  
-		      $(document.body).css('background', "url(" + bgImageBaseUrl + bgImageArray[k] + ") no-repeat center center fixed");
-		      $(document.body).css('background-size', "cover");
-		      
-		      if ((k + 1) === bgImageArray.length) { setTimeout(function() { backgroundSequence() }, bgImageCrossFadeMSecs)} else { k++; }
-		  },
-		  bgImageCrossFadeMSecs * i
-	        );
-	      }
-	  }
-	  
-	  function displayBackgroundImage(pos) {
-	      $(document.body).css('background', "url(" + bgImageBaseUrl + bgImageArray[pos] + ") no-repeat center center fixed");
-	      $(document.body).css('background-size', "cover");
-	  }
-	  
-	  function backgroundSequence(pos) {
-	      displayBackgroundImage(pos);
-	      window.setTimeout(function() {
-		  var nextPos = (pos + 1 ) % bgImageArray.length;
-		  backgroundSequence(nextPos);
-	      }, 
-		bgImageCrossFadeMSecs
-	      );		 
-	  }
-	  
-	  $(document).ready(function() {
-	      backgroundSequence(0);
-	  });
-*/	  
+	  setupConnection("display");	  
         </script>
+
     </head>
     <body id="xfade" style="background-color: white;">
       <!-- figure elements used for x 4 background image cross-fades (xfade) -->
