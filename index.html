@@ -13,9 +13,10 @@
         <!--<link rel="manifest" href="/manifest.webmanifest">-->
 
         <!-- Cast Debug Logger -->
-        <!-- <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script> -->
+        <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>
 
         <link rel="stylesheet" href="index.css">
+	
         <script src="socketCreation.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
@@ -28,18 +29,18 @@
 	      
               var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=250x250';
 	      var $img = $('<img>').attr('src',url);
-              $('#barcode').html($img)
+              $('#barcode').html($img);
 	      
               console.log("URL: " + url);
               $('#website').text("Or visit on your phone: " + nric + '/join/' + getCookie('roomName'));
           }
 	  	  
-	  window.addEventListener('load', function () {  
+	  window.addEventListener('load', function() {  
 	      setupConnection("display"); 	      
 	  });
 
           // page specific functions
-
+/*
 	  var bgImageArray = [
 	      "uow-background--ko-te-tangata-red.png",
 	      "uow-background--ko-te-tangata-yellow.png",
@@ -99,11 +100,17 @@
 	  $(document).ready(function() {
 	      backgroundSequence(0);
 	  });
-	  
+*/	  
         </script>
     </head>
-    <body style="background-color: white;">
-        <div class="center" style="width: 50%;">
+    <body id="xfade" style="background-color: white;">
+      <!-- figure elements used for x 4 background image cross-fades (xfade) -->
+      <figure></figure>
+      <figure></figure>
+      <figure></figure>
+      <figure></figure>
+
+      <div class="center" style="width: 50%; z-index: 1;">
             <h1 id="heading" class="shake-constant shake-chunk">Scan me to select an interactive app!</h1>
             <div id="frame" class="frame">
 	      <div id="barcode" class="center" style="align-content: center; height: 250px">

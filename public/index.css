@@ -1,4 +1,4 @@
-html, body {
+html, body, figure {
     width:  100%;
     height: 100%;
     margin:   0;
@@ -16,8 +16,9 @@ body {
     font-family:     monospace;
     color:           #000000;
 
+    /*
     background-blend-mode: darken;
-    transition: 5s;
+    */
 }
 
 .center {
@@ -27,16 +28,6 @@ body {
     flex-direction:  column;
 }
 
-/*
-#uni_logo {
-    position:absolute;
-    z-index:9999;
-    left:48px;
-    top:27px;
-    width:35vmin;
-    margin:2vmin;
-}
-*/
 
 .button {
     position: relative;
@@ -52,14 +43,141 @@ body {
     background-color: burlywood;
 }
 
-/*
-#barcode {
-    mix-blend-mode: multiply;
-}
-*/
 
 .frame {
-    /* background-color:rgb(177 167 152 / 60%); */
     padding:5px;
 }
+
+
+/*
+  CSS background image cross-fade (xfade) adapted from details in:
+     https://stackoverflow.com/questions/24618296/crossfade-animation-does-not-work-in-firefox-ie-or-opera
+*/
+
+#xfade {
+    position: relative;
+}
+
+#xfade figure {
+    position: absolute;
+    opacity: 0;
+}
+
+
+figure:nth-child(1) {
+    background: url(uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
+    background-size: cover;
+    
+    animation:         xfade 48s 0s infinite; /* name, duration, delay-start, iteration-count */
+    -moz-animation:    xfade 48s 0s infinite;
+    -webkit-animation: xfade 48s 0s infinite;
+    -o-animation:      xfade 48s 0s infinite;
+}
+figure:nth-child(2) {
+    background: url(uow-background--for-the-people-red.png) no-repeat center center fixed;;
+    background-size: cover;
+
+    animation:         xfade 48s 12s infinite;
+    -moz-animation:    xfade 48s 12s infinite;
+    -webkit-animation: xfade 48s 12s infinite;
+    -o-animation:      xfade 48s 12s infinite;
+}
+figure:nth-child(3) {
+    background: url(uow-background--for-the-people-yellow.png) no-repeat center center fixed;;
+    background-size: cover;
+
+    animation:         xfade 48s 24s infinite;
+    -moz-animation:    xfade 48s 24s infinite;
+    -webkit-animation: xfade 48s 24s infinite;
+    -o-animation:      xfade 48s 24s infinite;
+}
+figure:nth-child(4) {
+    background: url(uow-background--ko-te-tangata-yellow.png) no-repeat center center fixed;;
+    background-size: cover;
+    
+    animation:         xfade 48s 36s infinite;
+    -moz-animation:    xfade 48s 36s infinite;
+    -webkit-animation: xfade 48s 36s infinite;
+    -o-animation:      xfade 48s 36s infinite;
+}
+
+
+@keyframes xfade { 
+  0%{
+    opacity: 0;
+  }
+  5%{
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  95%{
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes xfade { /* e.g., Safari and Chrome */
+  0%{
+    opacity: 0;
+  }
+  2%{
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  40%{
+    opacity: 0;
+  }
+}
+
+@-moz-keyframes xfade {
+  0%{
+    opacity: 0;
+  }
+  2%{
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  40%{
+    opacity: 0;
+  }
+}
+
+
+@-o-keyframes xfade {
+  0%{
+    opacity: 0;
+  }
+  2%{
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  40%{
+    opacity: 0;
+  }
+}
+
+@-ms-keyframes xfade {
+  0%{
+    opacity: 0;
+  }
+  2%{
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  40%{
+    opacity: 0;
+  }
+}
+
+
+
 
