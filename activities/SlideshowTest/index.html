@@ -25,6 +25,11 @@
     <script>
         // Generic socket setup
         function socketLoaded(anyListener){
+            vid = document.getElementById("video");
+            slide = document.getElementById("slideshow");
+            vid.src = '/Slide16.mp4';
+            vid.load();
+
             socket.onAny(anyListener); // Turns on the any listener
             socket.emit("displayLoaded"); 
             
@@ -34,14 +39,8 @@
             $('#barcode').html($img)
 
         } 
-
-        window.addEventListener('load', function() {
-            vid = document.getElementById("video");
-            slide = document.getElementById("slideshow");
-            vid.src = '/Slide16.mp4';
-            vid.load();
-            setupConnection("display");  
-        })
+            
+        setupConnection("display");  
         
         var currentSlide = 1;
         var maxSlides = 16;

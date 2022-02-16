@@ -13,7 +13,7 @@
         <!--<link rel="manifest" href="/manifest.webmanifest">-->
 
         <!-- Cast Debug Logger -->
-        <script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>
+        <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
 
         <link rel="stylesheet" href="index.css">
 	
@@ -35,9 +35,8 @@
               $('#website').text("Or visit on your phone: " + nric + '/join/' + getCookie('roomName'));
           }
 	  	  
-	  window.addEventListener('load', function() {  
-	      setupConnection("display"); 	      
-	  });
+		  setupConnection("display"); 	      
+	  
 
           // page specific functions
 /*

@@ -108,9 +108,14 @@ function setCookie(cname, cvalue, exmins) {
 }
 
 function setupConnection(type){
-    // Setup logic  
-    roomID = getCookie('roomID');
-    getVisitorID(type);
+    
+    // Once the window has loaded then setup will start
+    // Makes sure all required files are loaded before starting
+
+    window.addEventListener('load', function() {  
+        roomID = getCookie('roomID');
+        getVisitorID(type);
+    });    
 }
 
 function vote(userDecision){

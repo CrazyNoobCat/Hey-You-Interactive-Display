@@ -11,7 +11,7 @@
         setupConnection("display");  
         function socketLoaded(anyListener){
             socket.emit("displayLoaded");
-            socket.onAny(anyListener); // Turns on the any listener must have socketUpdate(event, args) in main script
+            //socket.onAny(anyListener); // Turns on the any listener must have socketUpdate(event, args) in main script
 
             // page specific functions    
                
