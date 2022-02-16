@@ -112,7 +112,7 @@ figure:nth-child(4) {
   25% {
     opacity: 1;
   }
-  95%{
+  30%{
     opacity: 0;
   }
 }

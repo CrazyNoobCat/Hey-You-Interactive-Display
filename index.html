@@ -23,19 +23,35 @@
         <script>
           // Generic socket setup
           function socketLoaded(anyListener) {
-              var nric = self.location.host;
-              console.log("nric: " + nric);
+
+	      socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
+		  //console.log("******* my own setNewCookie callback");
+		  //setCookie(cName,cContent, cDurationMins);
+
+		  if (cName == "roomName") {
+		      $('#website').text("Or visit on your phone: " + nric_host + '/join/' + cContent);
+		  }
+	      });
+
+              var nric_host = self.location.host;
+              console.log("nric hostname: " + nric_host);
               console.log("Room ID: " + getCookie('roomID'));
+
+	      var full_room_id = nric_host + '/join/' + getCookie('roomID')
 	      
-              var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=250x250';
+              var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=250x250';
 	      var $img = $('<img>').attr('src',url);
               $('#barcode').html($img);
 	      
-              console.log("URL: " + url);
-              $('#website').text("Or visit on your phone: " + nric + '/join/' + getCookie('roomName'));
+              console.log("QR code URL: " + url);
+
+	      if (getCookie('roomName') != "") {
+		  $('#website').text("Or visit on your phone: " + nric_host + '/join/' + getCookie('roomName'));
+	      }
+	      
           }
 	  	  
-		  setupConnection("display"); 	      
+	  setupConnection("display"); 	      
 	  
 
           // page specific functions
