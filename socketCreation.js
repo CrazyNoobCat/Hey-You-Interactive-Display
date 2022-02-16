@@ -22,8 +22,8 @@ function startSocket(visitorID, type){
         roomID = visitorID;
     }
 
-    console.log("Device ID: " + visitorID);
-    console.log("Room ID: " + roomID);
+    console.log("startSocket: Device ID: " + visitorID);
+    console.log("startSocket: Room ID:   " + roomID);
 
     var url = window.location.host;
     socket = io(url , {
@@ -65,7 +65,8 @@ function startSocket(visitorID, type){
         setCookie('roomID',cookieContent, 1000);
     });
 
-    socket.on('setNewCookie', (cName, cContent, cDurationMins) => {        
+    socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
+	console.log("#### default setNewCookie callback");
         setCookie(cName,cContent, cDurationMins);
     });
 

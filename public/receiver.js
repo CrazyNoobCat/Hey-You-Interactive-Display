@@ -29,6 +29,6 @@ if(ua.includes("CrKey")) {
     chromecastContext.start(chromecastSettings);
 
 } else {
-    console.log("UserAgent doesn't containt CrKey' so skipping ChromeCast Reciever start()")
+    console.log("UserAgent doesn't contain 'CrKey' so skipping ChromeCast Reciever start()")
 }
 
