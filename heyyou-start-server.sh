@@ -13,9 +13,9 @@ cd "$HEYYOU_HOME" \
 
 if [ $? = "0" ] ; then
     echo ""
-    echo "Launching node app-launcher as a background process"
+    echo "Launching node activity-launcher as a background process"
     echo ""
-    node app-launcher.js </dev/null >heyyou-server.log 2>&1 &
+    node activity-launcher.js </dev/null >heyyou-server.log 2>&1 &
     echo $! >heyyou-server.pid
 else
     echo "Failed to successfully source 'heyyou-setup.bash'" >&2

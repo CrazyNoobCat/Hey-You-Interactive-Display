@@ -18,10 +18,10 @@ const httpPort = process.env.PORT || 3000;
 
 // The general setup of Hey You is as follows:
 //  
-//   1. A 'display' starts by showing the home page to the app-launcher
+//   1. A 'display' starts by showing the home page to the activity-launcher
 //
 //   2. When a 'client' (phone-based user) connects via the QR code
-//      (or else by entering the URL the app-launcher displays) they
+//      (or else by entering the URL the activity-launcher displays) they
 //      are shown (on their phone) a list of apps that can be launched
 //
 //   3. Upon selecting an app from the list, the display is then sent
