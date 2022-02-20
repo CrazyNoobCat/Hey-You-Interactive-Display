@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<!--
+  Adapted from:
+    https://openclipart.org/detail/192461/icon-set-1
+  -->
+
+<svg
+   id="svg2"
+   sodipodi:docname="left-openclipart.svg"
+   viewBox="0 0 511.99998 511.99999"
+   sodipodi:version="0.32"
+   version="1.0"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   width="512"
+   height="512"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <defs
+     id="defs10" />
+  <sodipodi:namedview
+     id="base"
+     bordercolor="#666666"
+     inkscape:pageshadow="2"
+     guidetolerance="10"
+     pagecolor="#ffffff"
+     gridtolerance="10000"
+     inkscape:window-height="1017"
+     inkscape:zoom="1.4098083"
+     objecttolerance="10"
+     showgrid="false"
+     borderopacity="1.0"
+     inkscape:current-layer="g19757"
+     inkscape:cx="168.46262"
+     inkscape:cy="296.84887"
+     inkscape:window-y="-8"
+     inkscape:window-x="-8"
+     inkscape:window-width="1920"
+     inkscape:pageopacity="0.0"
+     inkscape:document-units="px"
+     inkscape:pagecheckerboard="true"
+     inkscape:window-maximized="1"
+     width="512px" />
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     transform="translate(-42.339,-276.34)">
+    <g
+       id="g19757"
+       transform="matrix(9.1270224,0,0,9.1270224,-654.61184,-3516.4683)">
+      <g
+         id="g20723">
+        <g
+           id="g2138"
+           transform="matrix(0.99033322,0,0,0.99033322,5.5861002,4.0580751)">
+          <path
+             id="path7537"
+             d="m 105.06,430.92 h 12.899 c 1.414,0 2.561,1.269 2.561,2.826 v 20.336 c 0,1.559 -1.147,2.824 -2.561,2.824 H 105.06 v 11.127 l -25.897,-24.117 25.897,-24.12 z"
+             style="fill:#000000;fill-opacity:1"
+             inkscape:connector-curvature="0" />
+          <path
+             id="path7548"
+             d="m 92.434,433.43 11.255,-10.485 v 9.345 h 14.271 c 0.657,0 1.189,0.651 1.189,1.452 v 20.336 c 0,0.803 -0.532,1.451 -1.189,1.451 h -14.271 v 9.346 l -11.256,-10.47 -11.256,-10.49 11.256,-10.48 z"
+             style="fill:#000000;fill-opacity:1"
+             inkscape:connector-curvature="0" />
+        </g>
+      </g>
+    </g>
+  </g>
+  <metadata
+     id="metadata7">
+    <rdf:RDF />
+  </metadata>
+</svg>
