@@ -78,10 +78,17 @@ function startSocket(visitorID, type){
 }    
 
 function selectActivity(activity) {
+    // ****
+    // Currently not used (more testing and debugging needed)
+    //
+    //window.location.pathname = '/activities' + activity + '/client.html';
+    
     socket.emit("selectActivity", roomID, activity, (response) => {
         console.log("Redirecting to " + activity);
         window.location.pathname = '/';
     });
+    
+    
   }
 
 function getCookie(cname) {
@@ -105,6 +112,8 @@ function setCookie(cname, cvalue, exmins) {
     d.setTime(d.getTime() + (exmins*60*1000));
     let expires = "expires="+ d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+
+    console.log(`set/update cookie: ${cname}=${cvalue} (${expires})`);
 }
 
 function setupConnection(type){
