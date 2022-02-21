@@ -24,12 +24,13 @@ const httpPort = process.env.PORT || 3000;
 //      (or else by entering the URL the activity-launcher displays) they
 //      are shown (on their phone) a list of apps that can be launched
 //
-//   3. Upon selecting an app from the list, the display is then sent
-//      the necessary files (.html, .css, .js) to run that app, and
-//      the client page changes to the controller for the app
+//   3. Upon selecting an app (activity) from the list, the display is 
+//      send the relevent activities/<activity>/index.html and the
+//      phone changed to display the controller for the activity
+//      activities/<activity>client.html
 //
 //   4. If another client joins a display while it us running an app,
-//      then then that client is directly provided the controller for
+//      then then client is directly provided the controller for
 //      that app
 
 
@@ -231,7 +232,6 @@ if (cmdline_args[0] == "-console") {
 
 /* Restful HTTP responses triggered by incoming GET requests */
 
-
 app.get('/join/:roomID', (req, res) => {
     if (findHostDisplayByRoomID(req.params.roomID) != undefined){
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
@@ -248,7 +248,7 @@ app.get('/join/:roomID', (req, res) => {
     }    
 });
 
-/* !!!!! Consder moving this match to be the first one */
+
 
 app.get('/', (req, res) => {
     // Currently checking if the cookie is undefined in getCookie. If undefined then returns undefined
@@ -276,6 +276,9 @@ app.get('/', (req, res) => {
 });
 
 
+// ****
+// Currently not used (more testing and debugging needed)
+// ****
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
@@ -292,6 +295,29 @@ app.get('/activity', (req, res) => {
         sendActivityFile(res, __dirname + defaultActivity +'/index.html', '/index.html', defaultActivityLabel); // This is for new displays
     }   
 });
+
+
+
+/* similar to the above, but driven directly by URL provided by the top-level client */
+
+
+app.get('/activities/:activity/:fileName', (req, res) => {
+    let activity = "/" + req.params.activity;
+    let fileName = "/" + req.params.fileName;
+
+    if (fileName == "/") {
+	fileName += "index.html";
+    }
+    
+    if (fs.existsSync(activityLocation + activity + fileName))
+        sendActivityFile(res, activityLocation + activity + fileName,fileName,activity); 
+    else{
+        console.log("File Error: requested file " + fileName + " did not exist for activity " + activity +".  Attempting to send so default activity version to device: " + req.params.roomID);
+        sendActivityFile(res,__dirname + defaultActivity + fileName,fileName,activity); 
+    }
+});
+
+
 
 app.get('/scripts/:fileName', (req, res) => {
     // Allow only files from verifiable activities
@@ -456,11 +482,12 @@ io.on('connection', (socket, host) => {
             assignShortName(display);
 
             // Using deviceID as the room identifier
-            socket.join(display.getDeviceID());
+	    let roomID = display.getDeviceID();
+            socket.join(roomID);
 
             display.setAsRoomHost();
-            display.setRoom(display.getDeviceID());
-            display.setCookie('roomID',display.getDeviceID(),1440) // 1 day
+            display.setRoom(roomID);
+            display.setCookie('roomID',roomID,1440) // mins => 1 day
 
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
