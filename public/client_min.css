@@ -5,8 +5,9 @@
 
 
 /*html, body */
-body {
+body, html{
     margin: 0px;
+    height: 100%;
 }
 
 /* #smartphone { */
@@ -138,11 +139,11 @@ div.fb-fillright {
     
     #mobile_page {
 	width:  100vw;
-	height: 100vh;
+	height: 100%;
     }
     
     div.smartphone {
-	height: 100vh;
+	height: 100%;
     }
 
     #client_header {
