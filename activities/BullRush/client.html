@@ -1,8 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Bull Rush Client | Hey You Interactive Display</title>
-    <link rel="stylesheet" href="client.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Bull Rush Controller | Hey You, Interact With Me!</title>
+
+    <!--<link rel="manifest" href="/manifest.webmanifest">-->
+
+    <link rel="stylesheet" media="screen"                               href="client_min.css" /> <!-- think of CSS as client/controller-core.css -->
+    <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="client.css"     /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
 
     <style>
         .arrow {
@@ -17,45 +24,58 @@
         }
 
         .dot {
-          height: 150px;
-          width: 150px;
-          border-radius: 50%;
-          margin: auto; 
           position: absolute; 
-          left: 0px; 
-          top: 0px; 
-          right: 0px; 
+          left:   0px; 
+          top:    300px; 
+          right:  0px; 
           bottom: 0px;
+          margin: auto; 
+          height: 120px;
+          width:  120px;
+          border-radius: 50%;
         }
     </style>
 
+    
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-      crossorigin="anonymous">
+      crossorigin="anonymoous">
     </script>
-    <script> 
-    $(function(){
-      $("#header").load("header.html"); 
-      $("#footer").load("footer.html"); 
-    });
-    </script> 
-  </head>
-  <body>
-    <div class="container">
-      <div id="header"></div>
 
+    <script src="socketCreation.js"></script>
+
+    <!--
+    <script> 
+      $(function(){
+	  $("#header").load("header.html"); 
+	  $("#footer").load("footer.html"); 
+      });
+    </script>
+    -->
     
-      <div id="stick1" class="dot"></div>
-    
-    <script src="/socketCreation.js"></script>
     <script>
-      // Generic socket setup
+      // Generic socket setup      
       setupConnection("client");  
 
-      console.log(roomID);
-      console.log(socket);
+      // Probably not necessary to access roomID, not currently used in code below!
+      var roomID = getCookie('roomID');
+      console.log("roomID: " + roomID);
 
+      //console.log(socket);
+
+      // Page specific functions ...
+      function socketLoaded(){
+        socket.emit('clientConnected')
+
+        socket.on('playerColour', (colour) =>{
+            console.log("Setting colour to: " + colour);
+	    document.getElementById("stick1-loading").style.display = "none";
+            document.getElementsByClassName("dot")[0].style.backgroundColor = colour;
+        });
+      }
+      
+    $(function(){      
       // page specific functions
       var form = document.getElementById('form');
       var input = document.getElementById('input');
@@ -63,14 +83,6 @@
       document.addEventListener('keydown', buttondown, false);
       document.addEventListener('keyup', buttonup, false);
 
-      function socketLoaded(){
-        socket.emit('clientConnected')
-
-        socket.on('playerColour', (colour) =>{
-          console.log("Setting colour to: " + colour);
-          document.getElementsByClassName("dot")[0].style.backgroundColor = colour;
-        });
-      }
       
 
       var left = document.getElementById('left');
@@ -278,8 +290,55 @@
         //alert("Key pressed: "+ e.key)
         //socket.emit('key up', e.key);
       }
+    });
     </script>
-      <div id="footer"></div>
+    
+  </head>
+
+  <body>
+
+    <div class="smartphone">
+      <div id="mobile_page">
+        <div id="client_header" class="header" style="width: 100%;">
+
+          <button onclick="selectActivity('/')" type="button"><img class="home-img" src="back.svg"></button>
+          <h1 class="text">Hey There, Interact With Me!</h1>
+          <img class="uni_img" src="uni_logo.svg">
+	</div>
+
+	<div class="heading">
+	  <h1>Control details</h1>
+	  <h2>
+	    Treat the circle at the centre of your screen like a joystick
+	  </h2>
+	  <h2>
+	    Touch (or click and hold) on the circle, <br />and:
+	  </h2>
+	  <ul>
+	    <li><i>Drag up</i> to make your Bullrush character (shape) run up</li>
+	    <li><i>Drag left</i> to make your Bullrush run to the left</li>
+	    <li><i>Drag diagonally up and to the left</i> to make your Bullrush run diagonally</li>
+	    <li>Press the <div style="display: inline-block; transform: scale(0.5);"><img class="home-img" src="back.svg" style="padding: 0"></div> button to exit the slideshow, and return to the App Chooser</li>
+	  </ul>
+	</div>
+
+	
+	<div class="controller-item" style="border: none;">
+	  <div id="stick1" class="dot"><span id="stick1-loading" class="text">Loading Joystick Control ...</span></div>
+	</div>
+      </div>
     </div>
+<!--    
+    <div class="container">
+      <div id="header"></div>
+
+    
+
+
+
+    <div id="footer"></div>
+    </div>
+    -->
+    
   </body>
 </html>

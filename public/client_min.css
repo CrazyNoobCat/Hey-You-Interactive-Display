@@ -62,7 +62,7 @@ button {
     font-family: monospace;
 }
 
-h1.heading {
+.heading h1, .heading .h2 {
     text-align: left;
 }
 
@@ -167,10 +167,17 @@ div.fb-fillright {
 	padding-top: 2vw;
     }
 
-    h1.heading {
+    .heading h1, .heading h2 {
 	padding-left: 1.0rem;
     }        
 
+    .heading h1 {
+	font-size: 4vw;
+    }
+
+    .heading h2 {
+	font-size: 3.5vw;
+    }
 
 
     a.controller-item {
@@ -248,9 +255,15 @@ div.fb-fillright {
 	padding-top: 0.5rem;
     }
     
-    h1.heading {
+    .heading h1, .heading h2 {
 	padding-left: 4px;
+    }
+
+    .heading h1{
 	font-size: 120%; 
+    }
+    .heading h2 {
+	font-size: 110%; 
     }
 
 

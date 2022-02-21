@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">  
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
     <title>Top-level Controller | Hey You, Interact With Me!</title>
 
     <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
@@ -48,11 +51,21 @@
 	    <div class="fb-fillright">Smoke and Mirrors Slideshow</div>
 	  </div>
 	</a>
+
 	
 	<a class="controller-item" onclick="selectActivity('/Navigation')">
 	  <div class="fb-container">
-	    <div class="fb-alignleft"><img src="navigation.svg" /></div>	
-	    <div class="fb-fillright">University (DIY) Streetview</div>
+	    <div class="fb-alignleft">
+	      <!-- To convert #e03031 to filter settings, see:
+		     https://codepen.io/sosuke/pen/Pjoqqp 
+		-->
+	      <img style="filter: invert(26%) sepia(88%) saturate(3012%) hue-rotate(344deg) brightness(91%) contrast(94%);"
+		   src="navigation.svg" />
+	    </div>
+	    <div class="fb-fillright">
+	      University (DIY) Streetview <br />
+	      Navigate campus both indoors and outside
+	    </div>
 	  </div>
 	</a>
 
