@@ -1,73 +1,69 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Client | Hey You Interactive Display</title>
-    <link rel="stylesheet" media="screen and (max-device-width: 800px)" href="client_min.css">
-    <link rel="stylesheet" href="client.css" media="screen and (min-device-width: 800px)" />
+    <title>Top-level Controller | Hey You, Interact With Me!</title>
 
     <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
     <!--<link rel="manifest" href="/manifest.webmanifest">-->
 
-    <script src="socketCreation.js"></script>
-    <script>      
-      // Generic socket setup
-      setupConnection("client");  
-      function socketLoaded(){
-        console.log("Socket finished loading");
-      }
+    <link rel="stylesheet" media="screen"                               href="client_min.css" /> <!-- think of CSS as client/controller-core.css -->
+    <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="client.css"     /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
 
-      // page specific functions
-      
-    </script>
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymoous">
     </script>
+
+    <script src="/socketCreation.js"></script>
+    <script>      
+      // Generic socket setup
+      setupConnection("client");  
+
+      function socketLoaded(){
+          console.log("Socket finished loading");
+      }
+
+      // Any page specific functions go here ...
+      
+    </script>
   </head>
   <body>
-      <div class="message">
-        <div>
-          <img src="logo/Hey-You-Logo-unired-screen-512x512.png" style="display: block; margin-left: auto; margin-right: auto;"/>
-        </div>
-      
-        <h1>Please switch to a mobile device to use this site :)</h1>
-      </div>
 
+    <div class="smartphone">
       <div id="mobile_page">
-        <div id="client_header" class="header">
-          <button onclick="selectActivity('/')" type="button"><img class="home-img" src="Home.svg"></button>
+        <div id="client_header" class="header" style="width: 100%;">
+          <button style="width: 10%;" onclick="selectActivity('/')" type="button"><img class="home-img" src="home.svg"></button>
           <h1 class="text">Hey There, Interact With Me!</h1>
-          <img class="uni_img" src="uni_logo.svg">
+          <img class="uni_img" src="uni_logo_white.svg">
         </div>
+
+	<div class="heading">
+	  <h1 class="heading">Select an app to run on the display:</h1>
+	</div>
 	
-        <div id="client_body" class="body">
-          <div class="activitySelectionGrid">
-	    <div class="grid-item" style="padding-top: 2vw; padding-bottom: 2vw;">
-	      <h1 class="text" style="text-align: left; padding-left: 2vw;">
-		Select the app to run on the display:
-	      </h1>
-	    </div>
-            <a class="grid-item" onclick="selectActivity('/Navigation')">
-              <img class="item_image" src="navigation.svg">
-              <p class="item_name">Navigation</p>
-            </a>
-            <a class="grid-item" onclick="selectActivity('/BullRush')">
-              <img class="item_image" src="bullrush.svg">
-              <p class="item_name">Bull Rush</p>
-            </a>
-            <a class="grid-item" onclick="selectActivity('/SlideshowTest')">
-              <img class="item_image" src="projector.svg">
-              <p class="item_name">Slideshow</p>
-            </a>
-            <a class="grid-item" onclick="static()">
-              <img class="item_image" src="projector.svg">
-              <p class="item_name">Static Page</p>
-            </a>
-          </div> 
+	<a class="controller-item" onclick="selectActivity('/SlideshowTest')">
+	  <div class="fb-container">
+	    <div class="fb-alignleft"><img src="projector-screen.svg" /></div>	  
+	    <div class="fb-fillright">Smoke and Mirrors Slideshow</div>
+	  </div>
+	</a>
+	
+	<a class="controller-item" onclick="selectActivity('/Navigation')">
+	  <div class="fb-container">
+	    <div class="fb-alignleft"><img src="navigation.svg" /></div>	
+	    <div class="fb-fillright">University (DIY) Streetview</div>
+	  </div>
+	</a>
+
+	<a class="controller-item" onclick="selectActivity('/BullRush')">
+	  <div class="fb-container">
+	    <div class="fb-alignleft"><img src="bullrush.svg" /></div>	
+	    <div class="fb-fillright">Bullrush Game (multiplayer)</div>
+	  </div>
+	</a>
+	
       </div>
-      <footer>
-        <button id="footer_button" onclick="selectActivity('/')" type="button">Return Home</button>
-      </footer>
+      
   </body>
 </html>
