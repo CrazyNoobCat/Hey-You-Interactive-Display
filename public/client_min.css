@@ -5,6 +5,10 @@
 
 
 /*html, body */
+body {
+    margin: 0px;
+}
+
 /* #smartphone { */
 #mobile_page { 
     /*background: linear-gradient(#392502, #be0403); */
