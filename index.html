@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>App Launcher | Hey You Interactive Display</title>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
+        <title>App Launcher Display | Hey You, Interact With Me!</title>
 
-	<!--
-        <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" sizes="any">
-        <link rel="icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="https://www.waikato.ac.nz/favicon-32x32.png?v=QE50XMk2oY"> < ! - - 180×180 - - > apparently!
-	  -->
 	  
 	<link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
 	
@@ -21,36 +15,58 @@
         <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
 
         <link rel="stylesheet" href="index.css">
+	<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
 	
         <script src="socketCreation.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
         <script>
-          // Custom socketLoaded() for top-level activity launcher
-          function socketLoaded(anyListener) {
 
-	      var display_host = self.location.host;
-              console.log("Display hostname: " + display_host);
-              console.log("Room ID: " + getCookie('roomID'));
-
-
-	      socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
-		  if (cName == "roomName") {
-		      $('#website').text("Or visit on your phone: " + display_host + '/join/' + cContent);
-		  }
-	      });
-
-	      var full_room_id = display_host + '/join/' + getCookie('roomID')
+	  function displayRoomQRCode(displayHost,roomID)
+	  {
+	      // For the QR code, work directly with the roomID
+	      
+	      var full_room_id = displayHost + '/join/' + roomID;
 	      
               var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=250x250';
 	      var $img = $('<img>').attr('src',url);
               $('#barcode').html($img);
 	      
               console.log("QR code URL: " + url);
+	  }
+
+	  function displayRoomURL(displayHost,roomName)	  
+	  {
+	      // For roomURL we work with the roomName to give a nicer URL to type in
+	      // This is subsequently mapped to the roomID URL by the server
+
+	      $('#website').text("Or visit on your phone: " + displayHost + '/join/' + roomName);
+	  }
+	  
+          // Custom socketLoaded() for top-level activity launcher
+	  
+          function socketLoaded(anyListener)
+	  {
+	      var displayHost = self.location.host;
+
+              console.log("socketLoaded: Display hostname: " + displayHost);
+              console.log("socketLoaded: Room ID: " + getCookie('roomID'));
+
+
+	      socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
+		  if (cName == "roomName") {
+		      displayRoomURL(displayHost,cContent);
+		  }
+	      });
+
+	      var roomID = getCookie('roomID');
+	      displayRoomQRCode(displayHost,roomID);
+	      
 
 	      if (getCookie('roomName') != "") {
-		  $('#website').text("Or visit on your phone: " + display_host + '/join/' + getCookie('roomName'));
+		  var roomName = getCookie('roomName');
+		  displayRoomURL(displayHost,roomName);
 	      }
 	      
           }
@@ -59,6 +75,7 @@
         </script>
 
     </head>
+
     <body id="xfade" style="background-color: white;">
       <!-- figure elements used for x 4 background image cross-fades (xfade) -->
       <figure></figure>
@@ -69,7 +86,13 @@
       <div class="center" style="width: 50%; z-index: 1;">
             <h1 id="heading" class="shake-constant shake-chunk">Scan me to select an interactive app!</h1>
             <div id="frame" class="frame">
-	      <div id="barcode" class="center" style="align-content: center; height: 250px">
+	      <div id="branding-logo" class="center" style="align-content: center; width 250px; height: 250px">
+		<img src="logo/Hey-You-Logo-unired-screen-256x256.png" />
+	      </div>
+	      <div id="barcode" class="center" style="align-content: center; width: 250px; height: 250px; margin-top: 3px;">
+		<div style="width: 100%; height: 250px; line-height: 250px; text-align: center; background-color: #f8f8f8;">
+		  Loading ...
+		</div>
 	      </div>
             </div>                        
             <h2 id="website">Or visit on your phone:</h2>
