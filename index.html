@@ -26,10 +26,16 @@
 	  function displayRoomQRCode(displayHost,roomID)
 	  {
 	      // For the QR code, work directly with the roomID
+
+        console.log("Screen resolution: " + screen.availWidth + " x " + screen.availHeight);
+
+        var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
+
+        console.log("QR Size = " + QRSize);
 	      
 	      var full_room_id = displayHost + '/join/' + roomID;
 	      
-              var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=250x250';
+              var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRSize +'x' + QRSize;
 	      var $img = $('<img>').attr('src',url);
               $('#barcode').html($img);
 	      
@@ -86,7 +92,7 @@
       <div class="center" style="width: 50%; z-index: 1;">
             <h1 id="heading" class="shake-constant shake-chunk">Scan me to select an interactive app!</h1>
             <div id="frame" class="frame">
-	      <div id="branding-logo" class="center" style="align-content: center; width 250px; height: 250px">
+	      <div id="branding-logo" class="center" style="align-content: center; width: 250px; height: 250px">
 		<img src="logo/Hey-You-Logo-unired-screen-256x256.png" />
 	      </div>
 	      <div id="barcode" class="center" style="align-content: center; width: 250px; height: 250px; margin-top: 3px;">
