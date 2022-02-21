@@ -81,8 +81,8 @@ class Connection
     clearMessages(){this.#messages = []};
 
     setShortName(name){
-        this.#shortName = name
-        this.setCookie('roomName',name,1440 * 365); // 1 year
+        this.#shortName = name;
+        this.setCookie('roomName',name, 1440 * 365); // mins => 1 year
     };
 
     setCookie(cName, cContent, cDurationMins){
