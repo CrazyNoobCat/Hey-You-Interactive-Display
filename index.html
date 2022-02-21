@@ -1,84 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>App Launcher Display | Hey You, Interact With Me!</title>
+		<title>App Launcher Display | Hey You, Interact With Me!</title>
 
-	  
-	<link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
-	
-        <!--<link rel="manifest" href="/manifest.webmanifest">-->
+		
+		<link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+		
+		<!--<link rel="manifest" href="/manifest.webmanifest">-->
 
-        <!-- Cast Debug Logger -->
-        <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
+		<!-- Cast Debug Logger -->
+		<!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
 
-        <link rel="stylesheet" href="index.css">
-	<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
-	
-        <script src="socketCreation.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+		<link rel="stylesheet" href="index.css">
+		<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
+		
+		<script src="socketCreation.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
-        <script>
+		<script>
+			function displayRoomQRCode(displayHost,roomID)
+			{
+				// For the QR code, work directly with the roomID
+				var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
 
-	  function displayRoomQRCode(displayHost,roomID)
-	  {
-	      // For the QR code, work directly with the roomID
+				var full_room_id = displayHost + '/join/' + roomID;
 
-        console.log("Screen resolution: " + screen.availWidth + " x " + screen.availHeight);
+				var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRSize +'x' + QRSize;
 
-        var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
+				var $img = $('<img>').attr('src',url);
 
-        console.log("QR Size = " + QRSize);
-	      
-	      var full_room_id = displayHost + '/join/' + roomID;
-	      
-              var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRSize +'x' + QRSize;
-	      var $img = $('<img>').attr('src',url);
-              $('#barcode').html($img);
-	      
-              console.log("QR code URL: " + url);
-	  }
+				$('#barcode').html($img);
+			}
 
-	  function displayRoomURL(displayHost,roomName)	  
-	  {
-	      // For roomURL we work with the roomName to give a nicer URL to type in
-	      // This is subsequently mapped to the roomID URL by the server
+			function displayRoomURL(displayHost,roomName)	  
+			{
+				// For roomURL we work with the roomName to give a nicer URL to type in
+				// This is subsequently mapped to the roomID URL by the server
 
-	      $('#website').text("Or visit on your phone: " + displayHost + '/join/' + roomName);
-	  }
-	  
-          // Custom socketLoaded() for top-level activity launcher
-	  
-          function socketLoaded(anyListener)
-	  {
-	      var displayHost = self.location.host;
+				$('#website').text("Or visit on your phone: " + displayHost + '/join/' + roomName);
+			}
 
-              console.log("socketLoaded: Display hostname: " + displayHost);
-              console.log("socketLoaded: Room ID: " + getCookie('roomID'));
+			// Custom socketLoaded() for top-level activity launcher
+
+			function socketLoaded(anyListener)
+			{
+				var displayHost = self.location.host;
+
+				console.log("socketLoaded: Display hostname: " + displayHost);
+				console.log("socketLoaded: Room ID: " + getCookie('roomID'));
+
+				socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
+					if (cName == "roomName") {
+						displayRoomURL(displayHost,cContent);
+					}
+				});
+
+				var roomID = getCookie('roomID');
+				displayRoomQRCode(displayHost,roomID);
 
 
-	      socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
-		  if (cName == "roomName") {
-		      displayRoomURL(displayHost,cContent);
-		  }
-	      });
+				if (getCookie('roomName') != "") {
+					var roomName = getCookie('roomName');
+					displayRoomURL(displayHost,roomName);
+				}
 
-	      var roomID = getCookie('roomID');
-	      displayRoomQRCode(displayHost,roomID);
-	      
+				var iconSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.04));
 
-	      if (getCookie('roomName') != "") {
-		  var roomName = getCookie('roomName');
-		  displayRoomURL(displayHost,roomName);
-	      }
-	      
-          }
-	  	  
-	  setupConnection("display");	  
-        </script>
+				$('#branding-logo').width = iconSize;
+				$('#branding-logo').height = iconSize;
+			}
+
+			setupConnection("display");	  
+		</script>
 
     </head>
 
@@ -92,10 +89,10 @@
       <div class="center" style="width: 50%; z-index: 1;">
             <h1 id="heading" class="shake-constant shake-chunk">Scan me to select an interactive app!</h1>
             <div id="frame" class="frame">
-	      <div id="branding-logo" class="center" style="align-content: center; width: 250px; height: 250px">
-		<img src="logo/Hey-You-Logo-unired-screen-256x256.png" />
+	      <div id="branding-logo" class="center" style="align-content: center;">
+		<img src="logo/Hey-You-Logo-unired-screen.svg" />
 	      </div>
-	      <div id="barcode" class="center" style="align-content: center; width: 250px; height: 250px; margin-top: 3px;">
+	      <div id="barcode" class="center" style="align-content: center; margin-top: 3px;">
 		<div style="width: 100%; height: 250px; line-height: 250px; text-align: center; background-color: #f8f8f8;">
 		  Loading ...
 		</div>
