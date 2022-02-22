@@ -780,11 +780,17 @@ async function assignShortName(display){
             console.error(err);
             return;
         }
-        let names = data.split('\n');    
+
+        // Check the line endings
+        var temp = source.indexOf('\n');
+        var lineEnding = '\n'
+        if (source[temp - 1] === '\r')
+            lineEnding = '\r\n'
+
+        let names = data.split(lineEnding);    
         if (displays.length < names.length)
             display.setShortName(names[displays.length -1]);
         else
             display.setShortName(displays.length - 1);
     })
 }
-
