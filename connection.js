@@ -71,7 +71,7 @@ class Connection
         if (this.#host == true || this.#shortName != null || this.numOfClients > 0) // Characteristics of a display
             return;
         else
-            this.message('extendRoomID');// Informs the socket to extend it's cookie validty 
+            this.message('extendRoomID', 1);// Informs the socket to extend it's cookie validty by one minue
     }
 
     addMessage(...args){

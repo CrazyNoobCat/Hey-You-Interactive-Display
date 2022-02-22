@@ -39,7 +39,7 @@ var clients  = []; // An array containing all the clients
 
 const defaultActivity      = '';
 const defaultActivityLabel = 'Activity-Launcher (Default)';
-const defaultCookieTimeout = 1000 * 60 * 1000; // Number of minutes a cookie will last for
+const defaultCookieTimeout = 1 * 60 * 1000; // Number of milliseconds a cookie will last for
 const activityLocation = __dirname + '/activities';
 
 
