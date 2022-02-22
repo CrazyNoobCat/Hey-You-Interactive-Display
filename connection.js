@@ -21,15 +21,16 @@ class Connection
     #messages = []; // All messages which the display hasn't recieved due to it not being ready 
     numOfClients = 0;
     #shortName = null;
+    failedConsecutiveHeartBeat = 0;
     
     // Only used for clients
     #lastInteractionTime;
     
     constructor(io, socket, activity, timeoutLimit) {
-	this.#io              = io;
+	    this.#io              = io;
         this.#socket          = socket;
         this.#currentActivity = activity; // Connection class itself;
-	this.timeoutLimit     = timeoutLimit;
+	    this.timeoutLimit     = timeoutLimit;
 	
         this.#room = socket.handshake.query.roomID;
 

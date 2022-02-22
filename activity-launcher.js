@@ -482,7 +482,7 @@ io.on('connection', (socket, host) => {
             assignShortName(display);
 
             // Using deviceID as the room identifier
-	    let roomID = display.getDeviceID();
+	        let roomID = display.getDeviceID();
             socket.join(roomID);
 
             display.setAsRoomHost();
@@ -561,7 +561,13 @@ io.on('connection', (socket, host) => {
         if (active){
             var room = args[0];
 
-            switch (event) {                
+            switch (event) {   
+                case "heartbeat":
+                    display = findDisplayBySocketID(socket.id)
+                    display.updateLastInteractionTime();
+                    display.failedConsecutiveHeartbeat = 0;
+                    break;
+
                 case "selectActivity":
                     // Client has indicated an activity change
                     var activitySelected = args[1];
@@ -590,6 +596,7 @@ io.on('connection', (socket, host) => {
                                               
 
                     callback();
+                    break;
 
                 case "displayLoaded":
                     display = findDisplayBySocketID(socket.id);
@@ -706,7 +713,7 @@ server.listen(httpPort, () => {
 
 clientTimeoutCheck(); // Call the next function and then let it loop
 
-// Checks every second to see if client is active
+// Checks every 5 to see if client is active
 async function clientTimeoutCheck(){
     setTimeout(() => {
         clients.forEach(function(client, index, object) {
@@ -728,7 +735,27 @@ async function clientTimeoutCheck(){
             }
           });
         clientTimeoutCheck();
-    }, 1000);   
+    }, 5000);   
+}
+
+displayHeartbeat();
+
+function displayHeartbeat(){
+    displayHeartbeat(() => {
+        displays.forEach(function(display, index, object) {
+            if (display.timedOut()){
+                if (display.failedConsecutiveHeartbeat++ > 2){
+                    // Forget the display, forcing it to reconnect
+                    object.splice(index, 1);
+                } else {
+                    display.message('reload'); // Cause the display to catchup and keep ChromeCasts alive
+                }
+
+            } else {
+                display.message('heartbeat');
+            }
+        })
+    }, 30 * 1000); // 30 seconds
 }
 
 async function assignShortName(display){

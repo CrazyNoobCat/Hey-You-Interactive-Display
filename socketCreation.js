@@ -65,6 +65,11 @@ function startSocket(visitorID, type){
         setCookie('roomID',cookieContent, 1000);
     });
 
+    socket.on('heartbeat', () => {
+        socket.emit('heartbeat');
+        console.log("heartbeat");
+    });
+
     socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
         setCookie(cName,cContent, cDurationMins);
     });

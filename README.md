@@ -73,6 +73,9 @@ Connect as an end-user to try out the install:
 All emit requests which don't fit one of the above values will be treated as a message which must be sent to the display.
 The display will be sent (event, deviceID, args)
 
+**Server Emit Codes**
+- clidentDC Format: ('clientDC', clientDeviceID); --> Informs the display that a client has been disconnected from their activity
+
 **Notes**
 
 Folders cannot be named z. This is due to static pages defaulting to /stiatic/z so that it is refered to the default static page
