@@ -232,6 +232,22 @@ if (cmdline_args[0] == "-console") {
     enableConsole()
 }
 
+//
+// Based on discussion at:
+//   https://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
+//
+// Make it easy to look up a client's IP, even when we are routing the request to HeyYou
+// through a front-end web server (Apache2 in our case)
+//
+app.set('trust proxy', true)
+
+//
+// To support a dedicated list of Chromecast around the devices being served fix IPs
+// we need to register the MAC addresses of the Chromecast's with the DHCP server
+//
+// For detecting a Chromecast's MAC address see:
+//   https://support.google.com/chromecast/answer/6292171?hl=en
+
 
 /* Restful HTTP responses triggered by incoming GET requests */
 
@@ -295,6 +311,8 @@ app.get('/activity', (req, res) => {
         }
     }
     else {
+	console.log("/activity serving up default activity index.html to client IP: " + req.ip);
+	console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
         sendActivityFile(res, __dirname + defaultActivity +'/index.html', '/index.html', defaultActivityLabel); // This is for new displays
     }   
 });
