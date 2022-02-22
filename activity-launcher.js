@@ -742,7 +742,7 @@ async function clientTimeoutCheck(){
 displayHeartbeat();
 
 function displayHeartbeat(){
-    displayHeartbeatLoop(() => {
+    setTimeout(() => {
         displays.forEach(function(display, index, object) {
             if (display.timedOut()){
                 if (display.failedConsecutiveHeartbeat++ > 2){
@@ -756,7 +756,7 @@ function displayHeartbeat(){
                 display.message('heartbeat');
             }
         });
-        displayHeartbeatLoop();
+        displayHeartbeat();
     }, 30 * 1000); // 30 seconds
 }
 
