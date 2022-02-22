@@ -40,6 +40,7 @@ var clients  = []; // An array containing all the clients
 const defaultActivity      = '';
 const defaultActivityLabel = 'Activity-Launcher (Default)';
 const defaultCookieTimeout = 1 * 60 * 1000; // Number of milliseconds a cookie will last for
+const staticCookieValidMins = 120; // Valid for 2 hours by default
 const activityLocation = __dirname + '/activities';
 
 
@@ -337,7 +338,7 @@ app.get('/scripts/:fileName', (req, res) => {
 });
 
 app.get('*/error/:error', (req, res) => {
-    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (1 * 60 * 1000))});
+    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))});
     res.redirect('/error');
 });
 
@@ -487,7 +488,7 @@ io.on('connection', (socket, host) => {
 
             display.setAsRoomHost();
             display.setRoom(roomID);
-            display.setCookie('roomID',roomID,1440) // mins => 1 day
+            display.setCookie('roomID',roomID,defaultCookieTimeout) // mins => 1 day
 
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
@@ -669,8 +670,8 @@ io.on('connection', (socket, host) => {
                     // Set staticActivity cookie
                     client = findClientBySocketID(socket.id);
                     display = findHostDisplayByRoomID(client.getRoom());
-                    client.setCookie('staticActivity',display.getCurrentActivity(),60); // Only valid for an hour
-                    client.setCookie("roomID",'',0.0001); // Invalidate old cookie
+                    client.setCookie('staticActivity',display.getCurrentActivity(),staticCookieValidMins);
+                    client.setCookie("roomID",'',0); // Invalidate old cookie
 
                     // Remove client
                     clients.forEach(function(clientTemp, index, object) {
