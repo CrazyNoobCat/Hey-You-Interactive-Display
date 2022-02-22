@@ -12,7 +12,6 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server);
 
-
 const publicDirectory = "/public";
 const httpPort = process.env.PORT || 3000;
 
@@ -43,7 +42,10 @@ const defaultCookieTimeout = 1 * 60 * 1000; // Number of milliseconds a cookie w
 const staticCookieValidMins = 120; // Valid for 2 hours by default
 const activityLocation = __dirname + '/activities';
 
+const start = new Date(); // This is the time which the server started. Use to reload connections after a restart
+const onStartReloadWindow = 2 * 60 * 1000
 
+console.log("Start time: " + start);
 
 function getCookie(req,cookieName){
     let cookies = req.headers.cookie; 
@@ -441,6 +443,12 @@ io.on('connection', (socket, host) => {
                 display.numOfClients++; // Increase client count for new room by one.
 
                 console.log("New Client: \t" + client.connectionInformation());
+
+                var currentTime = new Date();
+                if (currentTime - start < onStartReloadWindow){
+                    client.message('reload');
+                }
+
             } else {
                 // Could send error since there is no valid display for the client //////////////////////////
             }
@@ -494,6 +502,12 @@ io.on('connection', (socket, host) => {
             display.updateLastInteractionTime();
             
             console.log("New Display: \t" + display.connectionInformation());
+
+            var currentTime = new Date();
+            console.log(currentTime - start)
+            if (currentTime - start < onStartReloadWindow){
+                display.message('reload');
+            }
         }
     } else {
         console.log("Invalid connection request\t Type: " + socket.handshake.query.data + "\tReferer: " + socket.handshake.headers.referer);

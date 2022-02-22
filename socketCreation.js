@@ -59,10 +59,12 @@ function startSocket(visitorID, type){
         window.location.href = '/error/'+ message;
     });
 
-    socket.on('extendRoomID', (duration) => {
+    socket.on('extendRoom', (duration) => {
         console.log("Cookie duration extended");
         let cookieContent = getCookie('roomID');
         setCookie('roomID',cookieContent, duration); // Extend cookie duration by above duration
+        cookieContent = getCookie('roomName');
+        setCookie('roomName',cookieContent, duration); // Extend cookie duration by above duration
     });
 
     socket.on('heartbeat', () => {

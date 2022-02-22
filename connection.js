@@ -41,7 +41,7 @@ class Connection
     //
 
     timedOut(){
-        if (Date.now() - this.#lastInteractionTime > Connection.timeoutLimit)
+        if (Date.now() - this.#lastInteractionTime > this.timeoutLimit)
             return true;
         else
             return false;        
@@ -68,10 +68,7 @@ class Connection
     
     updateLastInteractionTime(){
         this.#lastInteractionTime = Date.now();
-        if (this.#host == true || this.#shortName != null || this.numOfClients > 0) // Characteristics of a display
-            return;
-        else
-            this.message('extendRoomID', 1);// Informs the socket to extend it's cookie validty by one minue
+        this.message('extendRoom', 1);// Informs the socket to extend it's cookie validty by one minue
     }
 
     addMessage(...args){
@@ -83,7 +80,7 @@ class Connection
 
     setShortName(name){
         this.#shortName = name;
-        this.setCookie('roomName',name, 1440 * 365); // mins => 1 year
+        this.setCookie('roomName',name,this.timeoutLimit); // mins => 1 year
     };
 
     setCookie(cName, cContent, cDurationMins){

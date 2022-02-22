@@ -26,12 +26,13 @@
         // Generic socket setup
         function socketLoaded(anyListener){
             vid = document.getElementById("video");
-            slide = document.getElementById("slideshow");
-            vid.src = '/Slide16.mp4';
-            vid.load();
+            slide = document.getElementById("slideshow");            
 
             socket.onAny(anyListener); // Turns on the any listener
             socket.emit("displayLoaded"); 
+
+            vid.src = '/Slide16.mp4';
+            vid.load();
             
             var nric = self.location.host;
             var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=250x250';
