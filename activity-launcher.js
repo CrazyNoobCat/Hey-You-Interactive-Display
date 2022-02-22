@@ -782,9 +782,9 @@ async function assignShortName(display){
         }
 
         // Check the line endings
-        var temp = source.indexOf('\n');
+        var temp = data.indexOf('\n');
         var lineEnding = '\n'
-        if (source[temp - 1] === '\r')
+        if (data[temp - 1] === '\r')
             lineEnding = '\r\n'
 
         let names = data.split(lineEnding);    
