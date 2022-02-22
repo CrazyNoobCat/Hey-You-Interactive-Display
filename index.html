@@ -22,18 +22,25 @@
 		<script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
 		<script>
-			function displayRoomQRCode(displayHost,roomID)
+		        var QRDim = null;
+
+		        function displayRoomQRCode(displayHost,roomID)
 			{
 				// For the QR code, work directly with the roomID
-				var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
-
+			        //var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
+			        //console.log("Dynamically computed QR size = " + QRSize);
 				var full_room_id = displayHost + '/join/' + roomID;
 
-				var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRSize +'x' + QRSize;
+			        //var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRSize +'x' + QRSize;
+			        var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRDim +'x' + QRDim;
 
-				var $img = $('<img>').attr('src',url);
+			        var $img = $('<img>').attr('src',url);
+			        $img.on("load", function() {
+				     $img.fadeIn(1000);
+				});
+			        $img.css("display","none");
 
-				$('#barcode').html($img);
+			         $('#barcode').html($img);
 			}
 
 			function displayRoomURL(displayHost,roomName)	  
@@ -41,7 +48,7 @@
 				// For roomURL we work with the roomName to give a nicer URL to type in
 				// This is subsequently mapped to the roomID URL by the server
 
-				$('#website').text("Or visit on your phone: " + displayHost + '/join/' + roomName);
+				$('#website').html('Or visit on your phone: <span style="white-space: nowrap;">' + displayHost + '/join/' + roomName + '</span>');
 			}
 
 			// Custom socketLoaded() for top-level activity launcher
@@ -68,13 +75,63 @@
 					displayRoomURL(displayHost,roomName);
 				}
 
-				var iconSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.04));
-
-				$('#branding-logo').width = iconSize;
-				$('#branding-logo').height = iconSize;
+			        //var iconSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.04));
+			        //console.log("Dynamically computed iconSize = " + iconSize);
+			    
+				//$('#branding-logo').width = iconSize;
+				//$('#branding-logo').height = iconSize;
 			}
 
-			setupConnection("display");	  
+		        // $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
+		        var viewportWidth  = $(window).width();
+		        var viewportHeight = $(window).height();
+
+		  console.log("Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);
+		  if (viewportHeight <= viewportWidth) {
+		      // Need to make sure Hey You logo + QR code (and the jiggling text above, and URL below)
+		      // all fit
+
+		      // => allow 20% space for text top and bottom, then equally split remaining space
+		      QRDim = (viewportHeight * 0.8) / 2;
+		  }
+		  else {
+		      // Not such a big issue when viewPort is already tall and thin (more wiggle room)
+		      // => viewportWidth / 2 would guarantee that logo and QR code would fit
+		      // However, there is the issue of the text top and bottom to fit in, and
+		      // that issue depends on how much taller the viewport is compared to width
+
+		      // The approach taken here is to:
+		      //    (i  provisionally set the QR code (and logo) to be viewportWidth/2
+		      //   (11) assume the text takes up 20% of viewport "min" dimension (i.e. width)
+		      //  (iii) then see if that added on the logo and qr-code exceeds the viewportHeight
+		      //   (iv) if it does, reduce the calculated QR code + logo dim by that amount so it does fit
+		      
+		      QRDim = (viewportWidth /2);
+		      var textDim = viewportWidth * 0.2;
+
+		      if (((QRDim * 2) + textDim) > viewportHeight) {
+			  QRDim -= (textDim/2); // the div by 2 is because the textDim reduction spans 2 images (QR code + Logo)
+		      }
+		  }
+		  QRDim = Math.round(QRDim);
+		  console.log("Dynamically computed QRDim = " + QRDim);
+		  
+		  setupConnection("display");
+
+
+		  $(document).ready(function () {
+		      var logoDim = Math.min(QRDim,250)
+		      
+		      $('#branding-logo').width(logoDim);
+		      $('#branding-logo').height(logoDim);
+
+		      $('#barcode').width(QRDim);
+		      $('#barcode').height(QRDim);
+		      $('#barcode-loading').width(QRDim);
+		      $('#barcode-loading').height(QRDim);
+
+		  });
+		  		      
 		</script>
 
     </head>
@@ -89,12 +146,14 @@
       <div class="center" style="width: 50%; z-index: 1;">
             <h1 id="heading" class="shake-constant shake-chunk">Scan me to select an interactive app!</h1>
             <div id="frame" class="frame">
-	      <div id="branding-logo" class="center" style="align-content: center;">
+	      <div id="branding-logo" class="center" style="align-content: center; margin: auto;">
 		<img src="logo/Hey-You-Logo-unired-screen.svg" />
 	      </div>
-	      <div id="barcode" class="center" style="align-content: center; margin-top: 3px;">
-		<div style="width: 100%; height: 250px; line-height: 250px; text-align: center; background-color: #f8f8f8;">
+	      <div class="center" style="position: relative; align-content: center; margin-top: 3px;">
+		<div id="barcode-loading" style="position: absolute; z-index: 1; width: 100%; text-align: center; background-color: #f8f8f8;">
 		  Loading ...
+		</div>
+		<div id="barcode" style="position: relative; z-index: 2;">
 		</div>
 	      </div>
             </div>                        
