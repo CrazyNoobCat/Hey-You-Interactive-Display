@@ -47,9 +47,9 @@ body, html{
 /*    align-items:center;*/
 }
 
-.home-img {
+.home-img, .home-img-small {
+    /* Convert RGG color to filter settings through https://codepen.io/sosuke/pen/Pjoqqp */
     filter: invert(55%) sepia(81%) saturate(544%) hue-rotate(348deg) brightness(105%) contrast(96%);
-    /*get target color here https://codepen.io/sosuke/pen/Pjoqqp ??? */
 }
 
 button {
@@ -119,6 +119,7 @@ div.fb-container-equispaced {
     font-family: monospace;
     text-align: center;
     border:1px solid rgba(255,255,255,0.8);
+    font-size: 120%;	
 }
 
 div.fb-alignleft {
@@ -157,6 +158,11 @@ div.fb-fillright {
 	width:  8vw; 
 	height: 8vw;
     }
+
+    .home-img-small {
+	width:  4vw; 
+	height: 4vw;
+    }    
 
     .uni_img {
 	width:20vw;
@@ -197,7 +203,6 @@ div.fb-fillright {
 	padding: 2vw;
 	margin-left:2vw;
 	margin-right: 2vw;
-	font-size: 4vw;	
     }
     
     div.fb-alignleft {
@@ -249,6 +254,11 @@ div.fb-fillright {
 	height: 2rem;
     }
 
+    .home-img-small {
+	width:  1rem; 
+	height: 1rem;
+    }
+
     .uni_img {
 	height: 1.6rem;
 	padding: 0.3rem;
@@ -284,7 +294,6 @@ div.fb-fillright {
 	padding: 6px;
 	margin-left: 6px;
 	margin-right: 6px;
-	font-size: 120%;
     }
 
     div.fb-alignleft {
