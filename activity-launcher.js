@@ -7,6 +7,8 @@ const { Server }  = require("socket.io");
 const { Console } = require('console');
 
 const Connection    = require('./connection');
+const ShortNames    = require('./shortNames')
+const shortNames    = new ShortNames('shortURLnames.txt');
 
 const app    = express();
 const server = http.createServer(app);
@@ -252,15 +254,16 @@ app.set('trust proxy', true)
 /* Restful HTTP responses triggered by incoming GET requests */
 
 app.get('/join/:roomID', (req, res) => {
+    console.log("Room join request: " + req.params.roomID);
     if (findHostDisplayByRoomID(req.params.roomID) != undefined){
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
         res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
         res.redirect('/'); // Prevents making a second cookie for a js file
-        console.log("New device joined with roomID: ")
+        console.log("New device joined with roomID: " + req.params.roomID);
     } else if ((display = findHostDisplayByName(req.params.roomID)) != undefined) {
         res.cookie('roomID', display.getDeviceID(), {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
         res.redirect('/'); // Prevents making a second cookie for a js file
-        console.log("New device joined with roomName: ")
+        console.log("New device joined with roomName: " + req.params.roomID);
     }  
     else { // If room doesn't exit
         res.redirect("/error/Room doesn't exist, rescan QR code");
@@ -451,6 +454,8 @@ io.on('connection', (socket, host) => {
             let display = findHostDisplayByRoomID(client.getRoom());
 
             if (display != undefined){
+                console.log("New Client: \t" + client.connectionInformation());
+
                 clients.push(client);
 
                 //Join client to room
@@ -459,8 +464,6 @@ io.on('connection', (socket, host) => {
 
                 display = findHostDisplayByRoomID(client.getRoom());
                 display.numOfClients++; // Increase client count for new room by one.
-
-                console.log("New Client: \t" + client.connectionInformation());
 
                 var currentTime = new Date();
                 if (currentTime - start < onStartReloadWindow){
@@ -480,13 +483,12 @@ io.on('connection', (socket, host) => {
             const display = displays[index];
             if (display.getDeviceID() == socket.handshake.query.clientID){
                 // Handle updating socket information for this reconnecting device
+                console.log("Socket update for display (device id): " + display.getDeviceID());
+
                 display.setNewSocket(socket);
 
                 socket.join(display.getRoom());
 
-                console.log("Socket update for display (device id): " + display.getDeviceID());
-
-                //console.log(Date.now() - display.getLastInteraction());
                 if (Date.now() - display.getLastInteraction() > 10000){
                     io.to(socket.id).emit("reload");
                     display.updateLastInteractionTime();
@@ -499,14 +501,15 @@ io.on('connection', (socket, host) => {
 
         if (newConnection){
             // Handle creating a new Connection instance for this device
-	    
             let display = new Connection(io,socket,defaultActivity,defaultCookieTimeout);
 
+            console.log("New Display: \t" + display.connectionInformation());
+	    
             // Add the new display to the list of displays
             displays.push(display);
 
             // Assign the shortname to the display
-            assignShortName(display);
+            display.setShortName(shortNames.nextFree());
 
             // Using deviceID as the room identifier
 	        let roomID = display.getDeviceID();
@@ -519,10 +522,8 @@ io.on('connection', (socket, host) => {
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
             
-            console.log("New Display: \t" + display.connectionInformation());
 
             var currentTime = new Date();
-            console.log(currentTime - start)
             if (currentTime - start < onStartReloadWindow){
                 display.message('reload');
             }
@@ -634,7 +635,7 @@ io.on('connection', (socket, host) => {
                 case "assignRoomName":
                     // Only displays will call this as per socketCreation.js
                     display = findDisplayBySocketID(socket.id);
-                    assignShortName(display);
+                    display.setShortName(shortNames.nextFree());
                     break;
 
                 case "displayLoaded":
@@ -714,6 +715,7 @@ io.on('connection', (socket, host) => {
                     // Remove client
                     clients.forEach(function(clientTemp, index, object) {
                         if (clientTemp == client){
+
                             object.splice(index,1);
                         }
                     });
@@ -783,9 +785,12 @@ function displayHeartbeat(){
     setTimeout(() => {
         displays.forEach(function(display, index, object) {
             if (display.timedOut()){
-                if (display.failedConsecutiveHeartbeat++ > 2){
+                if (display.failedConsecutiveHeartBeat++ >= 2){
                     // Forget the display, forcing it to reconnect
+                    shortNames.release(display.getShortName());
                     object.splice(index, 1);
+                    console.log("Display Length: " + displays.length);
+
                 } else {
                     display.message('reload'); // Cause the display to catchup and keep ChromeCasts alive
                 }
@@ -796,29 +801,4 @@ function displayHeartbeat(){
         });
         displayHeartbeat();
     }, 30 * 1000); // 30 seconds
-}
-
-async function assignShortName(display){
-    // Only allows one short name per display at a time
-    fs.readFile('shortURLnames.txt', 'utf8', (err, data) => {
-        if (err){
-            console.error(err);
-            return;
-        }
-
-        // Check the line endings
-        var temp = data.indexOf('\n');
-        var lineEnding = '\n'
-        if (data[temp - 1] === '\r')
-            lineEnding = '\r\n'
-
-        // Need to remove any spaces from name
-
-        let names = data.split(lineEnding);  
-
-        if (displays.length < names.length)
-            display.setShortName(names[displays.length -1]);
-        else
-            display.setShortName(displays.length - 1);
-    })
 }
