@@ -794,8 +794,6 @@ function displayHeartbeat(){
                     // Forget the display, forcing it to reconnect
                     shortNames.release(display.getShortName());
                     object.splice(index, 1);
-                    console.log("Display Length: " + displays.length);
-
                 } else {
                     display.message('reload'); // Cause the display to catchup and keep ChromeCasts alive
                 }
