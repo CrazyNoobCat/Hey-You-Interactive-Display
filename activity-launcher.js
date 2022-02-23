@@ -635,7 +635,12 @@ io.on('connection', (socket, host) => {
                 case "assignRoomName":
                     // Only displays will call this as per socketCreation.js
                     display = findDisplayBySocketID(socket.id);
-                    display.setShortName(shortNames.nextFree());
+
+                    // If no name could befound then assign new short name, else send current shortname
+                    if (display.getShortName == undefined)
+                        display.setShortName(shortNames.nextFree());
+                    else 
+                        display.resendShortName();
                     break;
 
                 case "displayLoaded":

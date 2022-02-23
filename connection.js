@@ -124,6 +124,10 @@ class Connection
         this.#io.to(this.getRoom()).emit(...args);
     }
 
+    resendShortName(){
+        this.setCookie('roomName',this.getShortName(),this.timeoutLimit);
+    }
+
 }
 
 module.exports = Connection;
