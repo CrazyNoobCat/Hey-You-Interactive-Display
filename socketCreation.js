@@ -20,6 +20,8 @@ function startSocket(visitorID, type){
     if (type == "display"){
         setCookie('roomID',visitorID,10);
         roomID = visitorID;
+    } else {
+        roomID = getCookie('roomID'); // Must be a client so get roomID
     }
 
     console.log("startSocket: Device ID: " + visitorID);
@@ -82,6 +84,14 @@ function startSocket(visitorID, type){
         socketUpdate(...args); // This function must exist otherwise sockets will not work
     } // Off by default
 
+    // Ensure roomName is present before returning
+
+    if (type == 'display'){
+        roomName = getCookie('roomName')
+        if (roomName == '')
+            socket.emit('assignRoomName');
+    }
+
     socketLoaded(anyListener);
 }    
 
@@ -100,9 +110,8 @@ function selectActivity(activity) {
   }
 
 function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
+    let name = cname + "=";    
+    let ca = listDecodedURICookies();
     for(let i = 0; i <ca.length; i++) {
         let c = ca[i];
         while (c.charAt(0) == ' ') {
@@ -113,6 +122,11 @@ function getCookie(cname) {
         }
     }
     return "";
+}
+
+function listDecodedURICookies(){
+    let decodedCookie = decodeURIComponent(document.cookie);
+    return decodedCookie.split(';');
 }
 
 function setCookie(cname, cvalue, exmins) {
@@ -129,16 +143,8 @@ function setupConnection(type){
     // Once the window has loaded then setup will start
     // Makes sure all required files are loaded before starting
 
-    window.addEventListener('load', function() {  
-        roomID = getCookie('roomID');
-        if (roomID == ""){
-            getVisitorID(type); // If there is not already a roomID get one
-        }
-
-        roomName = getCookie('roomName')
-        if (roomName == "" && type == 'display'){
-            socket.emit('assignRoomName');
-        }
+    window.addEventListener('load', function() { 
+        getVisitorID(type);         
     });    
 }
 
