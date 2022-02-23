@@ -64,7 +64,8 @@ function startSocket(visitorID, type){
         let cookieContent = getCookie('roomID');
         setCookie('roomID',cookieContent, duration); // Extend cookie duration by above duration
         cookieContent = getCookie('roomName');
-        setCookie('roomName',cookieContent, duration); // Extend cookie duration by above duration
+        if (cookieContent != '')
+            setCookie('roomName',cookieContent, duration); // Extend cookie duration by above duration
     });
 
     socket.on('heartbeat', () => {
@@ -130,7 +131,14 @@ function setupConnection(type){
 
     window.addEventListener('load', function() {  
         roomID = getCookie('roomID');
-        getVisitorID(type);
+        if (roomID == ""){
+            getVisitorID(type); // If there is not already a roomID get one
+        }
+
+        roomName = getCookie('roomName')
+        if (roomName == "" && type == 'display'){
+            socket.emit('assignRoomName');
+        }
     });    
 }
 

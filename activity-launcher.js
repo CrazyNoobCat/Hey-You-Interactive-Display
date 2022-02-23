@@ -613,6 +613,12 @@ io.on('connection', (socket, host) => {
                     callback();
                     break;
 
+                case "assignRoomName":
+                    // Only displays will call this as per socketCreation.js
+                    display = findDisplayBySocketID(socket.id);
+                    assignShortName(display);
+                    break;
+
                 case "displayLoaded":
                     display = findDisplayBySocketID(socket.id);
 
@@ -775,6 +781,7 @@ function displayHeartbeat(){
 }
 
 async function assignShortName(display){
+    // Only allows one short name per display at a time
     fs.readFile('shortURLnames.txt', 'utf8', (err, data) => {
         if (err){
             console.error(err);
@@ -787,7 +794,10 @@ async function assignShortName(display){
         if (data[temp - 1] === '\r')
             lineEnding = '\r\n'
 
-        let names = data.split(lineEnding);    
+        // Need to remove any spaces from name
+
+        let names = data.split(lineEnding);  
+
         if (displays.length < names.length)
             display.setShortName(names[displays.length -1]);
         else
