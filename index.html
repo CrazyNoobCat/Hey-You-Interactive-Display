@@ -22,9 +22,9 @@
 		<script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
 		<script>
-		        var QRDim = null;
+			var QRDim = null;
 
-		        function displayRoomQRCode(displayHost,roomID)
+			function displayRoomQRCode(displayHost,roomID)
 			{
 				// For the QR code, work directly with the roomID
 			        //var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
@@ -82,9 +82,9 @@
 				//$('#branding-logo').height = iconSize;
 			}
 
-		        // $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
-		        var viewportWidth  = $(window).width();
-		        var viewportHeight = $(window).height();
+			// $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
+			var viewportWidth  = $(window).width();
+			var viewportHeight = $(window).height();
 
 		  console.log("Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);
 		  if (viewportHeight <= viewportWidth) {
