@@ -18,23 +18,23 @@ if [ $? = "0" ] ; then
     echo ""
 
     echo "Initializing ..."
-    echo ""
     
     node activity-launcher.js </dev/null >heyyou-server.log 2>&1 &
     heyyou_server_pid=$!
     
-    echo $heyyou_server_pid >heyyou-server.pid
-
+    # Give the server a bit of time to start up in the background
     sleep 2
     
     if [ -d /proc/$heyyou_server_pid ] ; then
-	echo "... successfully initialized"	
+	echo "                ... successfully initialized"
+	echo $heyyou_server_pid >heyyou-server.pid
     else
 	echo "" >&2
 	echo "Error encountered running: $0" >&2
 	echo "" >&2
 	
 	echo "... failed to initialize initialization"
+	echo ""
 	echo "For further details see:"
 	echo "  heyyou-server.log"
 	echo ""
