@@ -324,7 +324,7 @@ app.get('/activity', (req, res) => {
 
 /* similar to the above, but driven directly by URL provided by the top-level client */
 
-
+/*
 app.get('/activities/:activity/:fileName', (req, res) => {
     let activity = "/" + req.params.activity;
     let fileName = "/" + req.params.fileName;
@@ -340,7 +340,7 @@ app.get('/activities/:activity/:fileName', (req, res) => {
         sendActivityFile(res,__dirname + defaultActivity + fileName,fileName,activity); 
     }
 });
-
+*/
 
 
 app.get('/scripts/:fileName', (req, res) => {
