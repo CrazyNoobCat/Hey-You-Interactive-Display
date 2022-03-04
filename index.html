@@ -14,7 +14,7 @@
 		<!-- Cast Debug Logger -->
 		<!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
 
-		<link rel="stylesheet" href="index.css">
+		<link rel="stylesheet" type="text/css" href="index.css">
 		<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
 		
 		<script src="socketCreation.js"></script>
@@ -115,8 +115,7 @@
 		  }
 		  QRDim = Math.round(QRDim);
 		  console.log("Dynamically computed QRDim = " + QRDim);
-		  
-		  setupConnection("display");
+
 
 
 		  $(document).ready(function () {
@@ -131,7 +130,12 @@
 		      $('#barcode-loading').height(QRDim);
 
 		  });
-		  		      
+
+		  // All displays need to defined a socketLoaded() function,
+		  // and call socketConnection("display") to kick thigns off
+		  
+		  setupConnection("display");
+
 		</script>
 
     </head>
