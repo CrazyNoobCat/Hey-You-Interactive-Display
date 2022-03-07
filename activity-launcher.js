@@ -297,10 +297,12 @@ app.get('/', (req, res) => {
     }    
 });
 
+// Shortcut for the accessing the top-level display
+app.get('/display', (req, res) => {
+    res.redirect('/activity');
+});
 
-// ****
-// Currently not used (more testing and debugging needed)
-// ****
+	
 app.get('/activity', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
@@ -323,6 +325,9 @@ app.get('/activity', (req, res) => {
 
 
 /* similar to the above, but driven directly by URL provided by the top-level client */
+// ****
+// Currently not used (more testing and debugging needed)
+// ****
 
 /*
 app.get('/activities/:activity/:fileName', (req, res) => {
@@ -672,7 +677,7 @@ io.on('connection', (socket, host) => {
                     // Format ('displayEmit',room/socket to send to,event,args for event...)
                     //              event          0                 1       2
                     eventToSend = args[1];
-                    eventArgs = args[2];
+                    eventArgs   = args.slice(2);
 
                     // Hasn't been used with other displays yet, may run into issues
                     display = findDisplayBySocketID(socket.id); // using socket.id as no gaurantee room will be display
@@ -790,7 +795,7 @@ function displayHeartbeat(){
     setTimeout(() => {
         displays.forEach(function(display, index, object) {
             if (display.timedOut()){
-                if (display.failedConsecutiveHeartBeat++ >= 2){
+                if (display.failedConsecutiveHeartBeat++ >= 10){ // (@30 secs => 5 mins) Note: used to be 2
                     // Forget the display, forcing it to reconnect
                     shortNames.release(display.getShortName());
                     object.splice(index, 1);
