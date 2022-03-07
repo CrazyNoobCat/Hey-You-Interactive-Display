@@ -1,30 +1,76 @@
-var canvas = document.getElementById('gameCanvas');
-var ctx = canvas.getContext('2d');
-
-canvas.width = innerWidth - 30;
-canvas.height = innerHeight - 30;
 
 var players = [];
 var taggers = [];
 var tagged = [];
 
-var safeZone = 80;  // Constant
-var tempSafeZone = safeZone; // Draw this one
-var activeSafeZone = 2; // 0 = null, i.e. game over. 1 = left, 2 = right
+var getToSafeZoneWidth   = 80;                 // Stays constant
+var shrinkgingZoneWidth  = getToSafeZoneWidth; // Reduces over time
+
+var getToSafeZoneBgCol =  "#faaa33"; // yellow-ish
+var shrinkingZoneBgCol =  "#faaa33"; // yellow-ish (after some testing, using same color as getToSafeZone worked out for the best)
+
+// HSV 57, 20, 98 (a more yellow, paler version of #faaa33)
+//var directionArrowCol    = "rgb(250,247,200)";
+//var directionArrowCol    = "rgb(255,255,255)";
+
+var directionArrowsXNum = 20;
+
+var directionArrowsXQuarter1End   = Math.round(directionArrowsXNum/4);
+var directionArrowsXQuarter4Start = Math.round((3*directionArrowsXNum)/4);
+
+var directionArrowLength = 50;
+var directionArrowWidth  = 10;
+
+var directionArrowCol    = "#ffffff";
+
+var numFinishLineBars  = 50;
+var finishLineBarWidth = 6;
+
+var activeSafeZone    = 2;        // 0 = null, i.e. game over. 1 = left, 2 = right
 var playersInSafeZone = 0;
 
-var gameOver = false; // Set to true when game needs to be restarted
+var gameOver  = false; // Set to true when game needs to be restarted
 var gameReady = false;
 
 var displayResetThreshold = 10; // This is how many retry attemtps it takes before emiting a displayReset
-var retryCount = 0;
+var retryCount            = 0;
 
-const random = (min, max) => Math.floor(Math.random() * (max - min)) + min;
-const randomColor = () => Math.floor(Math.random() * 1048576).toString(16); //Only prints out max of 5 bits of the 6 colours
+const random      = (min, max) => Math.floor(Math.random() * (max - min)) + min;
+const randomColor = ()         => Math.floor(Math.random() * 1048576).toString(16); //Only prints out max of 5 bits of the 6 colours
 
+
+var canvas = null;
+var ctx    = null;
+
+var headingFontSize   = null;
+var paragraphFontSize = null;
+
+$(document).ready(function() {
+
+    // Init canvas variables
+    
+    canvas = document.getElementById('gameCanvas');
+    ctx    = canvas.getContext('2d');
+    
+    // Most of setting the canvas is dealth with in the CSS, but see:
+    //   https://stackoverflow.com/questions/10214873/make-canvas-as-wide-and-as-high-as-parent
+    // for detail about the canvas.width and canvas.height needing to also be set
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    minDimension = Math.min(canvas.width,canvas.height);
+    
+    headingFontSize   = Math.round(minDimension/24.0);
+    paragraphFontSize = Math.round(minDimension/24.0);
+    
     // Manual start --> call function draw();
     // Automatic start: when there are at least 2 players
-    gameStart();
+
+    draw(false); // draw board, but don't start animation     
+    gameStart(); // triggers draw(true) when enough players have join
+
+});
+
 
 function gameStart(timeout = 200) {
 
@@ -48,14 +94,19 @@ function gameStart(timeout = 200) {
 
             gameStart(5000);
         } else {
+	    gameReady = true;
             decreaseSafeZone();
-            draw();
+            draw(true);
         }
     }, timeout);
 }
 
-function setBackground() {
-    var num = Math.floor(Math.random() * 4);  //0 - 4
+function setBackgroundRandomDeprecated() {
+    // ****
+    // To use this, need to reinstate bullrush.css.orig as bullrush.css
+    
+    var num = Math.floor(Math.random() * 5);  //0 - 5 // **** Note: Math.random() choose from 0 to <1 (not <=1) so this will never select the last pos of "5"
+    
     if(num == 0) {
         document.body.className = "animated-shape";
     }
@@ -76,24 +127,156 @@ function setBackground() {
         document.body.className = "lines";
         
     }
+    else if(num == 5) {
+	document.body.className = "waves-monochrome";
+        
+    }    
 }
 
 function updatePlayerDisplayAtGameStart() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "100px Arial";
-    ctx.fillText('Players in game: ' + (players.length + taggers.length), canvas.width / 10, canvas.height / 2);
+    // console.log("canvas: " + canvas.width + " x " + canvas.height);
+
+    var num_all_players = players.length + taggers.length;
+
+    var info_message = "Players in game: " + num_all_players;
+    if (num_all_players > 1) {
+	info_message += "<br /><b>Game on!</b>";
+    }
+    else {
+	info_message += "<br /><i>More players needed to start game</i>";
+    }
+    
+    
+    $('#infobox').html(info_message);
+    
+    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //ctx.font = headingFontSize+"px Arial";
+    //ctx.fillText('Players in game: ' + (players.length + taggers.length), canvas.width / 10, canvas.height / 2);
 }
 
-function draw() {
+var goLeftArrows  = null;
+var goRightArrows = null;
+
+/* Adapted from: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array */
+
+function shuffle(array, startPos, endPos)
+{
+    //var currentIndex = array.length;
+    var currentIndex = endPos + 1;
+    
+    // While there remain elements to shuffle...
+    while (currentIndex > startPos) {
+
+	// Pick a remaining element...
+	//var randomIndex = Math.floor(Math.random() * currentIndex);
+	var randomIndex = startPos + Math.floor(Math.random() * (currentIndex-startPos));
+
+	currentIndex--;
+
+	// And swap it with the current element.
+	[array[currentIndex], array[randomIndex]] = [ array[randomIndex], array[currentIndex] ];
+    }
+
+  return array;
+}
+
+function generateRandomArrowPoints(arrowsXNum,xOrg,yOrg,xDim,yDim)
+{
+    var storedPoints = [];
+
+    var arrowsYGrid = Math.round(arrowsXNum/2.0);
+    
+    var yGridPos = [];
+    for (var i=0; i<arrowsXNum; i++) {
+	yGridPos[i] = i % arrowsYGrid;
+    }
+    shuffle(yGridPos,0,arrowsYGrid-1);
+    shuffle(yGridPos,arrowsYGrid,arrowsXNum-1);
+
+    arrowsYGrid -= 1; // produces more balanced y-spread
+
+    var xSpace = Math.round(xDim / arrowsXNum);
+    var ySpace = Math.round(yDim / arrowsYGrid);
+    
+    for (var i=0; i<arrowsXNum; i++) {
+	
+	var randomX = xOrg + (i*xSpace);
+	var randomY = yOrg + (yGridPos[i] * ySpace);
+
+	storedPoints.push({x: randomX, y: randomY});
+    }
+
+    return storedPoints;
+}
+
+function drawDirectionArrowHints(xOrg,yOrg,xDim,yDim)
+{
+    var paddingX    = 60;
+    var paddingY    = 260;
+ 
+    // Reduce selection area for arrows to ensure they fit
+    xOrg += paddingX;
+    yOrg += paddingY;
+    xDim -= (2*paddingX);
+    yDim -= (2*paddingY);
+
+    var storedArrows = null;
+    
+    if (activeSafeZone == 1) {
+	// getToSafeZone is on the left
+
+	if (goLeftArrows == null) {
+	    goLeftArrows = generateRandomArrowPoints(directionArrowsXNum,xOrg,yOrg,xDim,yDim);
+	}
+	storedArrows = goLeftArrows;
+    }
+    else {
+	// getToSafeZone is on the right
+
+	if (goRightArrows == null) {
+	    goRightArrows = generateRandomArrowPoints(directionArrowsXNum,xOrg,yOrg,xDim,yDim);
+	}
+	storedArrows = goRightArrows;
+    }
+    
+    
+    for (var i=0; i<directionArrowsXNum; i++) {
+
+	// skip middle part
+	if (i>directionArrowsXQuarter1End && i<directionArrowsXQuarter4Start) { continue; }
+	
+	var randomX = storedArrows[i].x;
+	var randomY = storedArrows[i].y;
+
+	if (activeSafeZone == 1) {
+	    // getToSafeZone is on the left	    
+	    drawArrow(ctx, randomX+directionArrowLength,randomY, randomX,randomY, directionArrowWidth, directionArrowCol);	
+	}
+	else {
+	    // getToSafeZone is on the right
+	    drawArrow(ctx, randomX,randomY, randomX+directionArrowLength,randomY, directionArrowWidth, directionArrowCol);	
+	}
+    }	
+}
+
+
+function draw(startAnimation) {
 
     //End game occurs here
     if (gameOver == true) {
+	/*
         ctx.fillStyle = "black";
-        ctx.font = "100px Arial";
+        //ctx.font = "100px Arial";
+	ctx.font = headingFontSize+"px Arial";
         ctx.fillText('GAME OVER - RELOADING', canvas.width / 10, canvas.height / 2);
+	*/
+	
+	$('#infobox').html("Game Over: Returning to main display ...");
+	
         setTimeout(() => { reset(); }, 1500);
         // Will need to add logic for keeping sockets conected???
-    } else {
+    }
+    else {
         //Clear screen
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -104,7 +287,9 @@ function draw() {
         ctx.lineWidth = 2;
         ctx.strokesStyle = "#FFFFFF";
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
+	
+	drawDirectionArrowHints(getToSafeZoneWidth,0,canvas.width-(2*getToSafeZoneWidth),canvas.height);
+	
         //Players
         drawTeam(players);
         drawTeam(taggers);
@@ -122,25 +307,94 @@ function draw() {
             } else {
                 activeSafeZone--;
             }
-            tempSafeZone = safeZone;
+            shrinkgingZoneWidth = getToSafeZoneWidth;
             playersInSafeZone = 0;
             decreaseSafeZone();
         }
 
-        // Will need to implement a delay?
-        requestAnimationFrame(draw);
+	if (startAnimation) {
+            // Will need to implement a delay?
+            requestAnimationFrame(draw);
+	}
     }
+}
+
+function drawFinishLine(xMid,yDim,numBars,barWidth)
+{
+    ctx.beginPath();
+
+    //var barWidth  = 5;
+    var barHeight = (yDim / numBars);
+
+    var x = xMid - (barWidth/2.0);    
+    var y = 0;
+    
+    for (var i=0; i<numBars; i++) {
+	var barBgCol = ((i%2) == 0) ? "#000000" : "#ffffff";
+
+        ctx.fillStyle = barBgCol;
+        ctx.fillRect(x,y,barWidth,barHeight)
+	
+	y += barHeight;	
+    }
+    
+    ctx.closePath();    
+}
+
+/* Based on: https://codepen.io/chanthy/pen/WxQoVG */
+
+function drawArrow(ctx, fromx, fromy, tox, toy, directionArrowWidth, color){
+    //variables to be used when creating the arrow
+    var headlen = 10;
+    var angle = Math.atan2(toy-fromy,tox-fromx);
+ 
+    ctx.save();
+    ctx.strokeStyle = color;
+ 
+    //starting path of the arrow from the start square to the end square
+    //and drawing the stroke
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.lineWidth = directionArrowWidth;
+    ctx.stroke();
+ 
+    //starting a new path from the head of the arrow to one of the sides of
+    //the point
+    ctx.beginPath();
+    ctx.moveTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
+               toy-headlen*Math.sin(angle-Math.PI/7));
+ 
+    //path from the side point of the arrow, to the other side point
+    ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),
+               toy-headlen*Math.sin(angle+Math.PI/7));
+ 
+    //path from the side point back to the tip of the arrow, and then
+    //again to the opposite side point
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
+               toy-headlen*Math.sin(angle-Math.PI/7));
+ 
+    //draws the paths created above
+    ctx.stroke();
+    ctx.restore();
 }
 
 function drawSafeZone() {
     // Draw left zone
+    var transitionX = null;
+    
     ctx.beginPath();
     if (activeSafeZone == 1) {
-        ctx.rect(0, 0, safeZone, canvas.height)
-        ctx.fillStyle = "#98FF98"; //Greenish colour
-    } else {
-        ctx.rect(0, 0, tempSafeZone, canvas.height)
-        ctx.fillStyle = "#EBECF0"; //Grayish colour
+	transitionX = getToSafeZoneWidth;
+	
+        ctx.rect(0, 0, getToSafeZoneWidth, canvas.height)
+        ctx.fillStyle = getToSafeZoneBgCol;
+    }
+    else {
+        ctx.rect(0, 0, shrinkgingZoneWidth, canvas.height)
+        ctx.fillStyle = shrinkingZoneBgCol;
     }
     ctx.fill();
     ctx.closePath();
@@ -149,14 +403,20 @@ function drawSafeZone() {
     //Draw right zone
     ctx.beginPath();
     if (activeSafeZone == 2) {
-        ctx.rect(canvas.width - safeZone, 0, safeZone, canvas.height)
-        ctx.fillStyle = "#98FF98"; //Greenish colour
-    } else {
-        ctx.rect(canvas.width - tempSafeZone, 0, tempSafeZone, canvas.height)
-        ctx.fillStyle = "#EBECF0"; //Grayish colour
+	transitionX = canvas.width - getToSafeZoneWidth;
+
+        ctx.rect(transitionX, 0, getToSafeZoneWidth, canvas.height)
+        ctx.fillStyle = getToSafeZoneBgCol;
+
+    }
+    else {
+        ctx.rect(canvas.width - shrinkgingZoneWidth, 0, shrinkgingZoneWidth, canvas.height)
+        ctx.fillStyle = shrinkingZoneBgCol;
     }
     ctx.fill();
     ctx.closePath();
+
+    drawFinishLine(transitionX,canvas.height,numFinishLineBars, finishLineBarWidth);
 }
 
 // Have to add the socket here
@@ -166,28 +426,26 @@ function playerAdd(newSocket) {
     if (p == null){
         if (taggers.length == 0 || players.length % 8 == 0 && players.length >= 1) {
             console.log("Added tagger: " + newSocket);
-            taggers.push(new player(canvas.width / 4 + random(0, canvas.width / 2), random(30, canvas.height - 30), 1, socketID, canvas, safeZone, activeSafeZone));
+            taggers.push(new player(canvas.width / 4 + random(0, canvas.width / 2), random(30, canvas.height - 30), 1, socketID, canvas, getToSafeZoneWidth, activeSafeZone));
     
         } else {
             console.log("Added player: " + newSocket);
-            if (activeSafeZone == 2 && tempSafeZone <= 25) {
-                var newX = random(canvas.width - tempSafeZone + 20, canvas.width - 20);
+            if (activeSafeZone == 2 && shrinkgingZoneWidth <= 25) {
+                var newX = random(canvas.width - shrinkgingZoneWidth + 20, canvas.width - 20);
                 var newSafeZone = 2;
             } else {
-                var newX = random(20, tempSafeZone - 20);
+                var newX = random(20, shrinkgingZoneWidth - 20);
                 var newSafeZone = 1;
             }
             if (newSafeZone == activeSafeZone){
                 playersInSafeZone++;
             }
-            players.push(new player(newX, random(20, canvas.height - 20), 0, socketID, canvas, safeZone, newSafeZone)); // 20 comes from max player radius
+            players.push(new player(newX, random(20, canvas.height - 20), 0, socketID, canvas, getToSafeZoneWidth, newSafeZone)); // 20 comes from max player radius
         }
     } else {
         console.log("New client already existed. Resent colour");
-        emitColour(socketID, p.colour);
+        emitColour(socketID, p.colour, p.type);
     }
-
-    
 
     // Any other logic for adding a player
 }
@@ -200,7 +458,9 @@ function playerRemove(team, player) {
     }
 
     if (players.length == 0 || taggers.length == 0) {
-        gameOver = true;
+	if (gameReady) {
+            gameOver = true;
+	}
     }
 
     // Other remove logic? player checking
@@ -211,14 +471,23 @@ function playerMove() {
         if (players[i].quit == true) {
             playerRemove("p", players[i]);
         } else {
-            playersInSafeZone += players[i].move(canvas, activeSafeZone, safeZone, tempSafeZone);
+            playersInSafeZone += players[i].move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth);
             for (var j = 0; j < taggers.length; j++) {
-                //Tagger intersect colission
+                //Tagger intersect collision
                 var difx = players[i].x - taggers[j].x;
                 var dify = players[i].y - taggers[j].y;
-                var distance = Math.sqrt(difx * difx + dify * dify);
+                var distance = Math.sqrt((difx*difx) + (dify*dify));
 
                 if (distance < players[i].radius + taggers[j].radius) {
+		    // Collision! Player has been hit (i.e., tagged)
+		    console.log("**** PlayerTaggerContact");
+		    
+		    var player = players[i];
+		    var tagger = taggers[j];
+
+		    emitPlayerHasBeenTagged(player.socket);
+		    emitTaggerHasCaughtPlayer(tagger.socket);
+		    
                     tagged.push(players[i])
                 }
             }
@@ -231,7 +500,7 @@ function taggerMove() {
         if (taggers[i].quit == true) {
             playerRemove("t", taggers[i]);
         } else {
-            taggers[i].move(canvas, activeSafeZone, safeZone, tempSafeZone);
+            taggers[i].move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth);
         }
     }
 }
@@ -258,11 +527,13 @@ function updateTaggers() {
 
     if (players.length == 0){
         //tagged[tagged.length - 1].setWinner();
-        gameOver = true;
+	if (gameReady) {
+            gameOver = true;
+	}
     }
 
     for (var i = 0; i < tagged.length; i++) {
-        tagged[i].typeChange(1, canvas, safeZone);
+        tagged[i].typeChange(1, canvas, getToSafeZoneWidth);
 
         players = arrayRemove(players, tagged[i]);
         taggers.push(tagged[i]);
@@ -295,7 +566,7 @@ function include(file) {
 }
 
 function socketUpdate(e, ...args) {
-    // Itterate through every player until the socket number matches
+    // Iterate through every player until the socket number matches
     if (e == 'clientConnected'){
         var id = args[0];
         console.log("New client: " + id);
@@ -306,7 +577,6 @@ function socketUpdate(e, ...args) {
         if (!loopTeamSocketUpdate(num, e, players))
             loopTeamSocketUpdate(num, e, taggers);
     }
-        
 }
 
 function loopTeamSocketUpdate(num, e, team) {
@@ -320,8 +590,8 @@ function loopTeamSocketUpdate(num, e, team) {
 function decreaseSafeZone() {
     setTimeout(() => {
         console.log("Decreaseing Safe Zone");
-        tempSafeZone = tempSafeZone - 0.3;
-        if (tempSafeZone > 0) {
+        shrinkgingZoneWidth = shrinkgingZoneWidth - 0.3;
+        if (shrinkgingZoneWidth > 0) {
             decreaseSafeZone();
         }
     }, 100);
@@ -343,12 +613,12 @@ class player {
     currSafeZone = 0; // 1 - left, 2 - right
     quit = false;
 
-    constructor(newX, newY, newType, newSocket, canvas, safeZone, newSafeZone) {
+    constructor(newX, newY, newType, newSocket, canvas, getToSafeZoneWidth, newSafeZone) {
         this.x = newX;
         this.y = newY;
         this.socket = newSocket;
         this.currSafeZone = newSafeZone;
-        this.typeChange(newType, canvas, safeZone);
+        this.typeChange(newType, canvas, getToSafeZoneWidth);
     }
 
     socketEventHandler(num, e) {
@@ -404,18 +674,23 @@ class player {
 
     draw(ctx) {
         // Circle for nontaggers
-        ctx.lineWidth = 1;
-        ctx.strokesStyle = "#FFFFFF";
+        //ctx.lineWidth = 1;
+        //ctx.strokesStyle = "#FFFFFF";
         if (this.type == 0) {
+	    drawPlayer(ctx,this.x,this.y,this.radius,this.colour);
+	    /*
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = this.colour;
             ctx.stroke();
             ctx.fill();
             ctx.closePath();
+	    */
         }
         //Draw a spike ball for taggers
         else if (this.type == 1) {
+	    drawTagger(ctx,this.x,this.y,this.radius,this.colour);
+	    /*
             var spikes = 16;
             var rot = Math.PI / 2 * 3;
             var step = Math.PI / spikes;
@@ -443,23 +718,24 @@ class player {
             ctx.stroke();
             ctx.fill();
             ctx.closePath();
+	    */
         }
 
     }
 
-    move(canvas, activeSafeZone, safeZone, tempSafeZone) {
+    move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth) {
         /*Basic colission*/
         if (this.type == 0) { //Normal player
             if (this.moveLeft && this.x - this.radius - this.dx > 0) {
                 this.x -= this.dx;
-                if (activeSafeZone == 1 && this.currSafeZone != 1 && this.x - this.radius < safeZone) {
+                if (activeSafeZone == 1 && this.currSafeZone != 1 && this.x - this.radius < getToSafeZoneWidth) {
                     this.currSafeZone = 1;
                     return 1;
                 }
             }
             if (this.moveRight && this.x + this.radius < canvas.width - this.dx) {
                 this.x += this.dx;
-                if (activeSafeZone == 2 && this.currSafeZone != 2 && this.x + this.radius > canvas.width - safeZone) {
+                if (activeSafeZone == 2 && this.currSafeZone != 2 && this.x + this.radius > canvas.width - getToSafeZoneWidth) {
                     this.currSafeZone = 2;
                     return 1;
                 }
@@ -472,10 +748,10 @@ class player {
             }
         } else { //Tagger
             if (activeSafeZone == 1) {
-                if (this.moveLeft && this.x - this.radius - this.dx > 0 + safeZone) {
+                if (this.moveLeft && this.x - this.radius - this.dx > 0 + getToSafeZoneWidth) {
                     this.x -= this.dx;
                 }
-                if (this.moveRight && this.x + this.radius + tempSafeZone < canvas.width - this.dx) {
+                if (this.moveRight && this.x + this.radius + shrinkgingZoneWidth < canvas.width - this.dx) {
                     this.x += this.dx;
                 }
                 if (this.moveUp && this.y - this.radius - this.dx > 0) {
@@ -485,10 +761,10 @@ class player {
                     this.y += this.dy;
                 }
             } else {
-                if (this.moveLeft && this.x - this.radius - this.dx > 0 + tempSafeZone) {
+                if (this.moveLeft && this.x - this.radius - this.dx > 0 + shrinkgingZoneWidth) {
                     this.x -= this.dx;
                 }
-                if (this.moveRight && this.x + this.radius + safeZone < canvas.width - this.dx) {
+                if (this.moveRight && this.x + this.radius + getToSafeZoneWidth < canvas.width - this.dx) {
                     this.x += this.dx;
                 }
                 if (this.moveUp && this.y - this.radius - this.dx > 0) {
@@ -507,7 +783,7 @@ class player {
         //         if (this.moveLeft && this.x - this.radius - this.dx > 0) {
         //             this.x -= this.dx;
         //         }
-        //         if (this.moveRight && this.x + this.radius < canvas.width - this.dx && (this.x + this.radius + this.dx < safeZone)) {
+        //         if (this.moveRight && this.x + this.radius < canvas.width - this.dx && (this.x + this.radius + this.dx < getToSafeZoneWidth)) {
         //             this.x += this.dx;
         //         }
         //         if (this.moveUp && this.y - this.radius - this.dx > 0) {
@@ -520,7 +796,7 @@ class player {
         //         if (this.moveLeft && this.x - this.radius - this.dx > 0) {
         //             if (this.currSafeZone != activeSafeZone)
         //                 this.x -= this.dx;
-        //             else if (this.x - this.radius - this.dx > canvas.width - safeZone)
+        //             else if (this.x - this.radius - this.dx > canvas.width - getToSafeZoneWidth)
         //                 this.x -= this.dx;
         //         }
         //         if (this.moveRight && this.x + this.radius < canvas.width - this.dx) {
@@ -537,10 +813,10 @@ class player {
 
         // } else {
         //     if (activeSafeZone == 1) {
-        //         if (this.moveLeft && this.x - this.radius - this.dx > 0 + safeZone) {
+        //         if (this.moveLeft && this.x - this.radius - this.dx > 0 + getToSafeZoneWidth) {
         //             this.x -= this.dx;
         //         }
-        //         if (this.moveRight && this.x + this.radius + tempSafeZone < canvas.width - this.dx) {
+        //         if (this.moveRight && this.x + this.radius + shrinkgingZoneWidth < canvas.width - this.dx) {
         //             this.x += this.dx;
         //         }
         //         if (this.moveUp && this.y - this.radius - this.dx > 0) {
@@ -550,10 +826,10 @@ class player {
         //             this.y += this.dy;
         //         }
         //     } else {
-        //         if (this.moveLeft && this.x - this.radius - this.dx > 0 + tempSafeZone) {
+        //         if (this.moveLeft && this.x - this.radius - this.dx > 0 + shrinkgingZoneWidth) {
         //             this.x -= this.dx;
         //         }
-        //         if (this.moveRight && this.x + this.radius + safeZone < canvas.width - this.dx) {
+        //         if (this.moveRight && this.x + this.radius + getToSafeZoneWidth < canvas.width - this.dx) {
         //             this.x += this.dx;
         //         }
         //         if (this.moveUp && this.y - this.radius - this.dx > 0) {
@@ -568,7 +844,7 @@ class player {
 
     }
 
-    typeChange(newType, canvas, safeZone) {
+    typeChange(newType, canvas, getToSafeZoneWidth) {
         // Set any and all type properties in here
         this.type = newType;
         this.moveLeft = false;
@@ -590,10 +866,10 @@ class player {
                 this.dy = random(2, 5);
                 this.radius = random(13, 20);
 
-                if (this.x + this.radius > canvas.width - safeZone) {
-                    this.x = canvas.width - safeZone - this.radius;
-                } else if (this.x - this.radius < safeZone) {
-                    this.x = safeZone + this.radius;
+                if (this.x + this.radius > canvas.width - getToSafeZoneWidth) {
+                    this.x = canvas.width - getToSafeZoneWidth - this.radius;
+                } else if (this.x - this.radius < getToSafeZoneWidth) {
+                    this.x = getToSafeZoneWidth + this.radius;
                 }
 
                 break;
@@ -603,7 +879,7 @@ class player {
         }
 
         // Emit colour
-        emitColour(this.socket, this.colour);
+        emitColour(this.socket, this.colour, this.type);
 
     }
 
