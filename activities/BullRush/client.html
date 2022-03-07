@@ -32,8 +32,19 @@
           margin: auto; 
           height: 120px;
           width:  120px;
-          border-radius: 50%;
+          /* border-radius: 50%; */
         }
+
+        .dotcanvas {
+          position: absolute; 
+          left:   0px; 
+          top:    300px; 
+          right:  0px; 
+          bottom: 0px;
+          margin: auto; 
+          height: 120px;
+          width:  120px;
+        }	
     </style>
 
     
@@ -43,17 +54,10 @@
       crossorigin="anonymoous">
     </script>
 
+    <script src="/scripts/bullrush-utils.js" type='text/javascript'></script>
+    
     <script src="socketCreation.js"></script>
 
-    <!--
-    <script> 
-      $(function(){
-	  $("#header").load("header.html"); 
-	  $("#footer").load("footer.html"); 
-      });
-    </script>
-    -->
-    
     <script>
       // Generic socket setup      
       setupConnection("client");  
@@ -66,13 +70,36 @@
 
       // Page specific functions ...
       function socketLoaded(){
-        socket.emit('clientConnected')
+          socket.emit('clientConnected');
+	  
+          socket.on('playerColour', (playerCol, playerType) => {
+              console.log("For player type '" + playerType + "' Setting colour to: " + playerCol);
+	      document.getElementById("stick1-loading").style.display = "none";
+              //document.getElementsByClassName("dot")[0].style.backgroundColor = playerCol;
+	      
+	      var canvas = document.getElementById('stick1-canvas');
+	      var ctx    = canvas.getContext('2d');
+	      
+	      canvas.width  = canvas.offsetWidth;
+	      canvas.height = canvas.offsetHeight;
+	      
+	      var xOrg   = canvas.width/2;
+	      var yOrg   = canvas.height/2;
+	      var radius = (Math.min(canvas.width,canvas.height)/2) -2; // some wiggle room to avoid clipping
 
-        socket.on('playerColour', (colour) =>{
-            console.log("Setting colour to: " + colour);
-	    document.getElementById("stick1-loading").style.display = "none";
-            document.getElementsByClassName("dot")[0].style.backgroundColor = colour;
-        });
+	      if (playerType == 0) {
+		  drawPlayer(ctx,xOrg,yOrg,radius,playerCol);
+	      }
+	      else {
+		  drawTagger(ctx,xOrg,yOrg,radius,playerCol);
+	      }
+	      
+          });
+	  
+	  socket.on('playerTaggerContact', () => {
+	      console.log("Player-Tagger contact!");
+	      navigator.vibrate(1000); // millisecs
+	  });	  
       }
       
     $(function(){      
@@ -308,9 +335,7 @@
 
 	<div class="heading">
 	  <h1>Control details</h1>
-	  <h2>
-	    Treat the circle at the centre of your screen like a joystick
-	  </h2>
+	  <h2>Treat the circle at the centre of your screen like a joystick</h2>
 	  <h2>
 	    Touch (or click and hold) on the circle, <br />and:
 	  </h2>
@@ -318,27 +343,22 @@
 	    <li><i>Drag up</i> to make your Bullrush character (shape) run up</li>
 	    <li><i>Drag left</i> to make your Bullrush run to the left</li>
 	    <li><i>Drag diagonally up and to the left</i> to make your Bullrush run diagonally</li>
-	    <li>Press the <div style="display: inline-block; transform: scale(0.5);"><img class="home-img" src="back.svg" style="padding: 0"></div> button to exit the slideshow, and return to the App Chooser</li>
+	    <li>Press the <div style="display: inline-block; transform: scale(0.5);"><img class="home-img" src="back.svg" style="padding: 0"></div> button to exit Bullrush, and return to the App Chooser</li>
 	  </ul>
 	</div>
-
 	
 	<div class="controller-item" style="border: none;">
-	  <div id="stick1" class="dot"><span id="stick1-loading" class="text">Loading Joystick Control ...</span></div>
+	  <div class="dot">
+	    <span id="stick1-loading" class="text">Loading Joystick Control ...</span>
+	  </div>
+	  <div id="stick1" class="dotcanvas">
+	    <canvas id="stick1-canvas" style="width: 100%; height: 100%;">
+	      Your browser does not support the HTML5 canvas tag.
+	    </canvas>
+	  </div>
 	</div>
       </div>
     </div>
-<!--    
-    <div class="container">
-      <div id="header"></div>
-
-    
-
-
-
-    <div id="footer"></div>
-    </div>
-    -->
     
   </body>
 </html>
