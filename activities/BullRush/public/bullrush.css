@@ -2,8 +2,10 @@
 html, body {
     width:   100vw;
     height:  100vh;
-    padding: 0;
+
     margin:  0;	      
+    border:  none;
+    padding: 0;
 }
 
 
@@ -12,10 +14,12 @@ html, body {
     width:   100%;
     height:  100%;
 
+    /* trigger centering of container is parent itself not full width and height */
+    margin-left:   auto;
+    margin-right:  auto;
+    border:        none;
     padding-left:  0;
     padding-right: 0;
-    margin-left:  auto;
-    margin-right: auto;
 }
 
 .canvas-bg-color {
@@ -27,11 +31,54 @@ html, body {
 }
 
 .canvas-bg-waves-monochrome {
+    /* display: block needed to keep firefox happy, see:
+         https://stackoverflow.com/questions/58625339/firefox-incorrectly-showing-vertical-scrollbar-on-100vh-chrome-and-safari-does
+     */
+    display: block;
+
+    padding: 0;
+    margin:  0;
+    border:  none;
+    
     width:   100%;
     height:  100%;
    
     background-color:#faaa33c0;
     background-image: url("waves-monochrome.svg");
 }
-	      
+
+div.barcode-center {
+    display: block;
+    position:absolute;
+
+    height: 250px;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+/* top-right */
+
+div.infobox {
+    font-family: monospace;
+    font-size:   150%;
+    
+    display:    block;
+    /* visibility: hidden; */
+    
+    position: absolute;
+    top:      0;
+    right:    100px;
+
+    width: 240px;
+    /* height: 30px; */
+
+    margin: 12px;
+    border: black solid 1px;
+    padding: 6px;
+
+    background-color: #ffffff40;
+    
+    
+}
+
 
