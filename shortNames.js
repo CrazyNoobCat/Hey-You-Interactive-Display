@@ -7,6 +7,14 @@ class ShortNames
 
 
     constructor (fileName) {
+
+	// Based on the first (keep it simple) approach given at
+	//   https://geshan.com.np/blog/2021/10/nodejs-read-file-line-by-line/
+	
+	const data = fs.readFileSync(fileName, 'utf8');
+	this.#freeNames = data.split(/\r?\n/);
+		
+	/*
         fs.readFile(fileName, 'utf8', (err, data) => {
             if (err){
                 console.error(err);
@@ -23,6 +31,8 @@ class ShortNames
     
             this.#freeNames = data.split(lineEnding);              
         });
+	*/
+	
     }
 
     // Get the nextFree name. Will return undefined if there are no more free names
