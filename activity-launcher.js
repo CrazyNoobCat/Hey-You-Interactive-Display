@@ -685,7 +685,7 @@ io.on('connection', (socket, host) => {
                     if (display != undefined && display.isRoomHost()) {
                         console.log("Re-emitted display event: " + eventToSend + "\t Args: "+ eventArgs + "\t\tRoom/Socket: " + room);
                         
-                        socket.to(room).emit(eventToSend,eventArgs);
+                        socket.to(room).emit(eventToSend,...eventArgs);
                     } else {
 
                         // New logic has to be written to retrieve who the request was suppoesdly made
