@@ -72,7 +72,7 @@
       function socketLoaded(){
           socket.emit('clientConnected');
 	  
-          socket.on('playerColour', (playerCol, playerType) => {
+          socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
               console.log("For player type '" + playerType + "' Setting colour to: " + playerCol);
 	      document.getElementById("stick1-loading").style.display = "none";
               //document.getElementsByClassName("dot")[0].style.backgroundColor = playerCol;
@@ -88,10 +88,10 @@
 	      var radius = (Math.min(canvas.width,canvas.height)/2) -2; // some wiggle room to avoid clipping
 
 	      if (playerType == 0) {
-		  drawPlayer(ctx,xOrg,yOrg,radius,playerCol);
+		  drawRunner(ctx,xOrg,yOrg,radius,playerCol,playerLabel);
 	      }
 	      else {
-		  drawTagger(ctx,xOrg,yOrg,radius,playerCol);
+		  drawTagger(ctx,xOrg,yOrg,radius,playerCol,playerLabel);
 	      }
 	      
           });

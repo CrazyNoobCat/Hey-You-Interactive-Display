@@ -1,4 +1,4 @@
-function  drawPlayer(ctx,xOrg,yOrg,radius,fillStyle)
+function  drawRunner(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
 {
     // Circle for nontaggers
     ctx.lineWidth = 1;
@@ -10,9 +10,15 @@ function  drawPlayer(ctx,xOrg,yOrg,radius,fillStyle)
     ctx.stroke();
     ctx.fill();
     ctx.closePath();
+
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font         = radius/2+"px Arial";
+    ctx.fillStyle    = "#ffffff";
+    ctx.fillText(textLabel, xOrg, yOrg);
 }
 
-function  drawTagger(ctx,xOrg,yOrg,radius,fillStyle)
+function  drawTagger(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
 {
     //Draw a spike ball for taggers
     ctx.lineWidth = 1;
@@ -46,11 +52,18 @@ function  drawTagger(ctx,xOrg,yOrg,radius,fillStyle)
 	ctx.lineTo(x, y)
 	rot += step
     }
+    
     ctx.lineTo(xOrg, yOrg - outerRadius);
     ctx.closePath();
     ctx.fillStyle = fillStyle;
     ctx.stroke();
     ctx.fill();
     ctx.closePath();
+
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font         = radius/2+"px Arial";
+    ctx.fillStyle    = "#ffffff";
+    ctx.fillText(textLabel, xOrg, yOrg);
 }
 

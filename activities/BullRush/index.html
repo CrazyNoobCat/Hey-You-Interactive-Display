@@ -31,17 +31,17 @@
           $('#barcode').html($img)             
       }            
       
-      function emitColour(id, playerColor, playerType){
-          console.log("Emited colour " + playerColor + " to " + id);
-          socket.emit('displayEmit', id, 'playerColour', playerColor, playerType);
+      function emitPlayerMarker(id, playerColor, playerType, playerLabel){
+          console.log("Emited " + playerLabel + ", colour " + playerColor + " to " + id);
+          socket.emit('displayEmit', id, 'playerMarker', playerColor, playerType, playerLabel);
       }
       
-      function emitPlayerHasBeenTagged(id){
+      function emitRunnerHasBeenTagged(id){
           console.log("Player has been tagged. Player id: " + id);
           socket.emit('displayEmit', id, 'playerTaggerContact');
       }
 
-      function emitTaggerHasCaughtPlayer(id){
+      function emitTaggerHasCaughtRunner(id){
 	  console.log("Tagger has caught a player. Tagger id: " + id);
           socket.emit('displayEmit', id, 'playerTaggerContact');	  
       }

@@ -1,5 +1,5 @@
 
-var players = [];
+var runners = [];
 var taggers = [];
 var tagged = [];
 
@@ -7,7 +7,7 @@ var getToSafeZoneWidth   = 80;                 // Stays constant
 var shrinkgingZoneWidth  = getToSafeZoneWidth; // Reduces over time
 
 var getToSafeZoneBgCol =  "#faaa33"; // yellow-ish
-var shrinkingZoneBgCol =  "#faaa33"; // yellow-ish (after some testing, using same color as getToSafeZone worked out for the best)
+var shrinkingZoneBgCol =  "#faaa33"; // yellow-ish (after some testing, using same colour as getToSafeZone worked out for the best)
 
 // HSV 57, 20, 98 (a more yellow, paler version of #faaa33)
 //var directionArrowCol    = "rgb(250,247,200)";
@@ -27,7 +27,7 @@ var numFinishLineBars  = 50;
 var finishLineBarWidth = 6;
 
 var activeSafeZone    = 2;        // 0 = null, i.e. game over. 1 = left, 2 = right
-var playersInSafeZone = 0;
+var runnersInSafeZone = 0;
 
 var gameOver  = false; // Set to true when game needs to be restarted
 var gameReady = false;
@@ -35,9 +35,9 @@ var gameReady = false;
 var displayResetThreshold = 10; // This is how many retry attemtps it takes before emiting a displayReset
 var retryCount            = 0;
 
+const zeroPad5    = (hexnum)   => "00000".substr(hexnum.length) + hexnum;
 const random      = (min, max) => Math.floor(Math.random() * (max - min)) + min;
-const randomColor = ()         => Math.floor(Math.random() * 1048576).toString(16); //Only prints out max of 5 bits of the 6 colours
-
+const randomCol5  = ()         => zeroPad5(Math.floor(Math.random() * 0x100000).toString(16)); //Only prints out max of 5 bits of the 6 colours
 
 var canvas = null;
 var ctx    = null;
@@ -66,8 +66,8 @@ $(document).ready(function() {
     // Manual start --> call function draw();
     // Automatic start: when there are at least 2 players
 
-    draw(false); // draw board, but don't start animation     
-    gameStart(); // triggers draw(true) when enough players have join
+    drawBoard(false); // draw board, but don't start animation     
+    gameStart(); // triggers drawBoard(true) when enough players have join
 
 });
 
@@ -83,7 +83,7 @@ function gameStart(timeout = 200) {
     }
 
     setTimeout(() => {
-        if (players.length <= 0) {//minimum players
+        if (runners.length <= 0) {//minimum players
             updatePlayerDisplayAtGameStart();
             retryCount++;
             console.log("Waiting for enough players to join. Will retry in 5 seconds");
@@ -96,7 +96,7 @@ function gameStart(timeout = 200) {
         } else {
 	    gameReady = true;
             decreaseSafeZone();
-            draw(true);
+            drawBoard(true);
         }
     }, timeout);
 }
@@ -136,7 +136,7 @@ function setBackgroundRandomDeprecated() {
 function updatePlayerDisplayAtGameStart() {
     // console.log("canvas: " + canvas.width + " x " + canvas.height);
 
-    var num_all_players = players.length + taggers.length;
+    var num_all_players = runners.length + taggers.length;
 
     var info_message = "Players in game: " + num_all_players;
     if (num_all_players > 1) {
@@ -147,11 +147,7 @@ function updatePlayerDisplayAtGameStart() {
     }
     
     
-    $('#infobox').html(info_message);
-    
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //ctx.font = headingFontSize+"px Arial";
-    //ctx.fillText('Players in game: ' + (players.length + taggers.length), canvas.width / 10, canvas.height / 2);
+    $('#infobox').html(info_message);    
 }
 
 var goLeftArrows  = null;
@@ -260,7 +256,7 @@ function drawDirectionArrowHints(xOrg,yOrg,xDim,yDim)
 }
 
 
-function draw(startAnimation) {
+function drawBoard(startAnimation) {
 
     //End game occurs here
     if (gameOver == true) {
@@ -291,30 +287,30 @@ function draw(startAnimation) {
 	drawDirectionArrowHints(getToSafeZoneWidth,0,canvas.width-(2*getToSafeZoneWidth),canvas.height);
 	
         //Players
-        drawTeam(players);
+        drawTeam(runners);
         drawTeam(taggers);
 
         //Move players if move enabled
-        playerMove();
+        runnerMove();
         taggerMove();
 
         //Update taggers
         updateTaggers();
 
-        if (playersInSafeZone == players.length && players.length != 0) {
+        if (runnersInSafeZone == runners.length && runners.length != 0) {
             if (activeSafeZone == 1) {
                 activeSafeZone++;
             } else {
                 activeSafeZone--;
             }
             shrinkgingZoneWidth = getToSafeZoneWidth;
-            playersInSafeZone = 0;
+            runnersInSafeZone = 0;
             decreaseSafeZone();
         }
 
 	if (startAnimation) {
             // Will need to implement a delay?
-            requestAnimationFrame(draw);
+            requestAnimationFrame(drawBoard);
 	}
     }
 }
@@ -343,13 +339,13 @@ function drawFinishLine(xMid,yDim,numBars,barWidth)
 
 /* Based on: https://codepen.io/chanthy/pen/WxQoVG */
 
-function drawArrow(ctx, fromx, fromy, tox, toy, directionArrowWidth, color){
+function drawArrow(ctx, fromx, fromy, tox, toy, directionArrowWidth, col){
     //variables to be used when creating the arrow
     var headlen = 10;
     var angle = Math.atan2(toy-fromy,tox-fromx);
  
     ctx.save();
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = col;
  
     //starting path of the arrow from the start square to the end square
     //and drawing the stroke
@@ -423,13 +419,18 @@ function drawSafeZone() {
 function playerAdd(newSocket) {
     var socketID = String(newSocket);
     p = playerExist(socketID);
-    if (p == null){
-        if (taggers.length == 0 || players.length % 8 == 0 && players.length >= 1) {
+    if (p == null) {
+        if (taggers.length == 0 || runners.length % 8 == 0 && runners.length >= 1) {
             console.log("Added tagger: " + newSocket);
-            taggers.push(new player(canvas.width / 4 + random(0, canvas.width / 2), random(30, canvas.height - 30), 1, socketID, canvas, getToSafeZoneWidth, activeSafeZone));
-    
-        } else {
-            console.log("Added player: " + newSocket);
+	    var newX = canvas.width / 4 + random(0, canvas.width / 2);
+	    var newY = random(30, canvas.height - 30);
+	    var newPlayerLabel = "T" + (runners.length+1);
+            var newPlayer = new player(newX,newY, 1, newPlayerLabel, socketID, canvas, getToSafeZoneWidth, activeSafeZone);
+	    
+            taggers.push(newPlayer);    
+        }
+	else {
+            console.log("Added runner: " + newSocket);
             if (activeSafeZone == 2 && shrinkgingZoneWidth <= 25) {
                 var newX = random(canvas.width - shrinkgingZoneWidth + 20, canvas.width - 20);
                 var newSafeZone = 2;
@@ -438,13 +439,18 @@ function playerAdd(newSocket) {
                 var newSafeZone = 1;
             }
             if (newSafeZone == activeSafeZone){
-                playersInSafeZone++;
+                runnersInSafeZone++;
             }
-            players.push(new player(newX, random(20, canvas.height - 20), 0, socketID, canvas, getToSafeZoneWidth, newSafeZone)); // 20 comes from max player radius
+	    var newY = random(20, canvas.height - 20); // 20 comes from max player radius
+	    var newPlayerLabel = "R" + (runners.length+1);
+            var newPlayer = new player(newX, newY, 0, newPlayerLabel, socketID, canvas, getToSafeZoneWidth, newSafeZone); 
+	    
+            runners.push(newPlayer);
         }
-    } else {
+    }
+    else {
         console.log("New client already existed. Resent colour");
-        emitColour(socketID, p.colour, p.type);
+        emitPlayerMarker(socketID, p.colour, p.type, p.playerLabel);
     }
 
     // Any other logic for adding a player
@@ -452,12 +458,12 @@ function playerAdd(newSocket) {
 
 function playerRemove(team, player) {
     if (team == "p"){
-        players = arrayRemove(players, player);
+        runners = arrayRemove(runners, player);
     } else {
         taggers = arrayRemove(taggers, player);
     }
 
-    if (players.length == 0 || taggers.length == 0) {
+    if (runners.length == 0 || taggers.length == 0) {
 	if (gameReady) {
             gameOver = true;
 	}
@@ -466,29 +472,29 @@ function playerRemove(team, player) {
     // Other remove logic? player checking
 }
 
-function playerMove() {
-    for (var i = 0; i < players.length; i++) {
-        if (players[i].quit == true) {
-            playerRemove("p", players[i]);
+function runnerMove() {
+    for (var i = 0; i < runners.length; i++) {
+        if (runners[i].quit == true) {
+            playerRemove("p", runners[i]);
         } else {
-            playersInSafeZone += players[i].move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth);
+            runnersInSafeZone += runners[i].move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth);
             for (var j = 0; j < taggers.length; j++) {
                 //Tagger intersect collision
-                var difx = players[i].x - taggers[j].x;
-                var dify = players[i].y - taggers[j].y;
+                var difx = runners[i].x - taggers[j].x;
+                var dify = runners[i].y - taggers[j].y;
                 var distance = Math.sqrt((difx*difx) + (dify*dify));
 
-                if (distance < players[i].radius + taggers[j].radius) {
-		    // Collision! Player has been hit (i.e., tagged)
+                if (distance < runners[i].radius + taggers[j].radius) {
+		    // Collision! Runner has been hit (i.e., tagged)
 		    console.log("**** PlayerTaggerContact");
 		    
-		    var player = players[i];
+		    var runner = runners[i];
 		    var tagger = taggers[j];
 
-		    emitPlayerHasBeenTagged(player.socket);
-		    emitTaggerHasCaughtPlayer(tagger.socket);
+		    emitRunnerHasBeenTagged(runner.socket);
+		    emitTaggerHasCaughtRunner(tagger.socket);
 		    
-                    tagged.push(players[i])
+                    tagged.push(runners[i])
                 }
             }
         }
@@ -506,8 +512,8 @@ function taggerMove() {
 }
 
 function playerExist(socketID){
-    for (var i = 0; i < players.length; i++) {
-        const p = players[i];
+    for (var i = 0; i < runners.length; i++) {
+        const p = runners[i];
         if (p.socket == socketID){
             return p;
         }
@@ -522,10 +528,10 @@ function playerExist(socketID){
 }
 
 function updateTaggers() {
-    // Add player to taggers and remove from players
+    // Add player to taggers and remove from runners
     // Change player properties to equal a taggers. HANDLED IN OBJECT
 
-    if (players.length == 0){
+    if (runners.length == 0){
         //tagged[tagged.length - 1].setWinner();
 	if (gameReady) {
             gameOver = true;
@@ -535,7 +541,7 @@ function updateTaggers() {
     for (var i = 0; i < tagged.length; i++) {
         tagged[i].typeChange(1, canvas, getToSafeZoneWidth);
 
-        players = arrayRemove(players, tagged[i]);
+        runners = arrayRemove(runners, tagged[i]);
         taggers.push(tagged[i]);
     }
     tagged.length = 0;
@@ -566,7 +572,6 @@ function include(file) {
 }
 
 function socketUpdate(e, ...args) {
-    // Iterate through every player until the socket number matches
     if (e == 'clientConnected'){
         var id = args[0];
         console.log("New client: " + id);
@@ -574,15 +579,19 @@ function socketUpdate(e, ...args) {
     }
     else {
         var num = args[0];
-        if (!loopTeamSocketUpdate(num, e, players))
+	// Iterate through every player until the socket number matches
+	// Start with checking the runners
+        if (!loopTeamSocketUpdate(num, e, runners))
+	    // Didn't get a match as a runner => try the taggers
             loopTeamSocketUpdate(num, e, taggers);
     }
 }
 
 function loopTeamSocketUpdate(num, e, team) {
     for (var i = 0; i < team.length; i++) {
-        if (team[i].socketEventHandler(num, e))
+        if (team[i].socketEventHandler(num, e)) {
             return true;
+	}
     }
     return false;
 }
@@ -598,24 +607,35 @@ function decreaseSafeZone() {
 }
 
 class player {
-    socket = '';
-    type = 0; // 0 - normal player, 1 - tagger, 2 - waiting for new round
+    type        = 0; // 0 - normal runner, 1 - tagger, 2 - waiting for new round
+    playerLabel = '';
+
     radius = 5;
-    x = 0;
-    y = 0;
+    x  = 0;
+    y  = 0;
     dx = 2;
     dy = 2;
-    moveLeft = false;
+
+    //colour = ("#40E0D0"); //turquoise //Red = (255,0,0)
+    colour = null;
+
+    moveLeft  = false;
     moveRight = false;
-    moveUp = false;
-    moveDown = false;
-    colour = ("#40E0D0"); //turquoise //Red = (255,0,0)
-    currSafeZone = 0; // 1 - left, 2 - right
+    moveUp    = false;
+    moveDown  = false;
+
+    socket = '';
+    
+    currSafeZone = 0;     // 1 - left, 2 - right
     quit = false;
 
-    constructor(newX, newY, newType, newSocket, canvas, getToSafeZoneWidth, newSafeZone) {
+
+    constructor(newX, newY, newType, playerLabel, newSocket, canvas, getToSafeZoneWidth, newSafeZone)
+    {
         this.x = newX;
         this.y = newY;
+	this.playerLabel = playerLabel;
+	
         this.socket = newSocket;
         this.currSafeZone = newSafeZone;
         this.typeChange(newType, canvas, getToSafeZoneWidth);
@@ -672,12 +692,12 @@ class player {
         return false;
     }
 
-    draw(ctx) {
+    draw(ctx,prefixLabel) {
         // Circle for nontaggers
         //ctx.lineWidth = 1;
         //ctx.strokesStyle = "#FFFFFF";
         if (this.type == 0) {
-	    drawPlayer(ctx,this.x,this.y,this.radius,this.colour);
+	    drawRunner(ctx,this.x,this.y,this.radius,this.colour,this.playerLabel);
 	    /*
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -689,7 +709,7 @@ class player {
         }
         //Draw a spike ball for taggers
         else if (this.type == 1) {
-	    drawTagger(ctx,this.x,this.y,this.radius,this.colour);
+	    drawTagger(ctx,this.x,this.y,this.radius,this.colour,this.playerLabel);
 	    /*
             var spikes = 16;
             var rot = Math.PI / 2 * 3;
@@ -725,7 +745,7 @@ class player {
 
     move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth) {
         /*Basic colission*/
-        if (this.type == 0) { //Normal player
+        if (this.type == 0) { //Runner
             if (this.moveLeft && this.x - this.radius - this.dx > 0) {
                 this.x -= this.dx;
                 if (activeSafeZone == 1 && this.currSafeZone != 1 && this.x - this.radius < getToSafeZoneWidth) {
@@ -853,15 +873,15 @@ class player {
         this.moveDown = false;
 
         switch (this.type) {
-            case 0: //Player
-                this.colour = ("#0" + randomColor()); //Red Minor 
+            case 0: // Runner
+                this.colour = ("#0" + randomCol5()); // Red Minor 
                 this.dx = random(3, 4);
                 this.dy = random(3, 4);
                 this.radius = random(12, 19);
                 break;
 
-            case 1: //Tagger
-                this.colour = ("#FF0000"); //Red
+            case 1: // Tagger
+                this.colour = ("#FF0000"); // Fully red
                 this.dx = random(2, 5);
                 this.dy = random(2, 5);
                 this.radius = random(13, 20);
@@ -878,15 +898,11 @@ class player {
                 break;
         }
 
-        // Emit colour
-        emitColour(this.socket, this.colour, this.type);
-
+        emitPlayerMarker(this.socket, this.colour, this.type, this.playerLabel);
     }
 
-
-
     setWinner(){
-        // Emit to player they are the winner
-        console.log("Send winner signal");
+        // Emit to runner they are the winner
+        console.log("Send winner signal!"); // ****
     }
 }
