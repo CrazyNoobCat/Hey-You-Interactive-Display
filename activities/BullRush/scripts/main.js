@@ -1,4 +1,6 @@
 
+var GameStartRetryTimeSecs = 5;
+
 var runners = [];
 var taggers = [];
 var tagged = [];
@@ -35,9 +37,9 @@ var gameReady = false;
 var displayResetThreshold = 10; // This is how many retry attemtps it takes before emiting a displayReset
 var retryCount            = 0;
 
-const zeroPad5    = (hexnum)   => "00000".substr(hexnum.length) + hexnum;
+const zeroPad5    = (num)      => "00000".substr(num.length) + num; // ensures the number passed in is left-zero-padded to be 5 digits in leng
 const random      = (min, max) => Math.floor(Math.random() * (max - min)) + min;
-const randomCol5  = ()         => zeroPad5(Math.floor(Math.random() * 0x100000).toString(16)); //Only prints out max of 5 bits of the 6 colours
+const randomCol5  = ()         => zeroPad5(Math.floor(Math.random() * 0x100000).toString(16)); // hex *5-digit* random value used as a colour in the form RGGBB
 
 var canvas = null;
 var ctx    = null;
@@ -63,11 +65,8 @@ $(document).ready(function() {
     headingFontSize   = Math.round(minDimension/24.0);
     paragraphFontSize = Math.round(minDimension/24.0);
     
-    // Manual start --> call function draw();
-    // Automatic start: when there are at least 2 players
-
     drawBoard(false); // draw board, but don't start animation     
-    gameStart(); // triggers drawBoard(true) when enough players have join
+    gameStart();      // triggers drawBoard(true) when enough players have join
 
 });
 
@@ -76,24 +75,25 @@ function gameStart(timeout = 200) {
 
     // Quit players aren't updated, only added players as dc players occurs in movement loop
 
-    for (var i = 1; i <= 5; i++) {
+    for (var i=1; i<=5; i++) {
         setTimeout(() => {
             updatePlayerDisplayAtGameStart();
         }, (timeout / 5) * i);
     }
 
     setTimeout(() => {
-        if (runners.length <= 0) {//minimum players
+        if (runners.length <= 0) {// not enough players yet
             updatePlayerDisplayAtGameStart();
             retryCount++;
-            console.log("Waiting for enough players to join. Will retry in 5 seconds");
+            console.log("Waiting for enough players to join. Will retry in " + GameStartRetryTimeSecs + " seconds");
 
             if (retryCount >= displayResetThreshold){
                 reset();
             }
 
-            gameStart(5000);
-        } else {
+            gameStart(GameStartRetryTimeSecs * 1000);
+        }
+	else {
 	    gameReady = true;
             decreaseSafeZone();
             drawBoard(true);
@@ -608,14 +608,20 @@ function decreaseSafeZone() {
 
 class player {
     type        = 0; // 0 - normal runner, 1 - tagger, 2 - waiting for new round
-    playerLabel = '';
+    playerLabel = null;
 
-    radius = 5;
-    x  = 0;
-    y  = 0;
-    dx = 2;
-    dy = 2;
+    //radius = 5;
+    //x  = 0;
+    //y  = 0;
+    //dx = 2;
+    //dy = 2;
 
+    x  = null;
+    y  = null;
+    dx = null;
+    dy = null;
+    
+    radius = null;
     //colour = ("#40E0D0"); //turquoise //Red = (255,0,0)
     colour = null;
 
@@ -624,7 +630,7 @@ class player {
     moveUp    = false;
     moveDown  = false;
 
-    socket = '';
+    socket = null;
     
     currSafeZone = 0;     // 1 - left, 2 - right
     quit = false;
@@ -641,11 +647,55 @@ class player {
         this.typeChange(newType, canvas, getToSafeZoneWidth);
     }
 
+
+    typeChange(newType, canvas, getToSafeZoneWidth) {
+        // Set any and all type properties in here
+        this.type = newType;
+
+        this.moveLeft  = false;
+        this.moveRight = false;
+        this.moveUp    = false;
+        this.moveDown  = false;
+
+        switch (this.type) {
+            case 0: // Runner
+                this.dx = random(3, 4);
+                this.dy = random(3, 4);
+                //this.radius = random(12, 19);
+                this.radius = 20;
+                this.colour = ("#0" + randomCol5()); // Red Minor 
+                break;
+
+            case 1: // Tagger
+                this.dx = random(2, 5);
+                this.dy = random(2, 5);
+                //this.radius = random(13, 20);
+                this.radius = 20;
+
+                if (this.x + this.radius > canvas.width - getToSafeZoneWidth) {
+                    this.x = canvas.width - getToSafeZoneWidth - this.radius;
+                } else if (this.x - this.radius < getToSafeZoneWidth) {
+                    this.x = getToSafeZoneWidth + this.radius;
+                }
+
+                this.colour = ("#FF0000"); // Fully red
+
+                break;
+
+            default:
+                break;
+        }
+
+        emitPlayerMarker(this.socket, this.colour, this.type, this.playerLabel);
+    }
+    
     socketEventHandler(num, e) {
         // Only allow updates for identical sockets?
         //console.log("Does socket: " + this.socket + " = " + num);
+
         var result = (num === this.socket);
         //console.log("Result: " + result);
+
         if (num === this.socket) {
             switch (e) {
                 case "upOn":
@@ -680,7 +730,7 @@ class player {
                     this.moveDown = false;
                     break;
                 case "clientDC":
-                    console.log("Controller dc signal recieved for player: " + this.socket + " In team: " + this.type);
+                    console.log("Controller dc signal recieved for player: " + this.socket + " for player type: " + this.type);
                     this.quit = true;
                     break;
                 default:
@@ -692,60 +742,22 @@ class player {
         return false;
     }
 
-    draw(ctx,prefixLabel) {
-        // Circle for nontaggers
-        //ctx.lineWidth = 1;
-        //ctx.strokesStyle = "#FFFFFF";
+    draw(ctx,prefixLabel)
+    {
         if (this.type == 0) {
 	    drawRunner(ctx,this.x,this.y,this.radius,this.colour,this.playerLabel);
-	    /*
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.colour;
-            ctx.stroke();
-            ctx.fill();
-            ctx.closePath();
-	    */
         }
-        //Draw a spike ball for taggers
         else if (this.type == 1) {
 	    drawTagger(ctx,this.x,this.y,this.radius,this.colour,this.playerLabel);
-	    /*
-            var spikes = 16;
-            var rot = Math.PI / 2 * 3;
-            var step = Math.PI / spikes;
-            var outerRadius = this.radius - 0.5;
-            var innerRadius = this.radius - 4;
-            var x = this.x;
-            var y = this.y;
-
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y - outerRadius)
-            for (var i = 0; i < spikes; i++) {
-                x = this.x + Math.cos(rot) * outerRadius;
-                y = this.y + Math.sin(rot) * outerRadius;
-                ctx.lineTo(x, y)
-                rot += step
-
-                x = this.x + Math.cos(rot) * innerRadius;
-                y = this.y + Math.sin(rot) * innerRadius;
-                ctx.lineTo(x, y)
-                rot += step
-            }
-            ctx.lineTo(this.x, this.y - outerRadius);
-            ctx.closePath();
-            ctx.fillStyle = this.colour;
-            ctx.stroke();
-            ctx.fill();
-            ctx.closePath();
-	    */
         }
-
+	else {
+	    console.error("player.draw(): unrecognized player type: " + this.type);
+	}
     }
 
     move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth) {
-        /*Basic colission*/
-        if (this.type == 0) { //Runner
+        /* Basic collision */
+        if (this.type == 0) { // Runner
             if (this.moveLeft && this.x - this.radius - this.dx > 0) {
                 this.x -= this.dx;
                 if (activeSafeZone == 1 && this.currSafeZone != 1 && this.x - this.radius < getToSafeZoneWidth) {
@@ -766,7 +778,8 @@ class player {
             if (this.moveDown && this.y + this.radius <= canvas.height - this.dy) {
                 this.y += this.dy;
             }
-        } else { //Tagger
+        }
+	else { // Tagger
             if (activeSafeZone == 1) {
                 if (this.moveLeft && this.x - this.radius - this.dx > 0 + getToSafeZoneWidth) {
                     this.x -= this.dx;
@@ -860,45 +873,6 @@ class player {
         //         }
         //     }
         // }
-
-
-    }
-
-    typeChange(newType, canvas, getToSafeZoneWidth) {
-        // Set any and all type properties in here
-        this.type = newType;
-        this.moveLeft = false;
-        this.moveRight = false;
-        this.moveUp = false;
-        this.moveDown = false;
-
-        switch (this.type) {
-            case 0: // Runner
-                this.colour = ("#0" + randomCol5()); // Red Minor 
-                this.dx = random(3, 4);
-                this.dy = random(3, 4);
-                this.radius = random(12, 19);
-                break;
-
-            case 1: // Tagger
-                this.colour = ("#FF0000"); // Fully red
-                this.dx = random(2, 5);
-                this.dy = random(2, 5);
-                this.radius = random(13, 20);
-
-                if (this.x + this.radius > canvas.width - getToSafeZoneWidth) {
-                    this.x = canvas.width - getToSafeZoneWidth - this.radius;
-                } else if (this.x - this.radius < getToSafeZoneWidth) {
-                    this.x = getToSafeZoneWidth + this.radius;
-                }
-
-                break;
-
-            default:
-                break;
-        }
-
-        emitPlayerMarker(this.socket, this.colour, this.type, this.playerLabel);
     }
 
     setWinner(){
