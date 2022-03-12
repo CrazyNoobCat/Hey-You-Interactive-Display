@@ -33,8 +33,12 @@ function  drawTagger(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
     // var outerRadius = radius - 0.5;
     // var innerRadius = radius - 4;
 
-    var outerRadius = radius * 35/36.0;
-    var innerRadius = radius * 14/18.0;
+    //var outerRadius = radius * 35/36.0;
+    //var innerRadius = radius * 14/18.0;
+
+    // Change to work of 20
+    var outerRadius = radius * 39/40.0;
+    var innerRadius = radius * 16/20.0;
 
     var x = xOrg;
     var y = yOrg;
