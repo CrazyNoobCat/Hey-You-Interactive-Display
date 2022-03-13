@@ -1,0 +1,21 @@
+.arrow {
+    position: relative;
+    display: inline-block;
+    width: 49%;
+}
+
+.inner {
+    margin: auto;
+    width: 75%;
+}
+
+.dot, .dotcanvas {
+    position: absolute; 
+    left:   0px; 
+    top:    300px; 
+    right:  0px; 
+    bottom: 0px;
+    margin: auto; 
+    height: 120px;
+    width:  120px;
+}	

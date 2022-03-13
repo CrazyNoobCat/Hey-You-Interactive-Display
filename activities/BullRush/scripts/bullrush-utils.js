@@ -1,3 +1,12 @@
+const PlayerType = {
+    Runner:    0,
+    Tagger:    1,
+    WaitingForAssignment: 2
+};
+
+Object.freeze(PlayerType);
+
+
 function  drawRunner(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
 {
     // Draw a circle for runners (i.e. the non-taggers)

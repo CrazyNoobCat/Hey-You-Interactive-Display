@@ -3,7 +3,8 @@ var GameStartRetryTimeSecs = 5;
 
 var runners = [];
 var taggers = [];
-var tagged = [];
+var tagged  = [];
+var winners = [];
 
 var getToSafeZoneWidth   = 80;                 // Stays constant
 var shrinkgingZoneWidth  = getToSafeZoneWidth; // Reduces over time
@@ -32,7 +33,7 @@ var activeSafeZone    = 2;        // 0 = null, i.e. game over. 1 = left, 2 = rig
 var runnersInSafeZone = 0;
 
 var gameOver  = false; // Set to true when game needs to be restarted
-var gameReady = false;
+var gameIsOn  = false;
 
 var displayResetThreshold = 10; // This is how many retry attemtps it takes before emiting a displayReset
 var retryCount            = 0;
@@ -94,7 +95,7 @@ function gameStart(timeout = 200) {
             gameStart(GameStartRetryTimeSecs * 1000);
         }
 	else {
-	    gameReady = true;
+	    gameIsOn = true;
             decreaseSafeZone();
             drawBoard(true);
         }
@@ -260,16 +261,9 @@ function drawBoard(startAnimation) {
 
     //End game occurs here
     if (gameOver == true) {
-	/*
-        ctx.fillStyle = "black";
-        //ctx.font = "100px Arial";
-	ctx.font = headingFontSize+"px Arial";
-        ctx.fillText('GAME OVER - RELOADING', canvas.width / 10, canvas.height / 2);
-	*/
-	
 	$('#infobox').html("Game Over: Returning to main display ...");
-	
-        setTimeout(() => { reset(); }, 1500);
+
+        setTimeout(() => { reset(); }, 10000);
         // Will need to add logic for keeping sockets conected???
     }
     else {
@@ -457,25 +451,27 @@ function playerAdd(newSocket) {
 }
 
 function playerRemove(team, player) {
-    if (team == "p"){
+    if (team == "r"){
         runners = arrayRemove(runners, player);
     } else {
         taggers = arrayRemove(taggers, player);
     }
 
+    /*
     if (runners.length == 0 || taggers.length == 0) {
-	if (gameReady) {
+	if (gameIsOn) {
             gameOver = true;
 	}
     }
-
+    */
+    
     // Other remove logic? player checking
 }
 
 function runnerMove() {
     for (var i = 0; i < runners.length; i++) {
         if (runners[i].quit == true) {
-            playerRemove("p", runners[i]);
+            playerRemove("r", runners[i]);
         } else {
             runnersInSafeZone += runners[i].move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth);
             for (var j = 0; j < taggers.length; j++) {
@@ -531,20 +527,34 @@ function updateTaggers() {
     // Add player to taggers and remove from runners
     // Change player properties to equal a taggers. HANDLED IN OBJECT
 
-    if (runners.length == 0){
-        //tagged[tagged.length - 1].setWinner();
-	if (gameReady) {
+    for (var i=0; i<tagged.length; i++) {
+	var tagged_runner = tagged[i];
+        tagged_runner.typeChange(PlayerType.Tagger, canvas, getToSafeZoneWidth);
+
+        runners = arrayRemove(runners, tagged_runner);
+        taggers.push(tagged_runner);
+    }
+
+
+    if (runners.length == 0) {
+	// Everyone has been captured
+
+	if (gameIsOn) {
+	    console.log("*** number of winning runners = " + tagged.length);
+	    
+	    for (var w=0; w<tagged.length; w++) {
+		var winning_runner = tagged[w];	
+		emitWinner(winning_runner.socket);
+	    }
+
             gameOver = true;
+	    gameIsOn = false;
+
+	    winners = tagged.slice(); // with no args, does (shallow) array copy
 	}
     }
-
-    for (var i = 0; i < tagged.length; i++) {
-        tagged[i].typeChange(1, canvas, getToSafeZoneWidth);
-
-        runners = arrayRemove(runners, tagged[i]);
-        taggers.push(tagged[i]);
-    }
-    tagged.length = 0;
+    
+    tagged.length = 0;    
 }
 
 function drawTeam(team) {
@@ -607,14 +617,8 @@ function decreaseSafeZone() {
 }
 
 class player {
-    type        = 0; // 0 - normal runner, 1 - tagger, 2 - waiting for new round
+    type        = PlayerType.WaitingForAssignment; // 0 - normal runner, 1 - tagger, 2 - waiting for new round
     playerLabel = null;
-
-    //radius = 5;
-    //x  = 0;
-    //y  = 0;
-    //dx = 2;
-    //dy = 2;
 
     x  = null;
     y  = null;
@@ -647,7 +651,6 @@ class player {
         this.typeChange(newType, canvas, getToSafeZoneWidth);
     }
 
-
     typeChange(newType, canvas, getToSafeZoneWidth) {
         // Set any and all type properties in here
         this.type = newType;
@@ -658,7 +661,7 @@ class player {
         this.moveDown  = false;
 
         switch (this.type) {
-            case 0: // Runner
+            case PlayerType.Runner: // Runner
                 this.dx = random(3, 4);
                 this.dy = random(3, 4);
                 //this.radius = random(12, 19);
@@ -666,7 +669,7 @@ class player {
                 this.colour = ("#0" + randomCol5()); // Red Minor 
                 break;
 
-            case 1: // Tagger
+            case PlayerType.Tagger: // Tagger
                 this.dx = random(2, 5);
                 this.dy = random(2, 5);
                 //this.radius = random(13, 20);
@@ -683,6 +686,7 @@ class player {
                 break;
 
             default:
+	        console.log("typeChange(): Unrecognized type '" + this.type + "'")
                 break;
         }
 
@@ -744,10 +748,10 @@ class player {
 
     draw(ctx,prefixLabel)
     {
-        if (this.type == 0) {
+        if (this.type == PlayerType.Runner) {
 	    drawRunner(ctx,this.x,this.y,this.radius,this.colour,this.playerLabel);
         }
-        else if (this.type == 1) {
+        else if (this.type == PlayerType.Tagger) {
 	    drawTagger(ctx,this.x,this.y,this.radius,this.colour,this.playerLabel);
         }
 	else {
@@ -757,7 +761,7 @@ class player {
 
     move(canvas, activeSafeZone, getToSafeZoneWidth, shrinkgingZoneWidth) {
         /* Basic collision */
-        if (this.type == 0) { // Runner
+        if (this.type == PlayerType.Runner) { // Runner
             if (this.moveLeft && this.x - this.radius - this.dx > 0) {
                 this.x -= this.dx;
                 if (activeSafeZone == 1 && this.currSafeZone != 1 && this.x - this.radius < getToSafeZoneWidth) {
@@ -811,7 +815,7 @@ class player {
 
         return 0;
         /* Advanced colission in progress */
-        // if (this.type == 0) {
+        // if (this.type == PlayerType.Runner) {
         //     if (activeSafeZone == 1) {
         //         if (this.moveLeft && this.x - this.radius - this.dx > 0) {
         //             this.x -= this.dx;
@@ -875,8 +879,11 @@ class player {
         // }
     }
 
+    /*
     setWinner(){
         // Emit to runner they are the winner
         console.log("Send winner signal!"); // ****
     }
+    */
+    
 }

@@ -32,20 +32,25 @@
       }            
       
       function emitPlayerMarker(id, playerColor, playerType, playerLabel){
-          console.log("Emited " + playerLabel + ", colour " + playerColor + " to " + id);
+          console.log("Notifying Player of their allocated marker. Sending to socket-id '" + id +"': " + playerLabel + ", colour=" + playerColor + ", label=" + playerLabel);
           socket.emit('displayEmit', id, 'playerMarker', playerColor, playerType, playerLabel);
       }
       
       function emitRunnerHasBeenTagged(id){
-          console.log("Player has been tagged. Player id: " + id);
+          console.log("Notifying Runner that they have been tagged. Sending to socket-id: " + id);
           socket.emit('displayEmit', id, 'playerTaggerContact');
       }
 
       function emitTaggerHasCaughtRunner(id){
-	  console.log("Tagger has caught a player. Tagger id: " + id);
+	  console.log("Notifying Tagger that they have caught a Runner. Sending to socket-id: " + id);
           socket.emit('displayEmit', id, 'playerTaggerContact');	  
       }
-            
+
+      function emitWinner(id){
+          console.log("Notifying Runner that they have won. Sending to socket-id: " + id);
+          socket.emit('displayEmit', id, 'youWin', "Congratulations you win!");
+      }
+
       function reset(){
           console.log("Display Reset Sent");
           socket.emit('displayReset');                

@@ -11,6 +11,9 @@
     <link rel="stylesheet" media="screen"                               href="client_min.css" /> <!-- think of CSS as client/controller-core.css -->
     <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="client.css"     /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
 
+    <link rel="stylesheet" href="bullrush-client.css" />
+
+    <!--
     <style>
         .arrow {
             position: relative;
@@ -23,19 +26,7 @@
           width: 75%;
         }
 
-        .dot {
-          position: absolute; 
-          left:   0px; 
-          top:    300px; 
-          right:  0px; 
-          bottom: 0px;
-          margin: auto; 
-          height: 120px;
-          width:  120px;
-          /* border-radius: 50%; */
-        }
-
-        .dotcanvas {
+        .dot, .dotcanvas {
           position: absolute; 
           left:   0px; 
           top:    300px; 
@@ -46,27 +37,29 @@
           width:  120px;
         }	
     </style>
-
+    -->
     
     <script
+      type="text/javascript"
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymoous">
     </script>
 
-    <script src="/scripts/bullrush-utils.js" type='text/javascript'></script>
-    
-    <script src="socketCreation.js"></script>
+    <!-- The following degined 'socket' as a global variable -->
+    <script type="text/javascript" src="socketCreation.js"></script>
 
+    <script type="text/javascript" src="/scripts/bullrush-utils.js"></script>
+    <script type="text/javascript" src="/scripts/bullrush-client.js"></script>
+    
     <script>
       // Generic socket setup      
       setupConnection("client");  
 
-      // Probably not necessary to access roomID, not currently used in code below!
+      // Following the standard client.html template
+      // => Probably not necessary to access roomID, not currently used in code below!
       var roomID = getCookie('roomID');
       console.log("roomID: " + roomID);
-
-      //console.log(socket);
 
       // Page specific functions ...
       function socketLoaded(){
@@ -75,7 +68,6 @@
           socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
               console.log("For player type '" + playerType + "' Setting colour to: " + playerCol);
 	      document.getElementById("stick1-loading").style.display = "none";
-              //document.getElementsByClassName("dot")[0].style.backgroundColor = playerCol;
 	      
 	      var canvas = document.getElementById('stick1-canvas');
 	      var ctx    = canvas.getContext('2d');
@@ -85,9 +77,11 @@
 	      
 	      var xOrg   = canvas.width/2;
 	      var yOrg   = canvas.height/2;
-	      var radius = (Math.min(canvas.width,canvas.height)/2) -2; // some wiggle room to avoid clipping
 
-	      if (playerType == 0) {
+	      var minRadius = Math.min(canvas.width,canvas.height)/2;
+	      var radius    = minRadius-2; // includesome wiggle room to avoid clipping
+
+	      if (playerType == PlayerType.Runner) {
 		  drawRunner(ctx,xOrg,yOrg,radius,playerCol,playerLabel);
 	      }
 	      else {
@@ -99,225 +93,19 @@
 	  socket.on('playerTaggerContact', () => {
 	      console.log("Player-Tagger contact!");
 	      navigator.vibrate(1000); // millisecs
+	  });
+
+	  /* not currently used */
+	  socket.on('displayToControllerMessage', (message) => {
+	      console.log("Message from Bullrush Display: " + message);
+	  });
+
+	  socket.on('youWin', (message) => {
+	      console.log("Message from Bullrush Display: " + message);
 	  });	  
+	  
+          console.log("Socket finished loading");	  
       }
-      
-    $(function(){      
-      // page specific functions
-      var form = document.getElementById('form');
-      var input = document.getElementById('input');
-
-      document.addEventListener('keydown', buttondown, false);
-      document.addEventListener('keyup', buttonup, false);
-
-      
-
-      var left = document.getElementById('left');
-      var right = document.getElementById('right');
-   
-      ///////////////////////////////////////////////////////////////////////   
-      class JoystickController
-      {
-        // stickID: ID of HTML element (representing joystick) that will be dragged
-        // maxDistance: maximum amount joystick can move in any direction
-        // deadzone: joystick must move at least this amount from origin to register value change
-        constructor( stickID, maxDistance, deadzone )
-        {
-          this.left = false;
-          this.right = false;
-          this.up = false;
-          this.down = false;
-          this.id = stickID;
-          let stick = document.getElementById(stickID);
-
-          // location from which drag begins, used to calculate offsets
-          this.dragStart = null;
-
-          // track touch identifier in case multiple joysticks present
-          this.touchId = null;
-          
-          this.active = false;
-          this.value = { x: 0, y: 0 }; 
-              this.xPlace = 0;
-              this.yPlace = 0;
-
-          let self = this;
-
-          function handleDown(event)
-          {
-              self.active = true;
-
-            // all drag movements are instantaneous
-            stick.style.transition = '0s';
-
-            // touch event fired before mouse event; prevent redundant mouse event from firing
-            event.preventDefault();
-
-              if (event.changedTouches)
-                self.dragStart = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
-              else
-                self.dragStart = { x: event.clientX, y: event.clientY };
-
-            // if this is a touch event, keep track of which one
-              if (event.changedTouches)
-                self.touchId = event.changedTouches[0].identifier;
-          }
-          
-          function handleMove(event) 
-          {
-              if ( !self.active ) return;
-
-              // if this is a touch event, make sure it is the right one
-              // also handle multiple simultaneous touchmove events
-              let touchmoveId = null;
-              if (event.changedTouches)
-              {
-                for (let i = 0; i < event.changedTouches.length; i++)
-                {
-                  if (self.touchId == event.changedTouches[i].identifier)
-                  {
-                    touchmoveId = i;
-                    event.clientX = event.changedTouches[i].clientX;
-                    event.clientY = event.changedTouches[i].clientY;
-                  }
-                }
-
-                if (touchmoveId == null) return;
-              }
-
-              const xDiff = event.clientX - self.dragStart.x;
-              const yDiff = event.clientY - self.dragStart.y;
-              const angle = Math.atan2(yDiff, xDiff);
-              const distance = Math.min(maxDistance, Math.hypot(xDiff, yDiff));
-              const xPosition = distance * Math.cos(angle);
-              const yPosition = distance * Math.sin(angle);
-
-              // move stick image to new position
-              stick.style.transform = `translate3d(${xPosition}px, ${yPosition}px, 0px)`;
-
-              // deadzone adjustment
-              const distance2 = (distance < deadzone) ? 0 : maxDistance / (maxDistance - deadzone) * (distance - deadzone);
-              const xPosition2 = distance2 * Math.cos(angle);
-              const yPosition2 = distance2 * Math.sin(angle);
-              const xPercent = parseFloat((xPosition2 / maxDistance).toFixed(4));
-              const yPercent = parseFloat((yPosition2 / maxDistance).toFixed(4));
-              
-              self.xPlace = xPercent;
-              self.yPlace = yPercent;
-              self.value = { x: self.xPlace, y: self.yPlace };
-            }
-
-          function handleUp(event) 
-          {
-            if ( !self.active ) return;
-
-            // if this is a touch event, make sure it is the right one
-            if (event.changedTouches && self.touchId != event.changedTouches[0].identifier) return;
-
-            // transition the joystick position back to center
-            stick.style.transition = '.2s';
-            stick.style.transform = `translate3d(0px, 0px, 0px)`;
-
-            // reset everything
-            self.value = { x: 0, y: 0 };
-            self.touchId = null;
-            self.active = false;
-            self.xPlace = 0;
-            self.yPlace = 0;
-          }
-
-          stick.addEventListener('mousedown', handleDown);
-          stick.addEventListener('touchstart', handleDown);
-          document.addEventListener('mousemove', handleMove, {passive: false});
-          document.addEventListener('touchmove', handleMove, {passive: false});
-          document.addEventListener('mouseup', handleUp);
-          document.addEventListener('touchend', handleUp);
-        }
-      }
-      ///////////////////////////////////////////////////////////////////////
-
-      let joystick1 = new JoystickController("stick1", 200, 8);
-
-      function update()
-      {
-        //Left and Right
-        if(joystick1.xPlace < -0.25 && joystick1.left == false){
-          joystick1.right = false;
-          socket.emit('leftOn', roomID);
-          socket.emit('rightOff', roomID);
-          joystick1.left = true;
-        }
-        if(joystick1.xPlace > 0.25 && joystick1.right == false){
-          joystick1.left = false;
-          socket.emit('rightOn', roomID);
-          socket.emit('leftOff', roomID);
-          joystick1.right = true;
-        }
-        if(joystick1.xPlace > -0.25 && joystick1.xPlace < 0.25 && (joystick1.left == true || joystick1.right == true)){
-          joystick1.left = false;
-          joystick1.right = false;
-          socket.emit('rightOff', roomID);
-          socket.emit('leftOff', roomID);
-        }
-
-        //Up and down
-        if(joystick1.yPlace < -0.25 && joystick1.up == false){
-          joystick1.down = false;
-          socket.emit('upOn', roomID);
-          socket.emit('downOff', roomID);
-          joystick1.up = true;
-        }
-        if(joystick1.yPlace > 0.25 && joystick1.down == false){
-          joystick1.up = false;
-          socket.emit('downOn', roomID);
-          socket.emit('upOff', roomID);
-          joystick1.down = true;
-        }
-        if(joystick1.yPlace > -0.25 && joystick1.yPlace < 0.25 && (joystick1.up == true || joystick1.down == true)){
-          joystick1.up = false;
-          joystick1.down = false;
-          socket.emit('upOff', roomID);
-          socket.emit('downOff', roomID);
-        }
-      }
-
-      function loop()
-      {
-        requestAnimationFrame(loop);
-        update();
-      }
-
-      loop();
-
-      //Function for when arrowkeys on the keyboard are pressed
-      function buttondown(e) {
-        if (e.key == 'ArrowLeft'){
-          console.log('Left');
-          document.getElementById("left").style.backgroundColor = "burlywood";
-          socket.emit('left key down');
-        }
-        if (e.key == 'ArrowRight'){
-          console.log('Right');
-          document.getElementById("right").style.backgroundColor = "burlywood";
-          socket.emit('right key down');
-        }
-        //alert("Key pressed: "+ e.key)
-        //socket.emit('key down', e.key);
-      }
-
-      function buttonup(e) {
-        if (e.key == 'ArrowLeft'){
-          document.getElementById("left").style.backgroundColor = "cadetblue";
-          socket.emit('left key up');
-        }
-        if (e.key == 'ArrowRight'){
-          document.getElementById("right").style.backgroundColor = "cadetblue";
-          socket.emit('right key up');
-        }
-        //alert("Key pressed: "+ e.key)
-        //socket.emit('key up', e.key);
-      }
-    });
     </script>
     
   </head>
