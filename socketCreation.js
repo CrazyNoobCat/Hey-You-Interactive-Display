@@ -104,10 +104,8 @@ function selectActivity(activity) {
     socket.emit("selectActivity", roomID, activity, (response) => {
         console.log("Redirecting to " + activity);
         window.location.pathname = '/';
-    });
-    
-    
-  }
+    });   
+}
 
 function getCookie(cname) {
     let name = cname + "=";    
