@@ -48,9 +48,19 @@
 
       function emitWinner(id){
           console.log("Notifying Runner that they have won. Sending to socket-id: " + id);
-          socket.emit('displayEmit', id, 'youWin', "Congratulations you win!");
+          socket.emit('displayEmit', id, 'endOfGame', "Last runner standing.<br/>Congratulations you win!");
       }
 
+      function emitYouWereCaught(id){
+          console.log("Notifying a player than was originally a RUnner that they have lost. Sending to socket-id: " + id);
+          socket.emit('displayEmit', id, 'endOfGame', "You started life as a Runner, but were caught by a tagger.");
+      }
+      
+      function emitEveryoneCaptured(id){
+          console.log("Notifying Tagger that everyone is now caught. Sending to socket-id: " + id);
+          socket.emit('displayEmit', id, 'endOfGame', "As a Tagger, <i>Mission Accomplished!</i> Everyone has been caught.");
+      }
+      
       function reset(){
           console.log("Display Reset Sent");
           socket.emit('displayReset');                

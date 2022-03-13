@@ -256,8 +256,34 @@ function drawDirectionArrowHints(xOrg,yOrg,xDim,yDim)
     }	
 }
 
+function moveTaggersOutOfSafeZone(activeSafeZone)
+{
+    if (activeSafeZone == SafeZonePosition.Left) {
+	// Move out any taggers in the left zone area
+	var lhsLine = getToSafeZoneWidth;
+	
+	for (var i=0; i<taggers.length; i++) {
+	    var tagger = taggers[i];
+	    if (tagger.x <= lhsLine) {
+		tagger.x = lhsLine + tagger.radius + 2; // 2 = wiggle room
+	    }
+	}
+    }
+    else {
+	// Move out taggers in the right zone area
+	var rhsLine = canvas.width - getToSafeZoneWidth;
+	
+	for (var i=0; i<taggers.length; i++) {
+	    var tagger = taggers[i];
+	    if (tagger.x >= rhsLine) {
+		tagger.x = rhsLine - tagger.radius - 2; // 2 = wiggle room
+	    }
+	}
+    }
+}
 
-function drawBoard(startAnimation) {
+function drawBoard(startAnimation)
+{
 
     //End game occurs here
     if (gameOver == true) {
@@ -292,11 +318,19 @@ function drawBoard(startAnimation) {
         updateTaggers();
 
         if (runnersInSafeZone == runners.length && runners.length != 0) {
-            if (activeSafeZone == SafeZonePosition.Left) {
+	    // Change which size the safe zone is on
+	    
+            if (activeSafeZone == SafeZonePosition.Left) {		
                 activeSafeZone = SafeZonePosition.Right;
             } else {
                 activeSafeZone = SafeZonePosition.Left;
             }
+	    // For the new SafeZone being set up, need to move any
+	    // taggers that might be there (as result of the zone
+	    // having previously shrunk away), otherwise they will get
+	    // stuck there
+	    moveTaggersOutOfSafeZone(activeSafeZone)
+	    
             shrinkgingZoneWidth = getToSafeZoneWidth;
             runnersInSafeZone = 0;
             decreaseSafeZone();
@@ -446,8 +480,6 @@ function playerAdd(newSocket) {
         console.log("New client already existed. Resent colour");
         emitPlayerMarker(socketID, p.colour, p.type, p.playerLabel);
     }
-
-    // Any other logic for adding a player
 }
 
 function playerRemove(team, player) {
@@ -464,12 +496,10 @@ function playerRemove(team, player) {
 	}
     }
     */
-    
-    // Other remove logic? player checking
 }
 
 function runnerMove() {
-    for (var i = 0; i < runners.length; i++) {
+    for (var i=0; i<runners.length; i++) {
         if (runners[i].quit == true) {
             playerRemove("r", runners[i]);
         } else {
@@ -482,7 +512,7 @@ function runnerMove() {
 
                 if (distance < runners[i].radius + taggers[j].radius) {
 		    // Collision! Runner has been hit (i.e., tagged)
-		    console.log("**** PlayerTaggerContact");
+		    //console.log("**** PlayerTaggerContact");
 		    
 		    var runner = runners[i];
 		    var tagger = taggers[j];
@@ -535,16 +565,40 @@ function updateTaggers() {
         taggers.push(tagged_runner);
     }
 
-
+    //
+    // Test to see if game should end
+    //
     if (runners.length == 0) {
 	// Everyone has been captured
 
 	if (gameIsOn) {
-	    console.log("*** number of winning runners = " + tagged.length);
+
+	    // In theory, greater than one runner can be caught in the last
+	    // cycle, meaning they all count as winners
+
+	    var rememberWinners = {};
 	    
 	    for (var w=0; w<tagged.length; w++) {
-		var winning_runner = tagged[w];	
-		emitWinner(winning_runner.socket);
+		var winningRunner = tagged[w];	
+		emitWinner(winningRunner.socket);
+
+		rememberWinners[winningRunner.socket] = true;
+	    }
+
+	    for (var l=0; l<taggers.length; l++) {
+		var tagger = taggers[l];
+		if (rememberWinners[tagger.socket]) {
+		    continue;
+		}
+		
+		if (tagger.playerLabel.startsWith("R")) {
+		    var capturedRunner = tagger;
+		    emitYouWereCaught(capturedRunner.socket);
+		}
+		else {
+		    var alwaysATagger = tagger;
+		    emitEveryoneCaptured(alwaysATagger.socket);
+		}
 	    }
 
             gameOver = true;
@@ -598,7 +652,7 @@ function socketUpdate(e, ...args) {
 }
 
 function loopTeamSocketUpdate(num, e, team) {
-    for (var i = 0; i < team.length; i++) {
+    for (var i=0; i<team.length; i++) {
         if (team[i].socketEventHandler(num, e)) {
             return true;
 	}
@@ -877,12 +931,5 @@ class player {
         //     }
         // }
     }
-
-    /*
-    setWinner(){
-        // Emit to runner they are the winner
-        console.log("Send winner signal!"); // ****
-    }
-    */
     
 }
