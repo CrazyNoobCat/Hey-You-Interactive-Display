@@ -6,6 +6,15 @@ const PlayerType = {
 
 Object.freeze(PlayerType);
 
+const SafeZonePosition = {
+    Unassigned: 0, // For example, when the game is over
+    Left:       1,
+    Right:      2
+};
+
+Object.freeze(SafeZonePosition);
+
+
 
 function  drawRunner(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
 {
@@ -38,7 +47,7 @@ function  drawTagger(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
     var step   = Math.PI / numSpikes;
 
     // Propotions based off a radius of 20 (in normalized space, -0.5, and 4.0)
-    var outerRadius = radius * 39/40.0;
+    var outerRadius = radius * 40/40.0; // **** Now just go all the way out!
     var innerRadius = radius * 16/20.0;
 
     var x = xOrg;

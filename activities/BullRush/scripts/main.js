@@ -29,7 +29,7 @@ var directionArrowCol    = "#ffffff";
 var numFinishLineBars  = 50;
 var finishLineBarWidth = 6;
 
-var activeSafeZone    = 2;        // 0 = null, i.e. game over. 1 = left, 2 = right
+var activeSafeZone    = SafeZonePosition.Right;  
 var runnersInSafeZone = 0;
 
 var gameOver  = false; // Set to true when game needs to be restarted
@@ -219,7 +219,7 @@ function drawDirectionArrowHints(xOrg,yOrg,xDim,yDim)
 
     var storedArrows = null;
     
-    if (activeSafeZone == 1) {
+    if (activeSafeZone == SafeZonePosition.Left) {
 	// getToSafeZone is on the left
 
 	if (goLeftArrows == null) {
@@ -245,7 +245,7 @@ function drawDirectionArrowHints(xOrg,yOrg,xDim,yDim)
 	var randomX = storedArrows[i].x;
 	var randomY = storedArrows[i].y;
 
-	if (activeSafeZone == 1) {
+	if (activeSafeZone == SafeZonePosition.Left) {
 	    // getToSafeZone is on the left	    
 	    drawArrow(ctx, randomX+directionArrowLength,randomY, randomX,randomY, directionArrowWidth, directionArrowCol);	
 	}
@@ -292,10 +292,10 @@ function drawBoard(startAnimation) {
         updateTaggers();
 
         if (runnersInSafeZone == runners.length && runners.length != 0) {
-            if (activeSafeZone == 1) {
-                activeSafeZone++;
+            if (activeSafeZone == SafeZonePosition.Left) {
+                activeSafeZone = SafeZonePosition.Right;
             } else {
-                activeSafeZone--;
+                activeSafeZone = SafeZonePosition.Left;
             }
             shrinkgingZoneWidth = getToSafeZoneWidth;
             runnersInSafeZone = 0;
@@ -376,7 +376,7 @@ function drawSafeZone() {
     var transitionX = null;
     
     ctx.beginPath();
-    if (activeSafeZone == 1) {
+    if (activeSafeZone == SafeZonePosition.Left) {
 	transitionX = getToSafeZoneWidth;
 	
         ctx.rect(0, 0, getToSafeZoneWidth, canvas.height)
@@ -392,7 +392,7 @@ function drawSafeZone() {
 
     //Draw right zone
     ctx.beginPath();
-    if (activeSafeZone == 2) {
+    if (activeSafeZone == SafeZonePosition.Right) {
 	transitionX = canvas.width - getToSafeZoneWidth;
 
         ctx.rect(transitionX, 0, getToSafeZoneWidth, canvas.height)
@@ -425,12 +425,12 @@ function playerAdd(newSocket) {
         }
 	else {
             console.log("Added runner: " + newSocket);
-            if (activeSafeZone == 2 && shrinkgingZoneWidth <= 25) {
+            if (activeSafeZone == SafeZonePosition.Right && shrinkgingZoneWidth <= 25) {
                 var newX = random(canvas.width - shrinkgingZoneWidth + 20, canvas.width - 20);
-                var newSafeZone = 2;
+                var newSafeZone = SafeZonePosition.Right;
             } else {
                 var newX = random(20, shrinkgingZoneWidth - 20);
-                var newSafeZone = 1;
+                var newSafeZone = SafeZonePosition.Left;
             }
             if (newSafeZone == activeSafeZone){
                 runnersInSafeZone++;
@@ -626,7 +626,6 @@ class player {
     dy = null;
     
     radius = null;
-    //colour = ("#40E0D0"); //turquoise //Red = (255,0,0)
     colour = null;
 
     moveLeft  = false;
@@ -636,7 +635,7 @@ class player {
 
     socket = null;
     
-    currSafeZone = 0;     // 1 - left, 2 - right
+    currSafeZone = SafeZonePosition.Unassigned;  // once assigned, signifies Left or Right
     quit = false;
 
 
@@ -764,15 +763,15 @@ class player {
         if (this.type == PlayerType.Runner) { // Runner
             if (this.moveLeft && this.x - this.radius - this.dx > 0) {
                 this.x -= this.dx;
-                if (activeSafeZone == 1 && this.currSafeZone != 1 && this.x - this.radius < getToSafeZoneWidth) {
-                    this.currSafeZone = 1;
+                if (activeSafeZone == SafeZonePosition.Left && this.currSafeZone != SafeZonePosition.Left && this.x - this.radius < getToSafeZoneWidth) {
+                    this.currSafeZone = SafeZonePosition.Left;
                     return 1;
                 }
             }
             if (this.moveRight && this.x + this.radius < canvas.width - this.dx) {
                 this.x += this.dx;
-                if (activeSafeZone == 2 && this.currSafeZone != 2 && this.x + this.radius > canvas.width - getToSafeZoneWidth) {
-                    this.currSafeZone = 2;
+                if (activeSafeZone == SafeZonePosition.Right && this.currSafeZone != SafeZonePosition.Right && this.x + this.radius > canvas.width - getToSafeZoneWidth) {
+                    this.currSafeZone = SafeZonePosition.Right;
                     return 1;
                 }
             }
@@ -784,7 +783,7 @@ class player {
             }
         }
 	else { // Tagger
-            if (activeSafeZone == 1) {
+            if (activeSafeZone == SafeZonePosition.Left) {
                 if (this.moveLeft && this.x - this.radius - this.dx > 0 + getToSafeZoneWidth) {
                     this.x -= this.dx;
                 }
@@ -816,7 +815,7 @@ class player {
         return 0;
         /* Advanced colission in progress */
         // if (this.type == PlayerType.Runner) {
-        //     if (activeSafeZone == 1) {
+        //     if (activeSafeZone == SafeZonePosition.Left) {
         //         if (this.moveLeft && this.x - this.radius - this.dx > 0) {
         //             this.x -= this.dx;
         //         }
@@ -849,7 +848,7 @@ class player {
         //     }
 
         // } else {
-        //     if (activeSafeZone == 1) {
+        //     if (activeSafeZone == SafeZonePosition.Left) {
         //         if (this.moveLeft && this.x - this.radius - this.dx > 0 + getToSafeZoneWidth) {
         //             this.x -= this.dx;
         //         }
