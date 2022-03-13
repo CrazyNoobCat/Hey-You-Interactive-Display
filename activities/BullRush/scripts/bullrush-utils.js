@@ -1,3 +1,5 @@
+// Enumerated types
+
 const PlayerType = {
     Runner:    0,
     Tagger:    1,
@@ -14,7 +16,7 @@ const SafeZonePosition = {
 
 Object.freeze(SafeZonePosition);
 
-
+// Core drawing routines for Runner (coloured circle) and Tracker (red spikey ball)
 
 function  drawRunner(ctx,xOrg,yOrg,radius,fillStyle,textLabel)
 {
