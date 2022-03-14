@@ -440,6 +440,7 @@ function drawSafeZone() {
 function playerAdd(newSocket) {
     var socketID = String(newSocket);
     p = playerExist(socketID);
+
     if (p == null) {
         if (taggers.length == 0 || runners.length % 8 == 0 && runners.length >= 1) {
             console.log("Added tagger: " + newSocket);
@@ -544,14 +545,14 @@ function playerExist(socketID){
     return null;
 }
 
-function updateTaggers() {
+function updateTaggers()
+{
     // Add player to taggers and remove from runners
-    // Change player properties to equal a taggers. HANDLED IN OBJECT
-
+    // But hold off changing the player marker and updating infoTopline in case those now tagged are the last runners standing
+    // In which case those runner(s) are the winners
+    
     for (var i=0; i<tagged.length; i++) {
 	var tagged_runner = tagged[i];
-        tagged_runner.typeChange(PlayerType.Tagger, canvas, getToSafeZoneWidth);
-
         runners = arrayRemove(runners, tagged_runner);
         taggers.push(tagged_runner);
     }
@@ -596,6 +597,16 @@ function updateTaggers() {
 	    gameIsOn = false;
 
 	    winners = tagged.slice(); // with no args, does (shallow) array copy
+	}
+    }
+    else {
+	// Most recent tagged Runner(s) are not the overall winners
+	// So convert to being Taggers
+	
+	for (var i=0; i<tagged.length; i++) {
+	    var tagged_runner = tagged[i];
+            tagged_runner.typeChange(PlayerType.Tagger, canvas, getToSafeZoneWidth);
+	    emitInfoTopline(tagged_runner.socket, 'You have been caught, and are now a Tagger<div style="font-size:85%">Now it is your turn to capture Runners</div>');	
 	}
     }
     
@@ -693,6 +704,13 @@ class player {
         this.socket = newSocket;
         this.currSafeZone = newSafeZone;
         this.typeChange(newType, canvas, getToSafeZoneWidth);
+
+	if (newType == PlayerType.Runner) {
+	    emitInfoTopline(this.socket, 'You are a Runner<div style="font-size:85%">Avoid the Taggers as long as you can</div>');
+	}
+	else {
+	    emitInfoTopline(this.socket, 'You are a Tagger<div style="font-size:85%">Capture Runners until none are left</div>');
+	}
     }
 
     typeChange(newType, canvas, getToSafeZoneWidth) {

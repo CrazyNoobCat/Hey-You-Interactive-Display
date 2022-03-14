@@ -12,7 +12,7 @@
 .dot, .dotcanvas {
     position: absolute; 
     left:   0px; 
-    top:    300px; 
+    top:    340px; 
     right:  0px; 
     bottom: 0px;
     margin: auto; 
@@ -20,7 +20,18 @@
     width:  120px;
 }	
 
-div.info-box {
+/* eog => end of game */
+
+#info-topline {
+    padding: 6px 12px 12px 6px;
+    background-color: #ffffff80;
+
+    font-size:   120%;
+    font-family: monospace;
+    color:       #ffffff;
+}
+
+div.eog-info-box {
     width: 240px;
     background-color: #ffffff80;
     font-family: monospace;
@@ -28,7 +39,7 @@ div.info-box {
     color: #ffffff;
 }
 
-p.info-box-text {
+p.eog-info-box-text {
   margin: 0;
   position: absolute;
   top: 50%;

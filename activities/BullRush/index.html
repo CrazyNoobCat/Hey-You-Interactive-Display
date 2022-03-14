@@ -35,6 +35,11 @@
           console.log("Notifying Player of their allocated marker. Sending to socket-id '" + socketId +"': " + playerLabel + ", colour=" + playerColor + ", label=" + playerLabel);
           socket.emit('displayEmit', socketId, 'playerMarker', playerColor, playerType, playerLabel);
       }
+
+      function emitInfoTopline(socketId,message){
+          console.log("Notifying Player of info topline message. Sending to socket-id: " + socketId + "message=" + message);
+          socket.emit('displayEmit', socketId, 'infoToplineMessage', message);
+      }
       
       function emitRunnerHasBeenTagged(socketId){
           console.log("Notifying Runner that they have been tagged. Sending to socket-id: " + socketId);

@@ -36,11 +36,12 @@
       // Generic socket setup      
       setupConnection("client");  
 
-      // Following the standard client.html template
-      // => Probably not necessary to access roomID, not currently used in code below!
-      var roomID = getCookie('roomID');
-      console.log("roomID: " + roomID);
+      var roomID   = getCookie('roomID');
+      var roomName = getCookie('roomName');
 
+      console.log("roomID:   " + roomID);
+      console.log("roomName: " + roomName);
+      
       // Page specific functions ...
       function socketLoaded(){
           socket.emit('clientConnected');
@@ -69,7 +70,12 @@
 	      }
 	      
           });
-	  
+
+          socket.on('infoToplineMessage', (message) => {
+	      $('#info-topline').html(message);
+	      $('#info-topline').slideDown();
+	  });
+	  	      
 	  socket.on('playerTaggerContact', (audioId) => {
 	      console.log("Player-Tagger contact!");
 
@@ -83,8 +89,9 @@
 	  socket.on('endOfGame', (message, audioId) => {
 
 	      $('#stick1').fadeOut();
-	      $('#info-box-text').html(message);
-	      $('#info-box').fadeIn();
+	      // eog => end of game 
+	      $('#eog-info-box-text').html(message);
+	      $('#eog-info-box').fadeIn();
 
 	      optPlayAudio(audioId);
 	  });
@@ -98,8 +105,8 @@
   <body>
     <audio class="hidden-audio" id="collide"></audio>
     <audio class="hidden-audio" id="in-zone"></audio>
-    <audio class="hidden-audio" id="gotcha"></audio>
-    <audio class="hidden-audio" id="winner"></audio>
+    <audio class="hidden-audio" id="gotcha" ></audio>
+    <audio class="hidden-audio" id="winner" ></audio>
 
     <div class="smartphone">
       <div id="mobile_page">
@@ -111,6 +118,10 @@
 	</div>
 
 	<div class="heading">
+	  <div id="info-topline" style="display: none;">
+	    Welcome to Bullrush
+	  </div>
+	  
 	  <h1>Control details</h1>
 	  <h2>Treat the circle at the centre of your screen like a joystick</h2>
 	  <h2>
@@ -134,8 +145,9 @@
 	    </canvas>
 	  </div>
 
-	  <div id="info-box" class="dot info-box" style="display: none;">
-	    <p id="info-box-text" class="info-box-text">	      
+	  <!-- eog => end of game -->
+	  <div id="eog-info-box" class="dot eog-info-box" style="display: none;">
+	    <p id="eog-info-box-text" class="eog-info-box-text">	      
 	    </p>
 	  </div>
 	  
