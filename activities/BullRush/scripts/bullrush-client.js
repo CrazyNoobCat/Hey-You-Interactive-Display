@@ -1,6 +1,4 @@
 
-//$(function(){      
-
 $(document).ready(function() {
       // page specific functions
       var form  = document.getElementById('form');
@@ -207,12 +205,28 @@ $(document).ready(function() {
         //socket.emit('key up', e.key);
       }
 
+    function init()
+    {
+	var collideMP3 = randomArrayEntry(AudioResources.Collide);
+	$('#collide').attr("src","audio/" + collideMP3);
+	
+	var inZoneMP3  = randomArrayEntry(AudioResources.InZone);
+	$('#in-zone').attr("src","audio/" + inZoneMP3);
 
-      function loop()
-      {
+    	var gotchaMP3  = randomArrayEntry(AudioResources.InZone);
+	$('#gotcha').attr("src","audio/" + gotchaMP3);
+
+    	var winnerMP3  = randomArrayEntry(AudioResources.InZone);
+	$('#winner').attr("src","audio/" + winnerMP3);
+    }
+    
+    function loop()
+    {
         requestAnimationFrame(loop);
         update();
-      }
-
-      loop();
+    }
+    
+    init();    
+    loop();
+    
 });

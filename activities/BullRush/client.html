@@ -11,6 +11,12 @@
     <link rel="stylesheet" media="screen"                               href="client_min.css" /> <!-- think of CSS as client/controller-core.css -->
     <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="client.css"     /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
 
+    <!-- 
+	 Consider determine is phone/desktop by media rule that test for hover and pointer as discussed at:
+	   https://stackoverflow.com/questions/42025632/how-to-detect-only-with-css-mobile-screens 
+	 and using this to refine the rule that include fake-phone desktop CSS
+      -->
+    
     <link rel="stylesheet" href="bullrush-client.css" />
     
     <script
@@ -64,22 +70,23 @@
 	      
           });
 	  
-	  socket.on('playerTaggerContact', () => {
+	  socket.on('playerTaggerContact', (audioId) => {
 	      console.log("Player-Tagger contact!");
-	      navigator.vibrate(1000); // millisecs
+
+	      if (typeof navigator.vibrate === "function") {
+		  navigator.vibrate(1000); // millisecs
+	      }
+
+	      optPlayAudio(audioId);
 	  });
 
-	  /* not currently used */
-	  socket.on('displayToControllerMessage', (message) => {
-	      console.log("Message from Bullrush Display: " + message);
-	  });
-
-	  socket.on('endOfGame', (message) => {
-	      //console.log("Message from Bullrush Display: " + message);
+	  socket.on('endOfGame', (message, audioId) => {
 
 	      $('#stick1').fadeOut();
 	      $('#info-box-text').html(message);
 	      $('#info-box').fadeIn();
+
+	      optPlayAudio(audioId);
 	  });
 	  
           console.log("Socket finished loading");	  
@@ -89,6 +96,10 @@
   </head>
 
   <body>
+    <audio class="hidden-audio" id="collide"></audio>
+    <audio class="hidden-audio" id="in-zone"></audio>
+    <audio class="hidden-audio" id="gotcha"></audio>
+    <audio class="hidden-audio" id="winner"></audio>
 
     <div class="smartphone">
       <div id="mobile_page">

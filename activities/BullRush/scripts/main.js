@@ -12,10 +12,6 @@ var shrinkgingZoneWidth  = getToSafeZoneWidth; // Reduces over time
 var getToSafeZoneBgCol =  "#faaa33"; // yellow-ish
 var shrinkingZoneBgCol =  "#faaa33"; // yellow-ish (after some testing, using same colour as getToSafeZone worked out for the best)
 
-// HSV 57, 20, 98 (a more yellow, paler version of #faaa33)
-//var directionArrowCol    = "rgb(250,247,200)";
-//var directionArrowCol    = "rgb(255,255,255)";
-
 var directionArrowsXNum = 20;
 
 var directionArrowsXQuarter1End   = Math.round(directionArrowsXNum/4);
@@ -38,9 +34,6 @@ var gameIsOn  = false;
 var displayResetThreshold = 10; // This is how many retry attemtps it takes before emiting a displayReset
 var retryCount            = 0;
 
-const zeroPad5    = (num)      => "00000".substr(num.length) + num; // ensures the number passed in is left-zero-padded to be 5 digits in leng
-const random      = (min, max) => Math.floor(Math.random() * (max - min)) + min;
-const randomCol5  = ()         => zeroPad5(Math.floor(Math.random() * 0x100000).toString(16)); // hex *5-digit* random value used as a colour in the form RGGBB
 
 var canvas = null;
 var ctx    = null;
@@ -512,8 +505,6 @@ function runnerMove() {
 
                 if (distance < runners[i].radius + taggers[j].radius) {
 		    // Collision! Runner has been hit (i.e., tagged)
-		    //console.log("**** PlayerTaggerContact");
-		    
 		    var runner = runners[i];
 		    var tagger = taggers[j];
 
