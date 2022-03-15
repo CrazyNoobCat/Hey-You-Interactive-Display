@@ -19,10 +19,12 @@
       video {
           display: none;
       }
-      
+/*      
       img {
           display: block;
       }
+*/
+      
     </style>
 
     <link rel="stylesheet" type="text/css" href="slideshow-animation.css"/>
@@ -36,7 +38,7 @@
         // Generic socket setup
         function socketLoaded(anyListener){
             vid = document.getElementById("video");
-            slide = document.getElementById("slideshow");            
+            slide = document.getElementById("baseslide-img");            
 
             socket.onAny(anyListener); // Turns on the any listener
             socket.emit("displayLoaded"); 
@@ -55,10 +57,10 @@
             
         setupConnection("display");  
 
-      var slideDir = "";
-      var slideExt = ".JPG";
-      //var slideDir = "smoke-and-mirrors-sampler/";
-      //var slideExt = ".PNG";
+      //var slideDir = "";
+      //var slideExt = ".JPG";
+      var slideDir = "/smoke-and-mirrors-sampler";
+      var slideExt = ".PNG";
       
       var currentSlide = 1;
       var maxSlides = 16;
@@ -121,21 +123,108 @@
                     socket.emit('displayEmit', args[0], 'download', slide.src );
             }
         }
+
+
+      var overlayImagePos = 2;
+      
+      function doSlideTransition(transitionType)
+      {
+	  //console.log("doTransition() called");
+
+	  var root = document.querySelector(':root');
+	  //root.style.setProperty('--animation-time', '2s');
+	  root.style.setProperty('--animation-baseslide', transitionType+'-baseslide');
+	  root.style.setProperty('--animation-overlay',   transitionType+'-overlay');
+	  
+	  document.getElementById("baseslide-li").classList.add("baseslide-animation");
+	  document.getElementById("overlay-li").classList.add("overlay-animation");
+	  var progressBar = document.getElementById("progress-bar");
+	  progressBar.style.display = "block";
+	  progressBar.classList.add("progress-bar-animate");
+
+      }
+
+      function slideAnimationReset()
+      {
+	  //console.log("slideAnimationReset() called");
+	  
+	  //document.getElementById("baseslide-img").src="images/"+images[overlayImagePos];
+	  document.getElementById("baseslide-img").src = slideDir + "/Slide" + overlayImagePos + slideExt;
+	  
+	  //overlayImagePos = (overlayImagePos + 1) % images.length;
+	  overlayImagePos = (overlayImagePos + 1) % maxSlides;
+
+	  if (overlayImagePos < maxSlides) {
+	      //document.getElementById("overlay-img").src="images/"+images[overlayImagePos];
+	      document.getElementById("overlay-img").src = slideDir + "/Slide" + overlayImagePos + slideExt;
+	  }
+	  
+	  document.getElementById("baseslide-li").classList.remove("baseslide-animation");
+	  document.getElementById("overlay-li").classList.remove("overlay-animation");
+	  document.getElementById("progress-bar").classList.remove("progress-bar-animate");
+      }
+
       
       $(document).ready(function() {
-	  var $firstSlide = $('#slideshow');
-	  $firstSlide.attr("src", slideDir + "/Slide" + currentSlide + slideExt);
-	  $firstSlide.on("load", function() {
-	      $firstSlide.fadeIn(1000);
-	  });
+	  // Set up first slide 
+	  var $baseSlide = $('#baseslide-img');
+	  var $overlaySlide = $('#overlay-img');
+	  
+	  $baseSlide.attr("src", slideDir + "/Slide" + currentSlide + slideExt);
+	  $overlaySlide.attr("src", slideDir + "/Slide" + overlayImagePos + slideExt);
 
+	  $baseSlide.on("load", function() {
+	      $baseSlide.fadeIn(1000);
+	      
+	      if (maxSlides > 1) {
+		  // Get the next slide set up as the overlay, but need to wait until fadeIn done
+		  setTimeout(() => { $overlaySlide.css("display", "block"); }, 1000);		  
+
+	      }	  	      
+	  });
       });
       
     </script>
 
   </head>
   <body>
+
+    <div class="container">
+      <div id="content-showslide">
+    	<div id="showslide">
+          <div id="mask">
+            <ul>
+              <li id="baseslide-li" style="z-index: 0;">
+		<img id="baseslide-img" style="display: none;"/>
+              </li>
+	      
+              <li id="overlay-li" style="z-index: -1;">
+		<img id="overlay-img" style="display: none;"/>
+              </li>
+            </ul>
+	  </div>
+	  <div id="progress-bar" class="progress-bar" style="display: none"></div>
+        </div>
+      </div>
+
+      <button onclick="doSlideTransition('fromright')">From Right Transition</button>
+      <button onclick="doSlideTransition('crossfade')">Cross-fade Transition</button>
+      <script>
+	// https://stackoverflow.com/questions/6186454/is-there-a-callback-on-completion-of-a-css3-animation
+	
+	// $("#sun").bind('oanimationend animationend webkitAnimationEnd', function() { 
+	//  alert("fin") 
+	// });
+	var element = document.getElementById("baseslide-li");
+	element.addEventListener("webkitAnimationEnd", slideAnimationReset,false);
+	element.addEventListener("animationend",       slideAnimationReset,false);
+	element.addEventListener("oanimationend",      slideAnimationReset,false);
+	element.addEventListener("MSAnimationEnd",     slideAnimationReset,false);
+      </script>
+    </div>
+    <!--
     <img id="slideshow" style="display: none;"/>
+    -->
     
     <video id='video' width="500px" height="500px" muted >           
       <source id='video' type="video/mp4"> 
