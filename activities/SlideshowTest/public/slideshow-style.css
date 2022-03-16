@@ -64,6 +64,10 @@
            animation: var(--animation-baseslide) var(--animation-time) linear 1; 
       -moz-animation: var(--animation-baseslide) var(--animation-time) linear 1;	
    -webkit-animation: var(--animation-baseslide) var(--animation-time) linear 1;
+
+           animation-play-state: var(--animation-play-state);
+      -moz-animation-play-state: var(--animation-play-state);
+   -webkit-animation-play-state: var(--animation-play-state);
 }
 
 .overlay-animation {
@@ -71,6 +75,10 @@
            animation: var(--animation-overlay) var(--animation-time) linear 1;
       -moz-animation: var(--animation-overlay) var(--animation-time) linear 1;
    -webkit-animation: var(--animation-overlay) var(--animation-time) linear 1;
+
+           animation-play-state: var(--animation-play-state);
+      -moz-animation-play-state: var(--animation-play-state);
+   -webkit-animation-play-state: var(--animation-play-state);
 }
 
 
@@ -79,4 +87,7 @@
       -moz-animation: timeline var(--animation-time) linear 1;
    -webkit-animation: timeline var(--animation-time) linear 1;
 
+           animation-play-state: var(--animation-play-state);
+      -moz-animation-play-state: var(--animation-play-state);
+   -webkit-animation-play-state: var(--animation-play-state);
 }

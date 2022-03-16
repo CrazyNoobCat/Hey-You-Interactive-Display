@@ -39,11 +39,29 @@
           }); 
       }
 
-      function send(e){
+      function send(e)
+      {
         socket.emit(e);
       }
 
-      function playAudio(state){
+      function sendPause()
+      {
+	  if ($('#play-pause').attr("class") == "do-pause") {
+              send('pause');
+	      $('#play-pause').attr("class","do-play");
+	      $('#play-pause').html("Play ⏵");
+	  }
+	  else {
+	      // resume play
+	      send('play');
+	      $('#play-pause').attr("class","do-pause");
+	      $('#play-pause').html("Pause ⏸");
+	  }
+	      
+      }
+      
+      function playAudio(state)
+      {
         if (state =='play')
           audio.play();
         else {
@@ -88,26 +106,26 @@
 	
 	<div class="controller-item" style="border: none;">
 	  <div class="fb-container-equispaced" style="font-size: 90%">
-	    <a class="fb-item" onclick="send('back')"><div><div style="display: inline-block; transform: scaleX(-1);">➥</div> Previous</div></a>
-	    <a class="fb-item" onclick="send('download')"><div>Download ⤓</div></a>
-	    <a class="fb-item" onclick="send('next')"><div>Next ➥</div></a>
+	    <a class="fb-item" onclick="send('back')" ><div><div style="display: inline-block; transform: scaleX(-1);">➥</div> Previous</div></a>
+	    <a class="fb-item" onclick="sendPause()"><div id="play-pause" class="do-pause">Pause ⏸</div></a>
+	    <a class="fb-item" onclick="send('next')" ><div>Next ➥</div></a>
 	  </div>
 	</div>
 
-	<!--
-	<div id="client_body" class="body">
-          <div class="activitySelectionGrid">
-            <a class="grid-item" onclick="send('next')">
-              <p class="item_name">Next</p>
-            </a>
-            <a class="grid-item" onclick="send('back')">
-              <p class="item_name">Back</p>
-            </a>
-            <a class="grid-item" onclick="send('download')">
-            <p class="item_name">Download</p>
-            </a>
-          </div>
+
+	<div class="controller-item" style="border: none; padding-top: 12px;">
+	  <div class="fb-container-equispaced" style="font-size: 90%">
+	    <a class="fb-item" style="visibility: hidden;"><div></div></a>
+	    <a class="fb-item" onclick="send('download')"><div>Download ⤓</div></a>
+	    <a class="fb-item" style="visibility: hidden;"><div></div></a>
+	  </div>
 	</div>
+	<!--
+	▶
+	⏵
+	⏸
+	⏭
+	⏮
 	-->
 	
 	
