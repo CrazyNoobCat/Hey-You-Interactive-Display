@@ -7,24 +7,26 @@
     <title>Slideshow Controller | Hey You, Interact With Me!</title>
 
     <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+
     <!--<link rel="manifest" href="/manifest.webmanifest">-->
 
     <link rel="stylesheet" media="screen"                               href="client_min.css" /> <!-- think of CSS as client/controller-core.css -->
     <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="client.css"     /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
 
     <script
+      type="text/javascript"
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymoous">
     </script>
 
-    <script src="socketCreation.js"></script>
+    <script type="text/javascript" src="socketCreation.js"></script>
     <script>      
       // Generic socket setup
       setupConnection("client");  
 
       // Page specific functions ..
-      var audio = new Audio('/Slide16.mp3');
+      //var audio = new Audio('/Slide16.mp3');
 
       function socketLoaded(){
 	  console.log("Socket finished loading");
@@ -33,10 +35,13 @@
               console.log(url);
               download(url);
           });   
-	  
+
+	  /*
           socket.on('audio', (state) => {
               playAudio(state);
-          }); 
+          });
+	  */
+	  
       }
 
       function send(e)
@@ -59,7 +64,8 @@
 	  }
 	      
       }
-      
+
+      /*
       function playAudio(state)
       {
         if (state =='play')
@@ -68,7 +74,8 @@
           audio.load();
         }
       }
-
+      */
+      
       function download(imageSrc) {
         const link = document.createElement('a');
         link.href = imageSrc;
