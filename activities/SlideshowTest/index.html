@@ -9,6 +9,9 @@
 
     <title>Slideshow | Hey You, Interact With Me!</title>
 
+    <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+    <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
+
     <style>
       :root {
 	  --animation-play-state:  running;
@@ -21,10 +24,12 @@
           display: flex;
           justify-content: center;
       }
-
+      /*
       video {
           display: none;
       }
+     */
+      
     </style>
 
     <link rel="stylesheet" type="text/css" href="slideshow-animation.css"/>
@@ -33,21 +38,24 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>    
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
     <script src="/socketCreation.js"></script>
+
+    <script type="text/javascript" src="/scripts/slideshow-display.js"></script>
+    
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
     <script>
-        var video;
+        //var video;
         var slide;
 
         // Generic socket setup
         function socketLoaded(anyListener){
-            video = document.getElementById("video");
+            //video = document.getElementById("video");
             slide = document.getElementById("baseslide-img");            
 
             socket.onAny(anyListener); // Turns on the any listener
             socket.emit("displayLoaded"); 
 
-            video.src = '/Slide16.mp4';
-            video.load();
+            //video.src = '/Slide16.mp4';
+            //video.load();
             
             var displayHost = self.location.host;
             var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + displayHost + '/join/' + getCookie('roomID') + '&size=250x250';
@@ -80,7 +88,8 @@
 	      var root = document.querySelector(':root');
 	      root.style.setProperty('--animation-play-state', 'running');
 	    }
-            else if (e === "next") {
+          else if (e === "next") {
+	      /*
                 if (currentSlidePos == maxSlides-1) {
 		    // Rick-rolled Easter Egg Feature !
                     slide.style.display = 'none';
@@ -95,7 +104,7 @@
                         socket.emit('displayEmit', getCookie('roomID'), 'audio', 'reset');
                         video.load();
                     }
-
+*/
 		    startNextSlide("fromright");
 
 		    /*
@@ -121,8 +130,10 @@
 		    //setTimeout(() => { startNextSlide("fromright"); }, 0);
 		    //doSlideTransition("fromright");
 		    setTimeout(() => { doSlideTransition("fromright") }, 1000);
-*/
+		    */
+	      /*
                 } 
+*/
 
             }
 	    else if (e === "back") {
@@ -135,6 +146,7 @@
 		currentSlideFS = currentSlidePos + 1; // Slide num on file system starts at 1, not 0
 		overlaySlideFS = overlaySlidePos + 1; // ditto
 
+		/*
 		// Only ever trigger Easter Egg if moving forwards in slide deck
 		// Always want it off going backwards
                 if (video.style.display === 'block'){
@@ -143,6 +155,7 @@
                     socket.emit('displayEmit', getCookie('roomID'), 'audio', 'reset');
                     video.load();
                 }
+		*/
 		
                 //slide.src = slideDir + "/Slide" + currentSlideFS + slideExt;
 
@@ -162,9 +175,13 @@
             }
 	    else if (e === "download") {
                 console.log(args);
-		
+
+		socket.emit('displayEmit', args[0], 'download', slide.src );
+
+		/*
                 if (currentSlidePos == maxSlides-1) {
 
+		    
 		    // Check if displaying Easter Egg
 		    if (video.style.display === 'block'){
 			socket.emit('displayEmit', args[0], 'download', video.src );
@@ -176,70 +193,10 @@
                 else {
                     socket.emit('displayEmit', args[0], 'download', slide.src );
 		}		
+*/
             }
-        }
-
-      
-      function doSlideTransition(transitionType)
-      {
-	  //console.log("doSlideTransition() called with transitionType = " + transitionType);
-
-	  var root = document.querySelector(':root');
-	  //root.style.setProperty('--animation-time', '2s');
-	  root.style.setProperty('--animation-baseslide', transitionType+'-baseslide');
-	  root.style.setProperty('--animation-overlay',   transitionType+'-overlay');
-	  
-	  document.getElementById("baseslide-li").classList.add("baseslide-animation");
-	  document.getElementById("overlay-li").classList.add("overlay-animation");
-
-	  var progressBar = document.getElementById("progress-bar");
-	  progressBar.style.display = "block";
-	  progressBar.style.width = "0px";
-	  progressBar.classList.add("progress-bar-animate");
-
       }
 
-      function slideAnimationReset()
-      {
-	  //console.log("slideAnimationReset() called with optCallback = " + optCallback);
-	  /*
-	  document.getElementById("baseslide-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
-	  
-	  currentSlidePos = (currentSlidePos + 1) % maxSlides;
-	  overlaySlidePos = (overlaySlidePos + 1) % maxSlides;
-
-	  currentSlideFS = currentSlidePos + 1;
-	  overlaySlideFS = overlaySlidePos + 1;
-	  
-	  //if (overlaySlidePos < maxSlides) {
-	      document.getElementById("overlay-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
-	  //}
-	  */
-	  
-	  document.getElementById("baseslide-li").classList.remove("baseslide-animation");
-	  document.getElementById("overlay-li").classList.remove("overlay-animation");
-	  document.getElementById("progress-bar").classList.remove("progress-bar-animate");
-      }
-
-      
-      $(document).ready(function() {
-	  // Set up first slide 
-	  var $baseSlideImg = $('#baseslide-img');
-	  var $overlaySlideImg = $('#overlay-img');
-	  
-	  $baseSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
-	  $overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
-
-	  $baseSlideImg.on("load", function() {
-	      $baseSlideImg.fadeIn(1000);
-	      
-	      if (maxSlides > 1) {
-		  // Get the next slide set up as the overlay, but need to wait until fadeIn done
-		  setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  
-
-	      }	  	      
-	  });
-      });
       
     </script>
 
@@ -263,61 +220,14 @@
 	  <div id="progress-bar" class="progress-bar" style="display: none"></div>
         </div>
       </div>
-      <!--
-      <button onclick="doSlideTransition('fromright')">From Right Transition</button>
-      <button onclick="doSlideTransition('crossfade')">Cross-fade Transition</button>
-      -->
       
-      <script>
-	// https://stackoverflow.com/questions/6186454/is-there-a-callback-on-completion-of-a-css3-animation
-	
-	// $("#sun").bind('oanimationend animationend webkitAnimationEnd', function() { 
-	//  alert("fin") 
-	// });
-
-	var startNextSlide = function () {
-	    // console.log("*** startNextSlide");
-
-	    slideAnimationReset();
-
-	    // Overlay slide becomes the new current slide
-	    document.getElementById("baseslide-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
-
-	    // Advance the counter on by +1
-	    currentSlidePos = (currentSlidePos + 1) % maxSlides;
-	    overlaySlidePos = (overlaySlidePos + 1) % maxSlides;	    
-	    currentSlideFS = currentSlidePos + 1;
-	    overlaySlideFS = overlaySlidePos + 1;
-
-	    // Set up the new overlay slide
-	    document.getElementById("overlay-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
-
-	    
-	    // Use setTimeout so initiating next slide occurs outside of the event handler for AnimationEnd
-	    // (with a small time delay)
-	    //
-	    // Use time delay trick for now.  For a more robust solution, see:
-	    //   https://css-tricks.com/restart-css-animation/
-	    
-	    setTimeout(() => { doSlideTransition("fromright") }, 100); 
-	};
-	    
-	var element = document.getElementById("baseslide-li");
-
-	element.addEventListener("webkitAnimationEnd", startNextSlide, false);
-	element.addEventListener("animationend",       startNextSlide, false);
-	element.addEventListener("oanimationend",      startNextSlide, false);
-	element.addEventListener("MSAnimationEnd",     startNextSlide, false);
-
-	doSlideTransition("fromright");
-	
-      </script>
     </div>
-    
+<!--    
     <video id='video' width="500px" height="500px" muted >           
       <source id='video' type="video/mp4"> 
     </video>
-
+    -->
+    
     <div id="barcodeL" style="height: 250px; display: block; position: absolute; left:  7px; top: 7px;"></div>
     <div id="barcodeR" style="height: 250px; display: block; position: absolute; right: 7px; top: 7px;"></div>
 
