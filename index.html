@@ -24,15 +24,12 @@
 		<script>
 			var QRDim = null;
 
-			function displayRoomQRCode(displayHost,roomID)
+		        function displayRoomQRCode(displayHost,roomID,qrDim)
 			{
 				// For the QR code, work directly with the roomID
-			        //var QRSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.05));
-			        //console.log("Dynamically computed QR size = " + QRSize);
 				var full_room_id = displayHost + '/join/' + roomID;
 
-			        //var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRSize +'x' + QRSize;
-			        var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + QRDim +'x' + QRDim;
+			        var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
 
 			        var $img = $('<img>').attr('src',url);
 			        $img.on("load", function() {
@@ -67,19 +64,17 @@
 				});
 
 				var roomID = getCookie('roomID');
-				displayRoomQRCode(displayHost,roomID);
-
-
-				if (getCookie('roomName') != "") {
-					var roomName = getCookie('roomName');
-					displayRoomURL(displayHost,roomName);
-				}
-
-			        //var iconSize = Math.round(Math.sqrt(screen.availWidth * screen.availHeight * 0.04));
-			        //console.log("Dynamically computed iconSize = " + iconSize);
+			        displayRoomQRCode(displayHost,roomID,QRDim);
 			    
-				//$('#branding-logo').width = iconSize;
-				//$('#branding-logo').height = iconSize;
+			        if (getCookie('roomName') != "") {
+				    console.log("socketLoaded(): roomName = " + getCookie('roomName'));
+
+				    var roomName = getCookie('roomName');
+				    displayRoomURL(displayHost,roomName);
+				}
+			        else {
+				    console.log("socketLoaded(): roomName not defined");
+				}
 			}
 
 			// $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
