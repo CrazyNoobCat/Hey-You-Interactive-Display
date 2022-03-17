@@ -14,22 +14,16 @@
 
     <style>
       :root {
-	  --animation-play-state:  running;
-	  --animation-time:        10s;
-	  --animation-baseslide:   fromright-baseslide;
-	  --animation-overlay:     fromright-overlay;
+	  --animation-play-state:   running;
+	  --animation-time:         10s;
+	  --animation-currentslide: fromright-currentslide;
+	  --animation-overlayslide: fromright-overlayslide;
       }
       
       body {
           display: flex;
           justify-content: center;
       }
-      /*
-      video {
-          display: none;
-      }
-     */
-      
     </style>
 
     <link rel="stylesheet" type="text/css" href="slideshow-animation.css"/>
@@ -43,160 +37,51 @@
     
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
     <script>
-        //var video;
-        var slide;
+      // Generic socket setup
+      function socketLoaded(anyListener){
+          socket.onAny(anyListener); // Turns on the any listener
+          socket.emit("displayLoaded"); 
 
-        // Generic socket setup
-        function socketLoaded(anyListener){
-            //video = document.getElementById("video");
-            slide = document.getElementById("baseslide-img");            
-
-            socket.onAny(anyListener); // Turns on the any listener
-            socket.emit("displayLoaded"); 
-
-            //video.src = '/Slide16.mp4';
-            //video.load();
+	  // Should the follow not be done on document.ready() ??
+	  
+          var displayHost = self.location.host;
+          var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + displayHost + '/join/' + getCookie('roomID') + '&size=250x250';
+	  var $imgL = $('<img>').attr('src',url);
+	  var $imgR = $('<img>').attr('src',url);
+	  
+          $('#barcodeL').html($imgL)
+          $('#barcodeR').html($imgR)
+      } 
+      
+      setupConnection("display");  
             
-            var displayHost = self.location.host;
-            var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + displayHost + '/join/' + getCookie('roomID') + '&size=250x250';
-	    var $imgL = $('<img>').attr('src',url);
-	    var $imgR = $('<img>').attr('src',url);
-	    
-            $('#barcodeL').html($imgL)
-            $('#barcodeR').html($imgR)
-        } 
-            
-        setupConnection("display");  
-
-      var slideDir = "/smoke-and-mirrors-sampler";
-      var slideExt = ".PNG";
-      
-      var currentSlidePos = 0;
-      var overlaySlidePos = 1;
-      var currentSlideFS  = currentSlidePos + 1;
-      var overlaySlideFS  = overlaySlidePos + 1;
-
-      var maxSlides = 15;
-      
-      
       function socketUpdate(e, ...args){
 	  if (e === "pause") {
 	      var root = document.querySelector(':root');
 	      root.style.setProperty('--animation-play-state', 'paused');
 	    }
-	    else if (e === "play") {
+	  else if (e === "play") {
 	      var root = document.querySelector(':root');
 	      root.style.setProperty('--animation-play-state', 'running');
-	    }
+	  }
           else if (e === "next") {
-	      /*
-                if (currentSlidePos == maxSlides-1) {
-		    // Rick-rolled Easter Egg Feature !
-                    slide.style.display = 'none';
-                    video.style.display = 'block';
-                    socket.emit('displayEmit', getCookie('roomID'), 'audio', 'play');
-                    video.play();
-                }
-		else {		   
-                    if (video.style.display === 'block') {
-                        video.style.display = 'none';
-                        slide.style.display = 'block'
-                        socket.emit('displayEmit', getCookie('roomID'), 'audio', 'reset');
-                        video.load();
-                    }
-*/
-		    startNextSlide("fromright");
+	      startNextSlide("fromright");	      	      
+          }
+	  else if (e === "back") {
 
-		    /*
-		    slideAnimationReset();
-		    
-		    currentSlidePos = (currentSlidePos + 1) % maxSlides;
-		    overlaySlidePos = (overlaySlidePos + 1) % maxSlides;
-
-		    currentSlideFS = currentSlidePos + 1; // Slide num on file system starts at 1, not 0 
-		    overlaySlideFS = overlaySlidePos + 1; // ditto
-		    
-                    //slide.src = slideDir + "/Slide" + currentSlideFS + slideExt;
-		    
-		    var $baseSlideImg = $('#baseslide-img');
-		    var $overlaySlideImg = $('#overlay-img');
-	  
-		    $baseSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
-		    $overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
-
-		    var progressBar = document.getElementById("progress-bar");
-		    progressBar.style.width = "0px";
-
-		    //setTimeout(() => { startNextSlide("fromright"); }, 0);
-		    //doSlideTransition("fromright");
-		    setTimeout(() => { doSlideTransition("fromright") }, 1000);
-		    */
-	      /*
-                } 
-*/
-
-            }
-	    else if (e === "back") {
-
-		slideAnimationReset();
-
-		currentSlidePos = (maxSlides + currentSlidePos - 1) % maxSlides;
-		overlaySlidePos = (maxSlides + overlaySlidePos - 1) % maxSlides;
-
-		currentSlideFS = currentSlidePos + 1; // Slide num on file system starts at 1, not 0
-		overlaySlideFS = overlaySlidePos + 1; // ditto
-
-		/*
-		// Only ever trigger Easter Egg if moving forwards in slide deck
-		// Always want it off going backwards
-                if (video.style.display === 'block'){
-                    video.style.display = 'none';
-                    slide.style.display = 'block'
-                    socket.emit('displayEmit', getCookie('roomID'), 'audio', 'reset');
-                    video.load();
-                }
-		*/
-		
-                //slide.src = slideDir + "/Slide" + currentSlideFS + slideExt;
-
-		var $baseSlideImg = $('#baseslide-img');
-		var $overlaySlideImg = $('#overlay-img');
-	  
-		$baseSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
-		$overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
-
-		//setTimeout(() => { startNextSlide("fromright"); }, 0);
-		//doSlideTransition("fromright");
-		setTimeout(() => { doSlideTransition("fromright") }, 100);
-		
-            }
-	    else if (e === "max") {
-                maxSlides = args[0];
-            }
-	    else if (e === "download") {
-                console.log(args);
-
-		socket.emit('displayEmit', args[0], 'download', slide.src );
-
-		/*
-                if (currentSlidePos == maxSlides-1) {
-
-		    
-		    // Check if displaying Easter Egg
-		    if (video.style.display === 'block'){
-			socket.emit('displayEmit', args[0], 'download', video.src );
-		    }
-		    else {
-			socket.emit('displayEmit', args[0], 'download', slide.src );
-		    }
-		}
-                else {
-                    socket.emit('displayEmit', args[0], 'download', slide.src );
-		}		
-*/
-            }
+	      startPrevSlide("fromright");
+	      
+          }
+	  else if (e === "download") {
+              console.log(args);
+	      
+	      var $currentSlideImg = $('#currentslide-img');
+	      socket.emit('displayEmit', args[0], 'download', $currentSlideImg.attr("src") );
+          }
+	  else {
+	      console.log("socketUpdate(): Unrecognized command '" + e + "'");
+	  }
       }
-
       
     </script>
 
@@ -208,12 +93,12 @@
     	<div id="showslide">
           <div id="mask">
             <ul>
-              <li id="baseslide-li" style="z-index: 0;">
-		<img id="baseslide-img" style="display: none;"/>
+              <li id="currentslide-li" style="z-index: 0;">
+		<img id="currentslide-img" style="display: none;"/>
               </li>
 	      
-              <li id="overlay-li" style="z-index: -1;">
-		<img id="overlay-img" style="display: none;"/>
+              <li id="overlayslide-li" style="z-index: -1;">
+		<img id="overlayslide-img" style="display: none;"/>
               </li>
             </ul>
 	  </div>
@@ -222,11 +107,6 @@
       </div>
       
     </div>
-<!--    
-    <video id='video' width="500px" height="500px" muted >           
-      <source id='video' type="video/mp4"> 
-    </video>
-    -->
     
     <div id="barcodeL" style="height: 250px; display: block; position: absolute; left:  7px; top: 7px;"></div>
     <div id="barcodeR" style="height: 250px; display: block; position: absolute; right: 7px; top: 7px;"></div>

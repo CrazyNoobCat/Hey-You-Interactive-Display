@@ -43,11 +43,13 @@
 	list-style:none;
 }
 
+/*
 #showslide:hover li, #showslide:hover .progress-bar {
             animation-play-state: paused;
        -moz-animation-play-state: paused;
     -webkit-animation-play-state: paused;
 }
+*/
 
 .progress-bar { 
     position:relative;
@@ -59,22 +61,22 @@
 }
 
 
-.baseslide-animation {
+.currentslide-animation {
         /* animation: name duration timing-fn iteration-count */
-           animation: var(--animation-baseslide) var(--animation-time) linear 1; 
-      -moz-animation: var(--animation-baseslide) var(--animation-time) linear 1;	
-   -webkit-animation: var(--animation-baseslide) var(--animation-time) linear 1;
+           animation: var(--animation-currentslide) var(--animation-time) linear 1; 
+      -moz-animation: var(--animation-currentslide) var(--animation-time) linear 1;	
+   -webkit-animation: var(--animation-currentslide) var(--animation-time) linear 1;
 
            animation-play-state: var(--animation-play-state);
       -moz-animation-play-state: var(--animation-play-state);
    -webkit-animation-play-state: var(--animation-play-state);
 }
 
-.overlay-animation {
+.overlayslide-animation {
         /* animation: name duration timing-fn iteration-count */
-           animation: var(--animation-overlay) var(--animation-time) linear 1;
-      -moz-animation: var(--animation-overlay) var(--animation-time) linear 1;
-   -webkit-animation: var(--animation-overlay) var(--animation-time) linear 1;
+           animation: var(--animation-overlayslide) var(--animation-time) linear 1;
+      -moz-animation: var(--animation-overlayslide) var(--animation-time) linear 1;
+   -webkit-animation: var(--animation-overlayslide) var(--animation-time) linear 1;
 
            animation-play-state: var(--animation-play-state);
       -moz-animation-play-state: var(--animation-play-state);

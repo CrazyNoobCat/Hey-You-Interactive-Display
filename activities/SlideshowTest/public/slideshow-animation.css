@@ -7,34 +7,34 @@
 
 
 /* Slide in from right */
-@keyframes fromright-baseslide {
+@keyframes fromright-currentslide {
      0% { left:    0px; opacity: 1; z-index: 0; }
     92% { left:    0px; opacity: 1; z-index: 0; } 
    100% { left:-1280px; opacity: 1; z-index: 0; } /* set to 0 if want fade out */
 }
-@-moz-keyframes fromright-baseslide {
+@-moz-keyframes fromright-currentslide {
      0% { left:    0px; opacity: 1; z-index: 0; }
     92% { left:    0px; opacity: 1; z-index: 0; } 
    100% { left:-1280px; opacity: 1; z-index: 0; } 
 }
-@-webkit-keyframes fromright-baseslide {
+@-webkit-keyframes fromright-currentslide {
      0% { left:    0px; opacity: 1; z-index: 0; }
     92% { left:    0px; opacity: 1; z-index: 0; } 
    100% { left:-1280px; opacity: 1; z-index: 0; } 
 	
 }
 
-@keyframes fromright-overlay {
+@keyframes fromright-overlayslide {
      0% { left: 1280px; opacity: 1; z-index:-1; } /* set to 0 if want fade in */
     92% { left: 1280px; opacity: 1; z-index: 0; } /* set to 0 if want fade in */
    100% { left:    0px; opacity: 1; z-index: 0; }
 }
-@-moz-keyframes fromright-overlay {
+@-moz-keyframes fromright-overlayslide {
      0% { left: 1280px; opacity: 1; z-index:-1; }
     92% { left: 1280px; opacity: 1; z-index: 0; }
    100% { left:    0px; opacity: 1; z-index: 0; }
 }
-@-webkit-keyframes fromright-overlay {
+@-webkit-keyframes fromright-overlayslide {
      0% { left: 1280px; opacity: 1; z-index:-1; } 
     92% { left: 1280px; opacity: 1; z-index: 0; }
    100% { left:    0px; opacity: 1; z-index: 0; }
@@ -43,34 +43,34 @@
 
 /* cross-fade */
 
-@keyframes crossfade-baseslide {
+@keyframes crossfade-currentslide {
      0% { left:   0px; opacity: 1; z-index: 0; }
     92% { left:   0px; opacity: 1; z-index: 0; } 
    100% { left:   0px; opacity: 0; z-index: 0; }
 }
-@-moz-keyframes crossfade-baseslide {
+@-moz-keyframes crossfade-currentslide {
      0% { left:   0px; opacity: 1; z-index: 0; }
     92% { left:   0px; opacity: 1; z-index: 0; } 
    100% { left:   0px; opacity: 0; z-index: 0; } 
 }
-@-webkit-keyframes crossfade-baseslide {
+@-webkit-keyframes crossfade-currentslide {
      0% { left:   0px; opacity: 1; z-index: 0; }
     92% { left:   0px; opacity: 1; z-index: 0; } 
    100% { left:   0px; opacity: 0; z-index: 0; } 
 	
 }
 
-@keyframes crossfade-overlay {
+@keyframes crossfade-overlayslide {
      0% { left:   0px; opacity: 0; z-index:-1; }
     92% { left:   0px; opacity: 0; z-index: 0; }
    100% { left:   0px; opacity: 1; z-index: 0; }
 }
-@-moz-keyframes crossfade-overlay {
+@-moz-keyframes crossfade-overlayslide {
      0% { left:   0px; opacity: 0; z-index:-1; }
     92% { left:   0px; opacity: 0; z-index: 0; }
    100% { left:   0px; opacity: 1; z-index: 0; }
 }
-@-webkit-keyframes crossfade-overlay {
+@-webkit-keyframes crossfade-overlayslide {
      0% { left:   0px; opacity: 0; z-index:-1; } 
     92% { left:   0px; opacity: 0; z-index: 0; }
    100% { left:   0px; opacity: 1; z-index: 0; }
