@@ -1,118 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-		<title>App Launcher Display | Hey You, Interact With Me!</title>
-
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      
+      <title>App Launcher Display | Hey You, Interact With Me!</title>
+      
+      
+      <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+      
+      <!--<link rel="manifest" href="/manifest.webmanifest">-->
+      
+      <!-- Cast Debug Logger -->
+      <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
+      
+      <link rel="stylesheet" type="text/css" href="index.css">
+      <link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
+      
+      <script type="text/javascript" src="socketCreation.js"></script>
+      <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+      <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+      
+      <script type="text/javascript" src="display-utils.js"></script>
+      
+      <script>
+	var QRDim = null;
+	
+	// Custom socketLoaded() for top-level activity launcher
+	
+	function socketLoaded(anyListener)
+	{
+	    var displayHost = self.location.host;
+	    
+	    console.log("socketLoaded: Display hostname: " + displayHost);
+	    console.log("socketLoaded: Room ID: " + getCookie('roomID'));
+	    
+	    socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
+		if (cName == "roomName") {
+		    displayRoomURL(displayHost,cContent,"website");
+		}
+	    });
+	    
+	    var roomID = getCookie('roomID');
+	    displayRoomQRCode(displayHost,roomID,QRDim,"barcode");
+	    
+	    if (getCookie('roomName') != "") {
+		console.log("socketLoaded(): roomName = " + getCookie('roomName'));
 		
-		<link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
-		
-		<!--<link rel="manifest" href="/manifest.webmanifest">-->
+		var roomName = getCookie('roomName');
+		displayRoomURL(displayHost,roomName,"website");
+	    }
+	    else {
+		console.log("socketLoaded(): roomName not defined");
+	    }
+	}
+	
+	// $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
+	var viewportWidth  = $(window).width();
+	var viewportHeight = $(window).height();
+	
+	console.log("Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);
+	if (viewportHeight <= viewportWidth) {
+	    // Need to make sure Hey You logo + QR code (and the jiggling text above, and URL below)
+	    // all fit
+	    
+	    // => allow 20% space for text top and bottom, then equally split remaining space
+	    QRDim = (viewportHeight * 0.8) / 2;
+	}
+	else {
+	    // Not such a big issue when viewPort is already tall and thin (more wiggle room)
+	    // => viewportWidth / 2 would guarantee that logo and QR code would fit
+	    // However, there is the issue of the text top and bottom to fit in, and
+	    // that issue depends on how much taller the viewport is compared to width
+	    
+	    // The approach taken here is to:
+	    //    (i  provisionally set the QR code (and logo) to be viewportWidth/2
+	    //   (11) assume the text takes up 20% of viewport "min" dimension (i.e. width)
+	    //  (iii) then see if that added on the logo and qr-code exceeds the viewportHeight
+	    //   (iv) if it does, reduce the calculated QR code + logo dim by that amount so it does fit
+	    
+	    QRDim = (viewportWidth /2);
+	    var textDim = viewportWidth * 0.2;
+	    
+	    if (((QRDim * 2) + textDim) > viewportHeight) {
+		QRDim -= (textDim/2); // the div by 2 is because the textDim reduction spans 2 images (QR code + Logo)
+	    }
+	}
+	QRDim = Math.round(QRDim);
+	console.log("Dynamically computed QRDim = " + QRDim);
 
-		<!-- Cast Debug Logger -->
-		<!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
-
-		<link rel="stylesheet" type="text/css" href="index.css">
-		<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
-		
-		<script type="text/javascript" src="socketCreation.js"></script>
-		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-		<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-
-		<script type="text/javascript" src="display-utils.js"></script>
-
-		<script>
-			var QRDim = null;
-
-			// Custom socketLoaded() for top-level activity launcher
-
-			function socketLoaded(anyListener)
-			{
-				var displayHost = self.location.host;
-
-				console.log("socketLoaded: Display hostname: " + displayHost);
-				console.log("socketLoaded: Room ID: " + getCookie('roomID'));
-
-				socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
-					if (cName == "roomName") {
-					    displayRoomURL(displayHost,cContent,"website");
-					}
-				});
-
-				var roomID = getCookie('roomID');
-			        displayRoomQRCode(displayHost,roomID,QRDim,"barcode");
-			    
-			        if (getCookie('roomName') != "") {
-				    console.log("socketLoaded(): roomName = " + getCookie('roomName'));
-
-				    var roomName = getCookie('roomName');
-				    displayRoomURL(displayHost,roomName,"website");
-				}
-			        else {
-				    console.log("socketLoaded(): roomName not defined");
-				}
-			}
-
-			// $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
-			var viewportWidth  = $(window).width();
-			var viewportHeight = $(window).height();
-
-		  console.log("Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);
-		  if (viewportHeight <= viewportWidth) {
-		      // Need to make sure Hey You logo + QR code (and the jiggling text above, and URL below)
-		      // all fit
-
-		      // => allow 20% space for text top and bottom, then equally split remaining space
-		      QRDim = (viewportHeight * 0.8) / 2;
-		  }
-		  else {
-		      // Not such a big issue when viewPort is already tall and thin (more wiggle room)
-		      // => viewportWidth / 2 would guarantee that logo and QR code would fit
-		      // However, there is the issue of the text top and bottom to fit in, and
-		      // that issue depends on how much taller the viewport is compared to width
-
-		      // The approach taken here is to:
-		      //    (i  provisionally set the QR code (and logo) to be viewportWidth/2
-		      //   (11) assume the text takes up 20% of viewport "min" dimension (i.e. width)
-		      //  (iii) then see if that added on the logo and qr-code exceeds the viewportHeight
-		      //   (iv) if it does, reduce the calculated QR code + logo dim by that amount so it does fit
-		      
-		      QRDim = (viewportWidth /2);
-		      var textDim = viewportWidth * 0.2;
-
-		      if (((QRDim * 2) + textDim) > viewportHeight) {
-			  QRDim -= (textDim/2); // the div by 2 is because the textDim reduction spans 2 images (QR code + Logo)
-		      }
-		  }
-		  QRDim = Math.round(QRDim);
-		  console.log("Dynamically computed QRDim = " + QRDim);
-
-
-
-		  $(document).ready(function () {
-		      var logoDim = Math.min(QRDim,250)
-		      
-		      $('#branding-logo').width(logoDim);
-		      $('#branding-logo').height(logoDim);
-
-		      $('#barcode').width(QRDim);
-		      $('#barcode').height(QRDim);
-		      $('#barcode-loading').width(QRDim);
-		      $('#barcode-loading').height(QRDim);
-
-		  });
-
-		  // All displays need to defined a socketLoaded() function,
-		  // and call socketConnection("display") to kick thigns off
-		  
-		  setupConnection("display");
-
-		</script>
-
+	
+	$(document).ready(function () {
+	    var logoDim = Math.min(QRDim,250)
+	    
+	    $('#branding-logo').width(logoDim);
+	    $('#branding-logo').height(logoDim);
+	    
+	    $('#barcode').width(QRDim);
+	    $('#barcode').height(QRDim);
+	    $('#barcode-loading').width(QRDim);
+	    $('#barcode-loading').height(QRDim);
+	    
+	});
+	
+	// All displays need to defined a socketLoaded() function,
+	// and call socketConnection("display") to kick thigns off
+	
+	setupConnection("display");
+	
+      </script>
+      
     </head>
-
+    
     <body id="xfade" style="background-color: white;">
       <!-- figure elements used for x 4 background image cross-fades (xfade) -->
       <figure></figure>
