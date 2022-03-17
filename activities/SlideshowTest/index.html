@@ -17,7 +17,6 @@
       :root {
 	  --slideshow-width:  1280px;
 	  --slideshow-height:  720px;
-	  --slideshow-height:  720px;
 	  
 	  --animation-play-state:   running;
 	  --animation-time:         10s;
@@ -51,16 +50,20 @@
           socket.onAny(anyListener); // Turns on the any listener
           socket.emit("displayLoaded"); 
 
-	  // Should the follow not be done on document.ready() ??
+	  //var qrDim = 250;
 
-	  var QRDim = 250;
+	  // $(window).width() is available from the get-go (i.e., don't need to wait for DOM ready)	
+	  var viewportWidth  = $(window).width();
+
+	  var qrDim = viewportWidth * 0.12; // 12% of width 
+
 	  
           var displayHost = self.location.host;
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
+	  displayRoomQRCode(displayHost,roomID,qrDim,"join-qrcode-left");
+	  displayRoomQRCode(displayHost,roomID,qrDim,"join-qrcode-right");
 	  
 	  displayRoomURL(displayHost,roomName,"join-room-url-left");
 	  displayRoomURL(displayHost,roomName,"join-room-url-right");

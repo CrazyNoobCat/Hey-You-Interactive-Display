@@ -54,7 +54,13 @@
 	  if ($('#play-pause').attr("class") == "do-pause") {
               send('pause');
 	      $('#play-pause').attr("class","do-play");
-	      $('#play-pause').html("Play ⏵");
+
+	      /* The following (smaller) play button ⏵ displayed as a unknown chaar on  
+	         the Andoroid  phhone used for testing  
+		 Choosing the larger play version (diffent codepoint) which does display, 
+		 but with a blue background on the Android test phone
+	      */	      
+	      $('#play-pause').html("Play ▶");  
 	  }
 	  else {
 	      // resume play
