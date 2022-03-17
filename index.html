@@ -56,10 +56,12 @@
 	    }
 	}
 	
-	// $(window) width() and height() are available from the get-go (i.e., don't need to wait for DOM ready)
-	var viewportWidth  = $(window).width();
-	var viewportHeight = $(window).height();
+	// $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
 	
+	//var viewportWidth  = $(window).width();
+	//var viewportHeight = $(window).height();
+
+	/*
 	console.log("Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);
 	if (viewportHeight <= viewportWidth) {
 	    // Need to make sure Hey You logo + QR code (and the jiggling text above, and URL below)
@@ -87,8 +89,14 @@
 		QRDim -= (textDim/2); // the div by 2 is because the textDim reduction spans 2 images (QR code + Logo)
 	    }
 	}
-	QRDim = Math.round(QRDim);
-	console.log("Dynamically computed QRDim = " + QRDim);
+	*/
+
+	// $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
+	
+	var viewportWidth  = $(window).width();
+	var viewportHeight = $(window).height();
+
+	QRDim = computeQRDimMaximizeHeight(viewportWidth,viewportHeight);
 
 	
 	$(document).ready(function () {

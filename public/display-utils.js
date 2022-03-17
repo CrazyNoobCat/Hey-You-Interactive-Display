@@ -1,4 +1,44 @@
 
+function computeQRDimMaximizeHeight(viewportWidth,viewportHeight)
+{		      	
+    console.log("computeQRDimMaximizeHeight() Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);
+
+    var qrDim = 0;
+    
+    if (viewportHeight <= viewportWidth) {
+	// Need to make sure Hey You logo + QR code (and the jiggling text above, and URL below)
+	// all fit
+	
+	// => allow 20% space for text top and bottom, then equally split remaining space
+	qrDim = (viewportHeight * 0.8) / 2;
+    }
+    else {
+	// Not such a big issue when viewPort is already tall and thin (more wiggle room)
+	// => viewportWidth / 2 would guarantee that logo and QR code would fit
+	// However, there is the issue of the text top and bottom to fit in, and
+	// that issue depends on how much taller the viewport is compared to width
+	
+	// The approach taken here is to:
+	//    (i  provisionally set the QR code (and logo) to be viewportWidth/2
+	//   (11) assume the text takes up 20% of viewport "min" dimension (i.e. width)
+	//  (iii) then see if that added on the logo and qr-code exceeds the viewportHeight
+	//   (iv) if it does, reduce the calculated QR code + logo dim by that amount so it does fit
+	
+	qrDim = (viewportWidth /2);
+	var textDim = viewportWidth * 0.2;
+	
+	if (((qrDim * 2) + textDim) > viewportHeight) {
+	    qrDim -= (textDim/2); // the div by 2 is because the textDim reduction spans 2 images (QR code + Logo)
+	}
+    }
+    qrDim = Math.round(qrDim);
+
+    console.log("Dynamically computed qrDim = " + qrDim);
+
+    return qrDim;
+}
+
+    
 function displayRoomQRCode(displayHost,roomID,qrDim,elemId)
 {
     // For the QR code, work directly with the roomID
