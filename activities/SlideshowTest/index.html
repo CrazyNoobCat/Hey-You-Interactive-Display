@@ -23,7 +23,10 @@
       body {
           display: flex;
           justify-content: center;
+	  font-family: monospace;
+	  color: #000000;
       }
+      
     </style>
 
     <link rel="stylesheet" type="text/css" href="slideshow-animation.css"/>
@@ -33,6 +36,7 @@
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
     <script type="text/javascript" src="/socketCreation.js"></script>
 
+    <script type="text/javascript" src="display-utils.js"></script>
     <script type="text/javascript" src="/scripts/slideshow-display.js"></script>
     
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
@@ -43,14 +47,28 @@
           socket.emit("displayLoaded"); 
 
 	  // Should the follow not be done on document.ready() ??
+
+	  var QRDim = 250;
 	  
           var displayHost = self.location.host;
+	  var roomID    = getCookie('roomID');
+	  var roomName  = getCookie('roomName');
+
+	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
+	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
+	  
+	  displayRoomURL(displayHost,roomName,"join-room-url-left");
+	  displayRoomURL(displayHost,roomName,"join-room-url-right");
+
+	  /*
           var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + displayHost + '/join/' + getCookie('roomID') + '&size=250x250';
 	  var $imgL = $('<img>').attr('src',url);
 	  var $imgR = $('<img>').attr('src',url);
 	  
-          $('#barcodeL').html($imgL)
-          $('#barcodeR').html($imgR)
+          $('#qrcode-left').html($imgL)
+          $('#qrcode-right').html($imgR)
+	  */
+
       } 
       
       setupConnection("display");  
@@ -81,8 +99,7 @@
 	  else {
 	      console.log("socketUpdate(): Unrecognized command '" + e + "'");
 	  }
-      }
-      
+      }      
     </script>
 
   </head>
@@ -108,8 +125,14 @@
       
     </div>
     
-    <div id="barcodeL" style="height: 250px; display: block; position: absolute; left:  7px; top: 7px;"></div>
-    <div id="barcodeR" style="height: 250px; display: block; position: absolute; right: 7px; top: 7px;"></div>
+    <div id="join-left-container" style="width: 250px; display: block; position: absolute; left:  7px; top: 7px;">
+      <div id="join-qrcode-div-left" style="position: relative; height: 250px;"><div id="join-qrcode-left"></div></div>
+      <h3  id="join-room-url-left"   style="position: relative;"></h3>
+    </div>
+    <div id="join-right-container" style="width: 250px; display: block; position: absolute; right: 7px; top: 7px;">
+      <div id="join-qrcode-div-right" style="position: relative; height: 250px;"><div id="join-qrcode-right"></div></div>      
+      <h3  style="position: relative" id="join-room-url-right"></h3>
+    </div>
 
     <footer>
         <script src="receiver.js"></script>
