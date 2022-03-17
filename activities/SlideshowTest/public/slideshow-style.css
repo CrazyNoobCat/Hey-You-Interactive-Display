@@ -1,62 +1,55 @@
 
 /* Layout */
 .container {
-	margin:   0 auto;
-	overflow: hidden;
+    margin:   0 auto;
+    overflow: hidden;
 }
 
 /* horizonatally centred */
 #content-showslide {
     width:  100%;
-    height: 760px;
+    height: var(--slideshow-height); /* used to be 760px, when all the other height values were 720px */
+
     margin: 10px auto 0;
 }
 
 /* Slideshow area */
 #showslide {
-    height:  720px;
-    width:  1280px;
+    position: relative;
+    width:  var(--slideshow-width);
+    height: var(--slideshow-height);
     
-    margin:40px auto 0;
-    overflow:visible;
-    position:relative;
+    margin:   40px auto 0;
+    overflow: visible;
 }
 
 #mask {
-	overflow:hidden;
-	height:720px;
+    overflow: hidden;
+    height: var(--slideshow-height);
 }
 
 #showslide ul {
-	margin:0;
-	padding:0;
-	position:relative;
+    position: relative;
+    margin:  0;
+    padding: 0;
 }
 
 #showslide li {
-	position: absolute;
-	top:    0px;
-	left:   0px;
-	width:  1280px;
-	height: 720px;
-
-	list-style:none;
+    position: absolute;
+    top:    0;
+    left:   0;
+    width:  var(--slideshow-width);
+    height: var(--slideshow-height);
+    
+    list-style:none;
 }
-
-/*
-#showslide:hover li, #showslide:hover .progress-bar {
-            animation-play-state: paused;
-       -moz-animation-play-state: paused;
-    -webkit-animation-play-state: paused;
-}
-*/
 
 .progress-bar { 
-    position:relative;
-    top:   -5px;
-    width:  1280px; 
-    height: 5px;
-
+    position: relative;
+    top:      -5px;
+    width:  var(--slideshow-width);
+    height:    5px;
+    
     background:#000;
 }
 

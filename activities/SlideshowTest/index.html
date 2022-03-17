@@ -10,10 +10,15 @@
     <title>Slideshow | Hey You, Interact With Me!</title>
 
     <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+
     <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
 
     <style>
       :root {
+	  --slideshow-width:  1280px;
+	  --slideshow-height:  720px;
+	  --slideshow-height:  720px;
+	  
 	  --animation-play-state:   running;
 	  --animation-time:         10s;
 	  --animation-currentslide: fromright-currentslide;
@@ -59,16 +64,6 @@
 	  
 	  displayRoomURL(displayHost,roomName,"join-room-url-left");
 	  displayRoomURL(displayHost,roomName,"join-room-url-right");
-
-	  /*
-          var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + displayHost + '/join/' + getCookie('roomID') + '&size=250x250';
-	  var $imgL = $('<img>').attr('src',url);
-	  var $imgR = $('<img>').attr('src',url);
-	  
-          $('#qrcode-left').html($imgL)
-          $('#qrcode-right').html($imgR)
-	  */
-
       } 
       
       setupConnection("display");  
@@ -101,8 +96,8 @@
 	  }
       }      
     </script>
-
   </head>
+  
   <body>
 
     <div class="container">
@@ -135,7 +130,8 @@
     </div>
 
     <footer>
-        <script src="receiver.js"></script>
+      <script src="receiver.js"></script>
     </footer>
-</body>
+
+  </body>
 </html>
