@@ -37,18 +37,18 @@
 	    
 	    socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
 		if (cName == "roomName") {
-		    displayRoomURL(displayHost,cContent,"website");
+		    displayRoomURL(displayHost,cContent,"join-room-url");
 		}
 	    });
 	    
 	    var roomID = getCookie('roomID');
-	    displayRoomQRCode(displayHost,roomID,QRDim,"barcode");
+	    displayRoomQRCode(displayHost,roomID,QRDim,"qrcode");
 	    
 	    if (getCookie('roomName') != "") {
 		console.log("socketLoaded(): roomName = " + getCookie('roomName'));
 		
 		var roomName = getCookie('roomName');
-		displayRoomURL(displayHost,roomName,"website");
+		displayRoomURL(displayHost,roomName,"join-room-url");
 	    }
 	    else {
 		console.log("socketLoaded(): roomName not defined");
@@ -96,10 +96,10 @@
 	    $('#branding-logo').width(logoDim);
 	    $('#branding-logo').height(logoDim);
 	    
-	    $('#barcode').width(QRDim);
-	    $('#barcode').height(QRDim);
-	    $('#barcode-loading').width(QRDim);
-	    $('#barcode-loading').height(QRDim);
+	    $('#qrcode').width(QRDim);
+	    $('#qrcode').height(QRDim);
+	    $('#qrcode-loading').width(QRDim);
+	    $('#qrcode-loading').height(QRDim);
 	    
 	});
 	
@@ -126,14 +126,14 @@
 		<img src="logo/Hey-You-Logo-unired-screen.svg" />
 	      </div>
 	      <div class="center" style="position: relative; align-content: center; margin-top: 3px;">
-		<div id="barcode-loading" style="position: absolute; z-index: 1; width: 100%; text-align: center; background-color: #f8f8f8;">
+		<div id="qrcode-loading" style="position: absolute; z-index: 1; width: 100%; text-align: center; background-color: #f8f8f8;">
 		  Loading ...
 		</div>
-		<div id="barcode" style="position: relative; z-index: 2;">
+		<div id="qrcode" style="position: relative; z-index: 2;">
 		</div>
 	      </div>
             </div>                        
-            <h2 id="website">Or visit on your phone:</h2>
+            <h2 id="join-room-url">Or visit on your phone:</h2>
         </div>
         <footer>
           <script src="receiver.js"></script>	    
