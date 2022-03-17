@@ -107,8 +107,13 @@
 	  <h1 class="heading">Control details:</h1>
 	  <ul>
 	    <li>Use the <i>Next</i> and <i>Previous</i> buttons to move through the slides</li>
+	    <li>Press <i>Pause</i> to give yourself more time to look at a slide</li>
+	    <li>Press <i>Play</i> to resume the slideshow</li>
 	    <li>Use the <i>Download</i> button to transfer the displayed slide onto your phone</li>
-	    <li>Press the <div style="display: inline-block; background-color: #e03031; padding: 3px;"><img class="home-img-small" src="back.svg" /></div> button to exit the slideshow, and return to the App Chooser</li>
+	    <li>
+	      Press the <div style="display: inline-block; background-color: #e03031; padding: 3px;"><img class="home-img-small" src="back.svg" /></div>
+	      button to exit the slideshow, and return to the App Chooser
+	    </li>
 	  </ul>
 	</div>
 
@@ -117,7 +122,7 @@
 	     Unicode version: 7.0 (2014)
 	  -->
 	
-	<div class="controller-item" style="border: none;">
+	<div class="controller-item" style="border: none; margin-top: 12px; padding-top: 24px;">
 	  <div class="fb-container-equispaced" style="font-size: 90%">
 	    <a class="fb-item" onclick="send('back')" ><div><div style="display: inline-block; transform: scaleX(-1);">➥</div> Previous</div></a>
 	    <a class="fb-item" onclick="sendPause()"><div id="play-pause" class="do-pause">Pause ⏸</div></a>
@@ -126,7 +131,7 @@
 	</div>
 
 
-	<div class="controller-item" style="border: none; padding-top: 12px;">
+	<div class="controller-item" style="border: none; padding-top: 12px; padding-bottom: 24px;">
 	  <div class="fb-container-equispaced" style="font-size: 90%">
 	    <a class="fb-item" style="visibility: hidden;"><div></div></a>
 	    <a class="fb-item" onclick="send('download')"><div>Download ⤓</div></a>
