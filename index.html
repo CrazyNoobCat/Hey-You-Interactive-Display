@@ -17,36 +17,14 @@
 		<link rel="stylesheet" type="text/css" href="index.css">
 		<link rel="stylesheet" type="text/css" href="https://csshake.surge.sh/csshake.min.css" />
 		
-		<script src="socketCreation.js"></script>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-		<script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+		<script type="text/javascript" src="socketCreation.js"></script>
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+
+		<script type="text/javascript" src="display-utils.js"></script>
 
 		<script>
 			var QRDim = null;
-
-		        function displayRoomQRCode(displayHost,roomID,qrDim)
-			{
-				// For the QR code, work directly with the roomID
-				var full_room_id = displayHost + '/join/' + roomID;
-
-			        var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
-
-			        var $img = $('<img>').attr('src',url);
-			        $img.on("load", function() {
-				     $img.fadeIn(1000);
-				});
-			        $img.css("display","none");
-
-			         $('#barcode').html($img);
-			}
-
-			function displayRoomURL(displayHost,roomName)	  
-			{
-				// For roomURL we work with the roomName to give a nicer URL to type in
-				// This is subsequently mapped to the roomID URL by the server
-
-				$('#website').html('Or visit on your phone: <span style="white-space: nowrap;">' + displayHost + '/join/' + roomName + '</span>');
-			}
 
 			// Custom socketLoaded() for top-level activity launcher
 
@@ -59,18 +37,18 @@
 
 				socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
 					if (cName == "roomName") {
-						displayRoomURL(displayHost,cContent);
+					    displayRoomURL(displayHost,cContent,"website");
 					}
 				});
 
 				var roomID = getCookie('roomID');
-			        displayRoomQRCode(displayHost,roomID,QRDim);
+			        displayRoomQRCode(displayHost,roomID,QRDim,"barcode");
 			    
 			        if (getCookie('roomName') != "") {
 				    console.log("socketLoaded(): roomName = " + getCookie('roomName'));
 
 				    var roomName = getCookie('roomName');
-				    displayRoomURL(displayHost,roomName);
+				    displayRoomURL(displayHost,roomName,"website");
 				}
 			        else {
 				    console.log("socketLoaded(): roomName not defined");
