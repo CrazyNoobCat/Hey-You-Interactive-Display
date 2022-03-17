@@ -8,36 +8,36 @@
 
 /* Slide in from right */
 @keyframes fromright-currentslide {
-     0% { left:    0px; opacity: 1; z-index: 0; }
-    92% { left:    0px; opacity: 1; z-index: 0; } 
-   100% { left:-1280px; opacity: 1; z-index: 0; } /* set to 0 if want fade out */
+     0% { left:                      0px; opacity: 1; z-index: 0; }
+    92% { left:                      0px; opacity: 1; z-index: 0; } 
+   100% { left:var(--slideshow-negwidth); opacity: 1; z-index: 0; } /* set to 0 if want fade out */
 }
 @-moz-keyframes fromright-currentslide {
-     0% { left:    0px; opacity: 1; z-index: 0; }
-    92% { left:    0px; opacity: 1; z-index: 0; } 
-   100% { left:-1280px; opacity: 1; z-index: 0; } 
+     0% { left:                      0px; opacity: 1; z-index: 0; }
+    92% { left:                      0px; opacity: 1; z-index: 0; } 
+   100% { left:var(--slideshow-negwidth); opacity: 1; z-index: 0; } 
 }
 @-webkit-keyframes fromright-currentslide {
-     0% { left:    0px; opacity: 1; z-index: 0; }
-    92% { left:    0px; opacity: 1; z-index: 0; } 
-   100% { left:-1280px; opacity: 1; z-index: 0; } 
+     0% { left:                      0px; opacity: 1; z-index: 0; }
+    92% { left:                      0px; opacity: 1; z-index: 0; } 
+   100% { left:var(--slideshow-negwidth); opacity: 1; z-index: 0; } 
 	
 }
 
 @keyframes fromright-overlayslide {
-     0% { left: 1280px; opacity: 1; z-index:-1; } /* set to 0 if want fade in */
-    92% { left: 1280px; opacity: 1; z-index: 0; } /* set to 0 if want fade in */
-   100% { left:    0px; opacity: 1; z-index: 0; }
+     0% { left: var(--slideshow-width); opacity: 1; z-index:-1; } /* set to 0 if want fade in */
+    92% { left: var(--slideshow-width); opacity: 1; z-index: 0; } /* set to 0 if want fade in */
+   100% { left:                    0px; opacity: 1; z-index: 0; }
 }
 @-moz-keyframes fromright-overlayslide {
-     0% { left: 1280px; opacity: 1; z-index:-1; }
-    92% { left: 1280px; opacity: 1; z-index: 0; }
-   100% { left:    0px; opacity: 1; z-index: 0; }
+     0% { left: var(--slideshow-width); opacity: 1; z-index:-1; }
+    92% { left: var(--slideshow-width); opacity: 1; z-index: 0; }
+   100% { left:                    0px; opacity: 1; z-index: 0; }
 }
 @-webkit-keyframes fromright-overlayslide {
-     0% { left: 1280px; opacity: 1; z-index:-1; } 
-    92% { left: 1280px; opacity: 1; z-index: 0; }
-   100% { left:    0px; opacity: 1; z-index: 0; }
+     0% { left: var(--slideshow-width); opacity: 1; z-index:-1; } 
+    92% { left: var(--slideshow-width); opacity: 1; z-index: 0; }
+   100% { left:                    0px; opacity: 1; z-index: 0; }
 }
 
 
