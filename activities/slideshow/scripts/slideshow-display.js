@@ -1,10 +1,140 @@
-      
-function doSlideTransition(transitionType)
+// $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
+var viewportXDim = $(window).width();
+var viewportYDim = $(window).height();
+
+var SlideMaxXDim = viewportXDim * 0.9;
+var SlideMaxYDim = viewportYDim * 0.9;
+var QRDim = Math.max(viewportXDim * 0.12,250);
+
+// State variables for slideshow activity
+var currentSlidePos = 0;
+var overlaySlidePos = 1;
+var currentSlideFS  = currentSlidePos + 1;
+var overlaySlideFS  = overlaySlidePos + 1;
+
+var SlidesOverview = null;      
+var slideDir  = null;
+//var slideExt  = null;
+var numSlides = null;
+
+var actualSlideImageXDim = null;
+var actualSlideImageYDim = null;
+
+var displaySlideXDim = null;
+var displaySlideYDim = null;
+
+var defaultSlideTransition = null;
+var defaultSlideDuration   = null;
+
+var slideDeck = null;
+
+function activateSlideshow(slideshowName,slidesOverviewJSON)
 {
-    //console.log("doSlideTransition() called with transitionType = " + transitionType);
+    //console.log("activateSlideshow() called!");
+    
+    slideDir = "/" + slideshowName;
+
+    slideDeck = slidesOverviewJSON.slides;
+    //slideExt = ".PNG";
+    numSlides = slideDeck.length;
+    
+    defaultSlideTransition = slidesOverviewJSON.defaultSlideTransition;
+    defaultSlideDuration   = slidesOverviewJSON.defaultSlideDuration;
+        
+    actualSlideImageXDim = slidesOverviewJSON.maxXDim;
+    actualSlideImageYDim = slidesOverviewJSON.maxYDim;
+    
+    var scaleXDim = SlideMaxXDim / actualSlideImageXDim ;
+    var scaleYDim = SlideMaxYDim / actualSlideImageYDim ;
+    
+    //var scaleTransform;
+    
+    if (scaleXDim < scaleYDim) {
+	// Don't want to overflow, so scale by the smaller amount
+	displaySlideXDim = SlideMaxXDim;
+	displaySlideYDim = actualSlideImageYDim * scaleXDim;
+	//scaleTransform = "scale("+scaleXDim+")";
+    }
+    else {
+	displaySlideXDim = actualSlideImageXDim * scaleYDim;
+	displaySlideYDim = SlideMaxYDim;
+	//scaleTransform = "scale("+scaleYDim+")";
+    }
+    displaySlideXDim = Math.floor(displaySlideXDim);
+    displaySlideYDim = Math.floor(displaySlideYDim);
+    
+    //$('#currentslide-img').css("transform",scaleTransform);
+    //$('#overlayslide-img').css("transform",scaleTransform);
+    
+    
+
+    $('#currentslide-img').css("width", displaySlideXDim+"px");
+    $('#currentslide-img').css("height",displaySlideYDim+"px");
+    $('#overlayslide-img').css("width", displaySlideXDim+"px");
+    $('#overlayslide-img').css("height",displaySlideYDim+"px");
     
     var root = document.querySelector(':root');
-    //root.style.setProperty('--animation-time', '2s');
+    root.style.setProperty('--slideshow-width',      displaySlideXDim+'px');
+    root.style.setProperty('--slideshow-height',     displaySlideYDim+'px');
+    root.style.setProperty('--slideshow-negwidth',  -displaySlideXDim+'px');
+    root.style.setProperty('--slideshow-negheight', -displaySlideYDim+'px');
+    
+    // Set up first slide 
+    var $currentSlideImg = $('#currentslide-img');
+    var $overlaySlideImg = $('#overlayslide-img');
+
+    var currentSlideFile = slideDeck[currentSlidePos].file;
+    var overlaySlideFile = slideDeck[overlaySlidePos].file;
+
+    $currentSlideImg.attr("src", slideDir + "/" + currentSlideFile);
+    $overlaySlideImg.attr("src", slideDir + "/" + overlaySlideFile);
+
+    //$currentSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
+    //$overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
+    
+    $currentSlideImg.on("load", function() {
+	$currentSlideImg.fadeIn(1000);
+	      
+	if (numSlides > 1) {
+	    // Get the next slide set up as the overlay, but need to wait until fadeIn done
+		  setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  
+	    
+	}	  	      
+    });
+    
+    // https://stackoverflow.com/questions/6186454/is-there-a-callback-on-completion-of-a-css3-animation        
+    $("#currentslide-li").bind('animationend oanimationend webkitAnimationEnd MSAnimationEnd', function() { 
+	startNextSlide() 
+    });
+
+    var localSlideDuration   = slideDeck[currentSlidePos].slideDuration;
+    var localSlideTransition = slideDeck[overlaySlidePos].slideTransition;
+
+    doSlideTransition(localSlideDuration,localSlideTransition);
+
+    //doSlideTransition(slideDeck[overlaySlidePos].slideTransition,slideDeck[currentSlidePos].slideDuration);
+}
+
+function loadSlideshow(slideshowName)
+{
+    //console.log("loadSlideshow() called!");
+    
+    $.ajax({
+	url: "/" + slideshowName + "/slidesOverview.json",
+	success: function(jsonResult) { activateSlideshow(slideshowName,jsonResult) }
+    });    
+}
+
+function doSlideTransition(localSlideDuration,localSlideTransition)
+{
+    //console.log("doSlideTransition() called"));
+
+    var transitionDur  = localSlideDuration   || defaultSlideDuration;
+    var transitionType = localSlideTransition || defaultSlideTransition;
+    
+    var root = document.querySelector(':root');
+
+    root.style.setProperty('--animation-time', transitionDur);
     root.style.setProperty('--animation-currentslide', transitionType+'-currentslide');
     root.style.setProperty('--animation-overlayslide', transitionType+'-overlayslide');
     
@@ -29,12 +159,18 @@ function slideAnimationReset()
 
 function startNextSlide() {
     
-    //console.log("*** startNextSlide()");
+    //console.log("startNextSlide()called");
     
     slideAnimationReset();
+
+    var $currentSlideImg = $('#currentslide-img');
+    var $overlaySlideImg = $('#overlayslide-img');
     
     // Overlay slide becomes the new current slide
-    document.getElementById("currentslide-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
+    var currentSlideFile = slideDeck[overlaySlidePos].file;
+    $currentSlideImg.attr("src", slideDir + "/" + currentSlideFile);
+    
+    //document.getElementById("currentslide-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
     
     // Advance the counter on by +1
     currentSlidePos = (currentSlidePos + 1) % numSlides;
@@ -43,7 +179,10 @@ function startNextSlide() {
     overlaySlideFS = overlaySlidePos + 1;
     
     // Set up the new overlay slide
-    document.getElementById("overlayslide-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
+    var overlaySlideFile = slideDeck[overlaySlidePos].file;
+    $overlaySlideImg.attr("src", slideDir + "/" + overlaySlideFile);
+
+    //document.getElementById("overlayslide-img").src = slideDir + "/Slide" + overlaySlideFS + slideExt;
     
     
     // Use setTimeout so initiating next slide occurs outside of the event handler for AnimationEnd
@@ -51,8 +190,11 @@ function startNextSlide() {
     //
     // Use time delay trick for now.  For a more robust solution, see:
     //   https://css-tricks.com/restart-css-animation/
+
+    var localSlideDuration   = slideDeck[currentSlidePos].slideDuration;
+    var localSlideTransition = slideDeck[overlaySlidePos].slideTransition;
     
-    setTimeout(() => { doSlideTransition("fromright") }, 100); 
+    setTimeout(() => { doSlideTransition(localSlideDuration,localSlideTransition) }, 100); 
 };
 
 function startPrevSlide()
@@ -70,10 +212,19 @@ function startPrevSlide()
 	      
     var $currentSlideImg = $('#currentslide-img');
     var $overlaySlideImg = $('#overlayslide-img');
+
+    var currentSlideFile = slideDeck[currentSlidePos].file;
+    var overlaySlideFile = slideDeck[overlaySlidePos].file;
+
+    $currentSlideImg.attr("src", slideDir + "/" + currentSlideFile);
+    $overlaySlideImg.attr("src", slideDir + "/" + overlaySlideFile);
     
-    $currentSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
-    $overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
+    //$currentSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
+    //$overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
+
+    var localSlideDuration   = slideDeck[currentSlidePos].slideDuration;
+    var localSlideTransition = slideDeck[overlaySlidePos].slideTransition;
     
-    setTimeout(() => { doSlideTransition("fromright") }, 100);
+    setTimeout(() => { doSlideTransition(localSlideDuration,localSlideTransition) }, 100);
 }
 

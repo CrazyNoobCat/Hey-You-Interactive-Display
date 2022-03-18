@@ -47,64 +47,6 @@
     
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
     <script>
-      // $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
-      var viewportXDim = $(window).width();
-      var viewportYDim = $(window).height();
-      
-      var SlideMaxXDim = viewportXDim * 0.9;
-      var SlideMaxYDim = viewportYDim * 0.9;
-      var QRDim = Math.max(viewportXDim * 0.12,250);
-
-      // State variables for slideshow activity      
-      var currentSlidePos = 0;
-      var overlaySlidePos = 1;
-      var currentSlideFS  = currentSlidePos + 1;
-      var overlaySlideFS  = overlaySlidePos + 1;
-
-      var slideDir  = null;
-      var slideExt  = null;
-      var numSlides = null;
-
-      var actualSlideImageXDim = null;
-      var actualSlideImageYDim = null;
-
-      var displaySlideXDim = null;
-      var displaySlideYDim = null;
-
-      function loadSlideshow()
-      {
-	  slideDir = "/smoke-and-mirrors-sampler";
-	  slideExt = ".PNG";
-	  numSlides = 15;	  
-
-	  actualSlideImageXDim = 1280;
-	  actualSlideImageYDim = 720;
-
-	  var scaleXDim = SlideMaxXDim / actualSlideImageXDim ;
-	  var scaleYDim = SlideMaxYDim / actualSlideImageYDim ;
-
-	  var scaleTransform;
-	  
-	  if (scaleXDim < scaleYDim) {
-	      // Don't want to overflow, so scale by the smaller amount
-	      displaySlideXDim = SlideMaxXDim;
-	      displaySlideYDim = actualSlideImageYDim * scaleXDim;
-	      //scaleTransform = "scale("+scaleXDim+","+scaleXDim+");";
-	      scaleTransform = "scale("+scaleXDim+")";
-	  }
-	  else {
-	      displaySlideXDim = actualSlideImageXDim * scaleYDim;
-	      displaySlideYDim = SlideMaxYDim;
-	      scaleTransform = "scale("+scaleYDim+")";
-	  }
-	  displaySlideXDim = Math.floor(displaySlideXDim);
-	  displaySlideYDim = Math.floor(displaySlideYDim);
-
-	  $('#currentslide-img').css("transform",scaleTransform);
-	  $('#overlayslide-img').css("transform",scaleTransform);
-	  
-      }
-      
       // Custom socketLoaded() for slideshow activity
       function socketLoaded(anyListener)
       {
@@ -150,48 +92,14 @@
       }
 
       $(document).ready(function() {
-	  $('#currentslide-img').css("width", displaySlideXDim+"px");
-	  $('#currentslide-img').css("height",displaySlideYDim+"px");
-	  $('#overlayslide-img').css("width", displaySlideXDim+"px");
-	  $('#overlayslide-img').css("height",displaySlideYDim+"px");
-	      
-	  var root = document.querySelector(':root');
-	  root.style.setProperty('--slideshow-width',      displaySlideXDim+'px');
-	  root.style.setProperty('--slideshow-height',     displaySlideYDim+'px');
-	  root.style.setProperty('--slideshow-negwidth',  -displaySlideXDim+'px');
-	  root.style.setProperty('--slideshow-negheight', -displaySlideYDim+'px');
-	  
-	  // Set up first slide 
-	  var $currentSlideImg = $('#currentslide-img');
-	  var $overlaySlideImg = $('#overlayslide-img');
-	  
-	  $currentSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
-	  $overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
-	  
-	  $currentSlideImg.on("load", function() {
-	      $currentSlideImg.fadeIn(1000);
-	      
-	      if (numSlides > 1) {
-		  // Get the next slide set up as the overlay, but need to wait until fadeIn done
-		  setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  
-		  
-	      }	  	      
-	  });
-
-	  // https://stackoverflow.com/questions/6186454/is-there-a-callback-on-completion-of-a-css3-animation        
-	  $("#currentslide-li").bind('animationend oanimationend webkitAnimationEnd MSAnimationEnd', function() { 
-	      startNextSlide() 
-	  });
-
-	  doSlideTransition("fromright");        
+	  //console.log("DOM.ready()");
+	  loadSlideshow("smoke-and-mirrors-sampler");
       });
-
+      
       // All displays need to defined a socketLoaded() function,
       // and call socketConnection("display") to kick things off
-
       setupConnection("display");
-      loadSlideshow();
-                  
+      
     </script>
   </head>
   
