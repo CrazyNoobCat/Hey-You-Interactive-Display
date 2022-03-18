@@ -1,7 +1,7 @@
 const fs     = require('fs');
 const path   = require('path');
 
-//const sizeOf = require('image-size');
+const sizeOf = require('image-size');
 
 const cmdlineArgs = process.argv.slice(2);
 
@@ -28,9 +28,13 @@ function readSlidesDir(inputDir)
 		const slideNumFS = slideMatch.groups.slideNumFS;
 		const slideExt   = slideMatch.groups.slideExt;
 
+		const imageDims = sizeOf(path.join(inputDir,file));
+		const imageXDim = imageDims.width;
+		const imageYDim = imageDims.height;
+		
 		//console.log("  Slide match: " + slideNumFS + "." + slideExt);
 		
-		const slideImageRec = { "file": file, "slideNum": slideNumFS-1 };
+		const slideImageRec = { "file": file, "slideNum": slideNumFS-1, "xdim": imageXDim, "ydim": imageYDim };
 		slideImageRecsLookup[slideNumFS] = slideImageRec;
 	    }
 	});
@@ -41,37 +45,103 @@ function readSlidesDir(inputDir)
 	    const key = sortedKeys[i];
 	    const rec = slideImageRecsLookup[key];
 	    
-	    console.log("  Storing slide record for: " + rec.file);
+	    console.log("  Storing slide record for: " + JSON.stringify(rec));
 	    
 	    slideImageRecs.push(rec);
 	}
     }
     catch (err) {
 	console.error("Failed to read directory: " + inputDir);
-	//console.error(err)
+	console.error();
+	console.error(err)
     }
 
     return slideImageRecs;
 
 }
 
+function generateSlidesOverview(slideImageRecs)
+{
+    var slidesOverview = {
+	"defaultSlideTransition": "fromright",
+	"defaultSlideTransitionComment": "Other slide transition(s) supported: 'crossfade'",
+	"defaultSlideDuration":   "10s"
+    };
+    
+    if (slideImageRecs.length>0) {
+	slideImageRecs[0].slideDuration = "15s"; // example of how to override default
+    }
 
-if (cmdlineArgs.length != 1) {
+    if (slideImageRecs.length>1) {
+	slideImageRecs[1].slideTransition = "crossfade"; // example of how to override default
+    }
+
+    slidesOverview["slides"] = slideImageRecs;
+	
+    // calc max image width and height, and store in overview
+    var maxXDim = 0;
+    var maxYDim = 0;
+    
+    var src_i = 0;
+    var dst_i = 0;
+    
+    for (var i=0; i< slideImageRecs.length; i++) {
+	const rec = slideImageRecs[i];
+
+	if (rec.xdim > maxXDim) {
+	    maxXDim = rec.xdim;
+	}	
+	if (rec.ydim > maxYDim) {
+	    maxYDim = rec.ydim;
+	}
+    }
+
+    slidesOverview["maxXDim"] = maxXDim;
+    slidesOverview["maxYDim"] = maxYDim;
+
+    return slidesOverview;
+}
+
+
+if (cmdlineArgs.length != 2) {
     console.error();
     console.error("Usage:");
-    console.error("    " + process.argv[1] + " slideshow-dir");
+    console.error("    " + process.argv[1] + " slideshow-dir slide-overview-output.json");
     console.error();
     process.exit(1);
 }
     
-const inputDir = cmdlineArgs[0];
+const inputDir       = cmdlineArgs[0];
+const outputJSONFile = cmdlineArgs[1];
+
+if (fs.existsSync(outputJSONFile)) {
+    console.error();
+    console.error("Error: Output JSON file already exists:");
+    console.error("    " + outputJSONFile);
+    console.error("Not overwriting it!");
+    console.error("Manually remove first, if you want to regenerate this slide overview file.");
+    console.error();
+    
+    process.exit(1);
+}
 
 
-var slideImageRecs = readSlidesDir(inputDir);
+var slideImageRecs     = readSlidesDir(inputDir);
+var slidesOverviewJSON = generateSlidesOverview(slideImageRecs);
 
 
+//console.log();
+//console.log("slideOverview:");
+//console.log(JSON.stringify(slidesOverviewJSON, null,2));
 
-//sizeOf('images/funny-cats.png', function (err, dimensions) {
-//  console.log(dimensions.width, dimensions.height);
-//});
-	      
+try {
+    console.log();
+    console.log("Saving slide overview JSON to:")
+    console.log("   " + outputJSONFile);    
+    fs.writeFileSync(outputJSONFile, JSON.stringify(slidesOverviewJSON,null,2));
+}
+catch (err) {
+    console.error("Failed to output JSON to: " + outputJSONFile);
+    console.error();
+    console.error(err)
+}
