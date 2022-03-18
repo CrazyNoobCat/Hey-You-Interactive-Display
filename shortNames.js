@@ -11,40 +11,24 @@ class ShortNames
 	// Based on the first (keep it simple) approach given at
 	//   https://geshan.com.np/blog/2021/10/nodejs-read-file-line-by-line/
 	
-	const data = fs.readFileSync(fileName, 'utf8');
-	this.#freeNames = data.split(/\r?\n/);
-		
-	/*
-        fs.readFile(fileName, 'utf8', (err, data) => {
-            if (err){
-                console.error(err);
-                return;
-            }
-    
-            // Check the line endings
-            var temp = data.indexOf('\n');
-            var lineEnding = '\n'
-            if (data[temp - 1] === '\r')
-                lineEnding = '\r\n'
-    
-            // Need to remove any spaces from name
-    
-            this.#freeNames = data.split(lineEnding);              
-        });
-	*/
-	
+	const data = fs.readFileSync(fileName, "utf8");
+	this.#freeNames = data.split(/\r?\n/);			
     }
 
     // Get the nextFree name. Will return undefined if there are no more free names
-    nextFree(){
+    nextFree()
+    {
         let fn = this.#freeNames.shift(); // Get first item of freeNames
 
-        if (fn != undefined)
+        if (fn != undefined) {
             this.#usedNames.push(fn);
+	}
+	
         return fn
     }
 
-    release(shortName){
+    release(shortName)
+    {
         // Mark name as unused
         let xName = (element) => element === shortName
         let index = this.#usedNames.findIndex(xName)
@@ -52,7 +36,8 @@ class ShortNames
         if (index != -1){
             this.#usedNames.splice(index,1);
             this.#freeNames.push(shortName);
-        } else {
+        }
+	else {
             return "shortName not in use"
         }
 
