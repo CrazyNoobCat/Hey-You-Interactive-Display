@@ -1,0 +1,101 @@
+{
+  "defaultSlideTransition": "fromright",
+  "defaultSlideTransitionComment": "Other slide transition(s) supported: 'crossfade'",
+  "defaultSlideDuration": "10s",
+  "slides": [
+    {
+      "file": "Slide1.PNG",
+      "slideNum": 0,
+      "xdim": 1280,
+      "ydim": 720,
+      "slideDuration": "15s"
+    },
+    {
+      "file": "Slide2.PNG",
+      "slideNum": 1,
+      "xdim": 1280,
+      "ydim": 720,
+      "slideTransition": "crossfade"
+    },
+    {
+      "file": "Slide3.PNG",
+      "slideNum": 2,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide4.PNG",
+      "slideNum": 3,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide5.PNG",
+      "slideNum": 4,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide6.PNG",
+      "slideNum": 5,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide7.PNG",
+      "slideNum": 6,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide8.PNG",
+      "slideNum": 7,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide9.PNG",
+      "slideNum": 8,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide10.PNG",
+      "slideNum": 9,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide11.PNG",
+      "slideNum": 10,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide12.PNG",
+      "slideNum": 11,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide13.PNG",
+      "slideNum": 12,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide14.PNG",
+      "slideNum": 13,
+      "xdim": 1280,
+      "ydim": 720
+    },
+    {
+      "file": "Slide15.PNG",
+      "slideNum": 14,
+      "xdim": 1280,
+      "ydim": 720
+    }
+  ],
+  "maxXDim": 1280,
+  "maxYDim": 720
+}
