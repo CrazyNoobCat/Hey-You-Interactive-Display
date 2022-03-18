@@ -26,7 +26,6 @@
       setupConnection("client");  
 
       // Page specific functions ..
-      //var audio = new Audio('/Slide16.mp3');
 
       function socketLoaded(){
 	  console.log("Socket finished loading");
@@ -34,14 +33,7 @@
           socket.on('download', (url) => {
               console.log(url);
               download(url);
-          });   
-
-	  /*
-          socket.on('audio', (state) => {
-              playAudio(state);
-          });
-	  */
-	  
+          });   	  
       }
 
       function send(e)
@@ -70,17 +62,6 @@
 	  }
 	      
       }
-
-      /*
-      function playAudio(state)
-      {
-        if (state =='play')
-          audio.play();
-        else {
-          audio.load();
-        }
-      }
-      */
       
       function download(imageSrc) {
         const link = document.createElement('a');
@@ -139,12 +120,13 @@
 	  </div>
 	</div>
 	<!--
-	▶
-	⏵
-	⏸
-	⏭
-	⏮
-	-->
+	    From https://en.wikipedia.org/wiki/Media_control_symbols
+	      ▶
+	      ⏵
+	      ⏸
+	      ⏭
+	      ⏮
+	  -->
 	
 	
       </div>
