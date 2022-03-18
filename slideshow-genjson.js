@@ -103,16 +103,16 @@ function generateSlidesOverview(slideImageRecs)
 }
 
 
-if (cmdlineArgs.length != 2) {
+if ((cmdlineArgs.length != 1) && (cmdlineArgs.length != 2)) {
     console.error();
     console.error("Usage:");
-    console.error("    " + process.argv[1] + " slideshow-dir slide-overview-output.json");
+    console.error("    " + process.argv[1] + " slideshow-dir [slide-overview-output.json]");
     console.error();
     process.exit(1);
 }
     
 const inputDir       = cmdlineArgs[0];
-const outputJSONFile = cmdlineArgs[1];
+const outputJSONFile = (cmdlineArgs.length==1) ? path.join(inputDir,"slideOverview.json") : cmdlineArgs[1];
 
 if (fs.existsSync(outputJSONFile)) {
     console.error();
