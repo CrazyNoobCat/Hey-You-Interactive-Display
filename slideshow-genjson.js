@@ -112,7 +112,7 @@ if ((cmdlineArgs.length != 1) && (cmdlineArgs.length != 2)) {
 }
     
 const inputDir       = cmdlineArgs[0];
-const outputJSONFile = (cmdlineArgs.length==1) ? path.join(inputDir,"slideOverview.json") : cmdlineArgs[1];
+const outputJSONFile = (cmdlineArgs.length==1) ? path.join(inputDir,"slidesOverview.json") : cmdlineArgs[1];
 
 if (fs.existsSync(outputJSONFile)) {
     console.error();
@@ -131,7 +131,7 @@ var slidesOverviewJSON = generateSlidesOverview(slideImageRecs);
 
 
 //console.log();
-//console.log("slideOverview:");
+//console.log("slidesOverview:");
 //console.log(JSON.stringify(slidesOverviewJSON, null,2));
 
 try {
