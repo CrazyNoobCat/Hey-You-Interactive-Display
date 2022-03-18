@@ -3,7 +3,8 @@
     "version": "0.0.2",
     "description": "Hey You Interactive Display",
     "dependencies": {
-        "express": "^4.17.1",
-        "socket.io": "^4.0.2"
+        "express":    "^4.17.1",
+        "socket.io":  "^4.0.2",
+	"image-size": "^1.0.1"
     }
 }
