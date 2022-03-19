@@ -117,12 +117,22 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 
 function loadSlideshow(slideshowName)
 {
-    //console.log("loadSlideshow() called!");
-    
+    /*
     $.ajax({
 	url: "/" + slideshowName + "/slidesOverview.json",
 	success: function(jsonResult) { activateSlideshow(slideshowName,jsonResult) }
-    });    
+    });
+    */
+    
+    $.getJSON("/"+slideshowName+"/slidesOverview.json")
+	.done(function(jsondata) {
+	    activateSlideshow(slideshowName,jsondata)
+	})
+	.fail(function( jqxhr, textStatus, error ) {
+	    var err = textStatus + ", " + error;
+	    console.error( "Request Failed: " + err );
+	    alert( "Request Failed: " + err );
+	});
 }
 
 function doSlideTransition(localSlideDuration,localSlideTransition)
