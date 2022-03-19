@@ -24,6 +24,6 @@ echo "Outputing Slide Deck List to:"
 echo "    '$ofile'"
 echo ""
 
-echo "["                > $ofile
-echo -e $dir_list_json  > $ofile
-echo "]"                > $ofile
+echo "["                 > $ofile
+echo -e $dir_list_json  >> $ofile
+echo "]"                >> $ofile
