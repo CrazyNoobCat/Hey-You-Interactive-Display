@@ -1,4 +1,26 @@
 
+function getURLParams()
+{
+    var urlParams = {};
+
+    var paramPairs = location.search.substr(1).split("&");
+
+    if (paramPairs !== "") {
+	for (var i=0; i<paramPairs.length; i++) {
+	    var paramPair = paramPairs[i];
+	    
+	    var paramTokens = paramPair.split("=");
+	    var paramName = paramTokens[0];
+	    var paramVal  = (paramTokens.length>=2) ? decodeURIComponent(paramTokens[1].replace(/\+/g, " ")) : null;
+	    
+	    urlParams[paramName] = paramVal;
+	}
+    }	
+
+    return urlParams;
+}
+    
+    
 function computeQRDimMaximizeHeight(viewportWidth,viewportHeight)
 {		      	
     console.log("computeQRDimMaximizeHeight() Viewport Dimensions: " + viewportWidth + " x " + viewportHeight);

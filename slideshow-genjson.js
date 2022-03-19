@@ -1,9 +1,7 @@
 const fs     = require('fs');
 const path   = require('path');
-
 const sizeOf = require('image-size');
 
-const cmdlineArgs = process.argv.slice(2);
 
 
 function readSlidesDir(inputDir)
@@ -102,6 +100,7 @@ function generateSlidesOverview(slideImageRecs)
     return slidesOverview;
 }
 
+const cmdlineArgs = process.argv.slice(2);
 
 if ((cmdlineArgs.length != 1) && (cmdlineArgs.length != 2)) {
     console.error();
@@ -130,15 +129,11 @@ var slideImageRecs     = readSlidesDir(inputDir);
 var slidesOverviewJSON = generateSlidesOverview(slideImageRecs);
 
 
-//console.log();
-//console.log("slidesOverview:");
-//console.log(JSON.stringify(slidesOverviewJSON, null,2));
-
 try {
     console.log();
     console.log("Saving slide overview JSON to:")
     console.log("   " + outputJSONFile);    
-    fs.writeFileSync(outputJSONFile, JSON.stringify(slidesOverviewJSON,null,2));
+    fs.writeFileSync(outputJSONFile, JSON.stringify(slidesOverviewJSON,null,4));
 }
 catch (err) {
     console.error("Failed to output JSON to: " + outputJSONFile);

@@ -165,7 +165,7 @@ function consoleInput() { // Console Commands
                 return; // bail here, so rl.prompt() isn't called again
             } 
             else if (line === "help" || line === '?') {
-                console.log(`Commands:\n\tclients {roomName/ID}/all\n\texit\n\tclear\n\tchangeActivity {roomName} {folder}\n\tdisplays\n`);
+                console.log(`Commands:\n\tclients {roomName/ID}/all\n\texit\n\tclear\n\tchangeActivity {roomName} {optUrlParams}\n\tdisplays\n`);
             } 
             else if (line.startsWith("clients",0)) {
                 console.log("Clients: ")
@@ -193,11 +193,14 @@ function consoleInput() { // Console Commands
             else if (line === "clear"){
                 console.clear();              
             } 
-            else if (line.startsWith("changeActivity",0)){
-                let roomName = line.split(" ")[1];
-                let folder = line.split(" ")[2];
-                let display = findHostDisplayByName(roomName);
-                display.activityChange(display);
+            else if (line.startsWith("changeActivity",0)) {
+		let lineTokens = line.split(" ");
+		
+                let roomName     = lineTokens[1];
+                let optUrlParams = (lineTokens.length>=3) ? lineTokens[2] : null;
+
+                let display = findHostDisplayByName(roomName);		
+                display.activityChange(display, optUrlParams);
             }
             else if (line === "displays"){                
                 displays.forEach(display => {
@@ -610,20 +613,22 @@ io.on('connection', (socket, host) => {
                 case "selectActivity":
                     // Client has indicated an activity change
                     var activitySelected = args[1];
-                    var callback = args[2]
+		    var optUrlParams     = args[2];
+                    var callback         = args[3];
 
                     client = findClientBySocketID(socket.id);
                     if (client != undefined) {
                         client.updateLastInteractionTime();
                         if (client.getRoom() == room){
-                            if (activitySelected == "/")
-                            activitySelected = defaultActivity;                    
-    
+                            if (activitySelected == "/") {
+				activitySelected = defaultActivity;                    
+			    }
+			    
                             console.log("New activity: " + activitySelected + "\tRoom: " + room);
     
                             display = findHostDisplayByRoomID(room);
-                            if (display != undefined){
-                                display.activityChange(activitySelected);
+                            if (display != undefined) {
+                                display.activityChange(activitySelected,optUrlParams);
     
                                 // Nothing is done for any subdisplays who are apart of this room.. Should this be assumed as part of the reload?
     
@@ -696,8 +701,8 @@ io.on('connection', (socket, host) => {
                 case "displayReset":
                     // Reset the display back to the default activity and get clients to reload
                     display = findDisplayBySocketID(socket.id);
-                    if (display != undefined){
-                        display.activityChange(defaultActivity); // Set to default
+                    if (display != undefined) {
+                        display.activityChange(defaultActivity,null); // Set to default, no optUrlParam to top-level default display
                         display.messageRoom('reload');
                         //io.to(display.getRoom()).emit('reload'); // Tell all devices to reload
                     }

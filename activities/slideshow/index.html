@@ -92,8 +92,14 @@
       }
 
       $(document).ready(function() {
-	  //console.log("DOM.ready()");
-	  loadSlideshow("smoke-and-mirrors-sampler");
+	  var urlParams = getURLParams();
+
+	  var slideshowName = urlParams["slidedeck"] || "waikato-uni-backgrounds";
+	  
+	  //loadSlideshow("smoke-and-mirrors-sampler");
+	  //loadSlideshow("waikato-uni-backgrounds");
+
+	  loadSlideshow(slideshowName);
       });
       
       // All displays need to defined a socketLoaded() function,

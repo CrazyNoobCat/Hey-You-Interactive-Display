@@ -16,7 +16,8 @@ function getVisitorID(type){
     .then(result => startSocket(result.visitorId, type))    
 }
 
-function startSocket(visitorID, type){
+function startSocket(visitorID, type)
+{
     if (type == "display"){
         setCookie('roomID',visitorID,10);
         roomID = visitorID;
@@ -36,11 +37,18 @@ function startSocket(visitorID, type){
         }
     });
 
-    socket.on('reload', () => {
-        if (type == "display")
-            window.location.href = '/activity';
-        else
+    socket.on('reload', (optUrlParams) => {
+        if (type == "display") {
+	    let full_href = "/activity";
+	    if (optUrlParams !== null) {
+		full_href += "?" + optUrlParams;
+	    }
+            window.location.href = full_href;
+	    //window.location.href = '/activity';
+	}
+        else {
             window.location.href = '/';
+	}
     }); 
 
     socket.on('reconnect', () => {
@@ -95,15 +103,11 @@ function startSocket(visitorID, type){
     socketLoaded(anyListener);
 }    
 
-function selectActivity(activity) {
-    // ****
-    // Currently not used (more testing and debugging needed)
-    //
-    //window.location.pathname = '/activities' + activity + '/client.html';
-    
-    socket.emit("selectActivity", roomID, activity, (response) => {
+function selectActivity(activity,optUrlParams)
+{
+    socket.emit("selectActivity", roomID, activity, optUrlParams, (response) => {
         console.log("Redirecting to " + activity);
-        window.location.pathname = '/';
+        window.location.pathname = '/'; // Consider passing on the optUrlParms to the client web page also?
     });   
 }
 

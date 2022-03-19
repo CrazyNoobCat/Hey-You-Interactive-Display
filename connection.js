@@ -17,20 +17,21 @@ class Connection
     ready = true;
 
     // Only used for displays
-    #host = false;
-    #messages = []; // All messages which the display hasn't recieved due to it not being ready 
+    #host        = false;
+    #messages    = []; // All messages which the display hasn't recieved due to it not being ready 
     numOfClients = 0;
-    #shortName = null;
+    #shortName   = null;
     failedConsecutiveHeartBeat = 0;
     
     // Only used for clients
     #lastInteractionTime;
     
-    constructor(io, socket, activity, timeoutLimit) {
-	    this.#io              = io;
+    constructor(io, socket, activity, timeoutLimit)
+    {
+	this.#io              = io;
         this.#socket          = socket;
         this.#currentActivity = activity; // Connection class itself;
-	    this.timeoutLimit     = timeoutLimit;
+	this.timeoutLimit     = timeoutLimit;
 	
         this.#room = socket.handshake.query.roomID;
 
@@ -38,47 +39,57 @@ class Connection
         this.updateLastInteractionTime();
     }
 
-    //
-
-    timedOut(){
-        if (Date.now() - this.#lastInteractionTime > this.timeoutLimit)
+    timedOut()
+    {
+        if (Date.now() - this.#lastInteractionTime > this.timeoutLimit) {
             return true;
-        else
-            return false;        
+	}
+        else {
+            return false;
+	}
     }
 
     // Setters
-    activityChange(activity){
+    activityChange(activity,optUrlParams)
+    {
         this.ready = false; // Allows time for the ready status to be set to true and enables saving of messages.   
-        this.#lastActivity = this.#currentActivity;
+        this.#lastActivity    = this.#currentActivity;
         this.#currentActivity = activity;
-        this.messageRoom('reload');
+
+        this.messageRoom('reload',optUrlParams);
     }
-    setNewSocket(socket){
+
+    setNewSocket(socket)
+    {
         this.#socket = socket;
         this.#lastInteractionTime = Date.now();
     } // Occurs on connection change or region
-    setRoom(room){
+
+    setRoom(room)
+    {
         // Should probably have some logic for removing from the old room
         this.#room = room;
     }
-    setAsRoomHost(){this.#host = true;}
 
-    removeAsRoomHost(){this.#host = false;}
+    setAsRoomHost()    { this.#host = true; }
+    removeAsRoomHost() { this.#host = false; }
     
-    updateLastInteractionTime(){
+    updateLastInteractionTime()
+    {
         this.#lastInteractionTime = Date.now();
         this.message('extendRoom', 1);// Informs the socket to extend it's cookie validty by one minue
     }
 
-    addMessage(...args){
+    addMessage(...args)
+    {
 
         this.#messages.push([...args]);
     }
     
-    clearMessages(){this.#messages = []};
+    clearMessages() { this.#messages = []} ;
 
-    setShortName(name){
+    setShortName(name)
+     {
         this.#shortName = name;
         this.setCookie('roomName',name,this.timeoutLimit); // mins => 1 year
     };
