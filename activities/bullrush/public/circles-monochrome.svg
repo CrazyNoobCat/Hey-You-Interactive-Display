@@ -1,36 +1,45 @@
 <?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" version="1.1" width="2000" height="2000" preserveAspectRatio="none" viewBox="0 0 2000 2000">
+  <!--
   <g clip-path='url("#SvgjsClipPath1050")' fill="none">
+  -->
+  
+  <g mask='url("#SvgjsMask1162")' fill='none'>
+    <!--
     <rect width="2000" height="2000" x="0" y="0" fill="rgba(0, 0, 0, 0.08)"/>
-    <circle r="333.335" cx="115.9" cy="203.29" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="238.605" cx="1176.61" cy="846.33" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="511.95" cx="1151.59" cy="9.19" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="471.655" cx="551.23" cy="1245.22" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="494.36" cx="1427.09" cy="1588.6" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="600.21" cx="1142.28" cy="474.46" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="579.38" cx="593.9" cy="1862.75" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="316.72" cx="93.63" cy="1896.7" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="353.52" cx="564.18" cy="1668.16" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="601.69" cx="14.55" cy="246.97" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="452.85" cx="647.52" cy="455.92" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="372.84" cx="982.7" cy="436.49" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="497.205" cx="21.7" cy="537.29" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="644.695" cx="406.48" cy="1669.53" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="580.55" cx="1861.34" cy="238.43" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="252.78" cx="663.37" cy="1991.88" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="205.31" cx="1750.53" cy="1385.23" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="606.655" cx="385.78" cy="1584.38" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="310.8" cx="1345.74" cy="544.09" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="320.225" cx="1974.59" cy="509.18" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="412.465" cx="429.76" cy="632.12" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="210.315" cx="987.67" cy="483.27" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="210.585" cx="885.91" cy="1358.92" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="568.38" cx="1550.82" cy="2.47" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
-    <circle r="188.325" cx="797.77" cy="357.07" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
+    -->
+    <circle r="333.335" cx="115.9"   cy="203.29"  stroke="#000000" stroke-opacity="0.04" stroke-width="2"/>
+    <circle r="238.605" cx="1176.61" cy="846.33"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="511.95"  cx="1151.59" cy="9.19"    stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="471.655" cx="551.23"  cy="1245.22" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="494.36"  cx="1427.09" cy="1588.6"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="600.21"  cx="1142.28" cy="474.46"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="579.38"  cx="593.9"   cy="1862.75" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="316.72"  cx="93.63"   cy="1896.7"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="353.52"  cx="564.18"  cy="1668.16" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="601.69"  cx="14.55"   cy="246.97"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="452.85"  cx="647.52"  cy="455.92"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="372.84"  cx="982.7"   cy="436.49"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="497.205" cx="21.7"    cy="537.29"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="644.695" cx="406.48"  cy="1669.53" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="580.55"  cx="1861.34" cy="238.43"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="252.78"  cx="663.37"  cy="1991.88" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="205.31"  cx="1750.53" cy="1385.23" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="606.655" cx="385.78"  cy="1584.38" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="310.8"   cx="1345.74" cy="544.09"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="320.225" cx="1974.59" cy="509.18"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="412.465" cx="429.76"  cy="632.12"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="210.315" cx="987.67"  cy="483.27"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="210.585" cx="885.91"  cy="1358.92" stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="568.38"  cx="1550.82" cy="2.47"    stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
+    <circle r="188.325" cx="797.77"  cy="357.07"  stroke="#000000" stroke-opacity="0.08" stroke-width="2"/>
   </g>
   <defs>
     <clipPath id="SvgjsClipPath1050">
-      <rect width="2000" height="2000" x="0" y="0"/>
+      <rect width="2000" height="2000" x="0" y="0" fill="white"/>
     </clipPath>
+
+    <mask id='SvgjsMask1162'><rect width='2000' height='2000' fill='white'></rect></mask>
+    
   </defs>
 </svg>

@@ -46,7 +46,9 @@ var svgBackgrounds = [ "circles-monochrome.svg",  "lines-monochrome.svg",  "mete
 $(document).ready(function() {
 
     var root = document.querySelector(':root');
-    root.style.setProperty('--bullrush-background', 'url("circles-monochrome.svg"');
+
+    var randomSvgBackground = randomArrayEntry(svgBackgrounds);
+    root.style.setProperty('--bullrush-background', 'url("'+randomSvgBackground+'"');
 
     // Init canvas variables    
     canvas = document.getElementById('gameCanvas');

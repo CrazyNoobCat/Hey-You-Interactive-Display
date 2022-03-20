@@ -31,7 +31,7 @@ html, body {
 }
 
 .canvas-bg-waves-monochrome {
-    /* display: block needed to keep firefox happy, see:
+    /* display block needed to keep firefox happy, see:
          https://stackoverflow.com/questions/58625339/firefox-incorrectly-showing-vertical-scrollbar-on-100vh-chrome-and-safari-does
      */
     display: block;
@@ -44,7 +44,7 @@ html, body {
     height:  100%;
    
     background-color:#faaa33c0;
-    background-image: url("waves-monochrome.svg");
+    background-image: var(--bullrush-background);
 }
 
 div.qrcode-center {
