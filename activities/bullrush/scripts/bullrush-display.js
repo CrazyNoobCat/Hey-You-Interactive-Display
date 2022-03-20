@@ -41,10 +41,14 @@ var ctx    = null;
 var headingFontSize   = null;
 var paragraphFontSize = null;
 
+var svgBackgrounds = [ "circles-monochrome.svg",  "lines-monochrome.svg",  "meteor-monochrome.svg",  "waves-monochrome.svg" ];
+
 $(document).ready(function() {
 
-    // Init canvas variables
-    
+    var root = document.querySelector(':root');
+    root.style.setProperty('--bullrush-background', 'url("circles-monochrome.svg"');
+
+    // Init canvas variables    
     canvas = document.getElementById('gameCanvas');
     ctx    = canvas.getContext('2d');
     
