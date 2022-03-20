@@ -62,6 +62,13 @@ function startSocket(visitorID, type)
         window.location.href = page;
     }); 
 
+    socket.on('disconnected', (message)=> {
+        // Could go to an HTML page instead
+        console.log("Disconnected: " + message);
+        setCookie('roomID','',0); // Cookie expiers instantly
+        window.location.href = '/disconnected/'+ message;
+    });
+
     socket.on('error', (message)=> {
         // Could go to an HTML page instead
         console.log("Error: " + message);

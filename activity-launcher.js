@@ -269,7 +269,7 @@ app.get('/join/:roomID', (req, res) => {
         console.log("New device joined with roomName: " + req.params.roomID);
     }  
     else { // If room doesn't exit
-        res.redirect("/error/Room doesn't exist, rescan QR code");
+        res.redirect("/error/Unable to find that Display-id or Display-name");
     }    
 });
 
@@ -295,7 +295,15 @@ app.get('/', (req, res) => {
             else 
                 sendActivityFile(res, __dirname + defaultActivity + '/static.html', "static.html", defaultActivityLabel)
         } else {
-            res.redirect("/error/No valid RoomID or Static Activity found, rescan QR code")
+	    let roomID = getCookie(req,"roomID");
+	    let staticActivity = getCookie(req,"staticActivity");
+
+	    if ((roomID == undefined) && (staticActivity == undefined)) {
+		res.redirect("/disconnected/No active display connection found.  This can be caused by client controller inactivity. Scan the QR Code again to rejoin");
+	    }
+	    else {
+		res.redirect("/error/No valid Display-id or Standalone App-id found. Try scanning an new QR Code.");
+	    }
         }
     }    
 });
@@ -368,6 +376,17 @@ app.get('/scripts/:fileName', (req, res) => {
 
 });
 
+// '/disconnected' is really an alias to /error, but is a preferred URL to show to the use
+// in certain situations
+app.get('*/disconnected/:error', (req, res) => {
+    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))});
+    res.redirect('/disconnected');
+});
+
+app.get('/disconnected', (req, res) => {
+    res.sendFile(__dirname + '/error.html');
+});
+
 app.get('*/error/:error', (req, res) => {
     res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))});
     res.redirect('/error');
@@ -396,7 +415,6 @@ app.get('*', (req, res) => {
             res.sendStatus(404);
         }
     } else {
-        //console.error("403 Error: Failed file retrival '" + req.params.fileName + "' (Not associated with an activity) \treq roomID: " + req.params.roomID);
 	if(fs.existsSync(__dirname + publicDirectory + req.path)) {
             sendActivityFile(res,__dirname + publicDirectory +req.path, req.path, activity);
 	}
@@ -413,33 +431,33 @@ io.on('connection', (socket, host) => {
 
     var newConnection = true;
 
-    if (socket.handshake.query.data == "client"){
+    if (socket.handshake.query.data == "client") {
         for (let index = 0; index < clients.length; index++) {
             const client = clients[index];
-            if (client.getDeviceID() == socket.handshake.query.clientID){
+            if (client.getDeviceID() == socket.handshake.query.clientID) {
                 // Handle updating socket information for this reconnecting device
 
-                if (client.getRoom() != socket.handshake.query.roomID){
+                if (client.getRoom() != socket.handshake.query.roomID) {
                     let display = findHostDisplayByRoomID(client.getRoom());
 
-                    if (display!= undefined){
+                    if (display != undefined) {
                         display.message('clientDC', client.getDeviceID());
                         //io.to(display.getRoom()).emit('clientDC', client.getDeviceID());
                         display.numOfClients--; // Reduce client count by one for old room.
                     } else {
                         // Error
+			console.error("io.on('connection'): When disconnecting old connection, did not find a display for roomID '" + client.getRoom());
                     }
 
                     display = findHostDisplayByRoomID(client.getRoom());
 
-                    if (display!= undefined){
+                    if (display != undefined) {
                         client.setRoom(socket.handshake.query.roomID);
                         display.numOfClients++; // Increase client count for new room by one.
                     } else {
-                        // Error 
-                    }
-
-                    
+                        // Error
+			console.error("io.on('connection'): When setting up new conection, did not find a display for roomID '" + client.getRoom());
+                    }                    
                 }
 
                 client.setNewSocket(socket);
@@ -478,11 +496,11 @@ io.on('connection', (socket, host) => {
                     client.message('reload');
                 }
 
-            } else {
-                // Could send error since there is no valid display for the client //////////////////////////
             }
-
-            
+	    else {
+                // Could send error since there is no valid display for the client //////////////////////////
+		console.error("io.on('connection'): Unable to form client-display socket connection, as no display found for for roomID '" + client.getRoom());
+            }            
         }
     } 
     else if (socket.handshake.query.data == "display"){
@@ -770,13 +788,14 @@ server.listen(httpPort, () => {
 clientTimeoutCheck(); // Call the next function and then let it loop
 
 // Checks every 5 to see if client is active
-async function clientTimeoutCheck(){
+async function clientTimeoutCheck()
+{
     setTimeout(() => {
         clients.forEach(function(client, index, object) {
             if (client.timedOut()) {
                 object.splice(index, 1);
 
-                client.message('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
+                client.message('disconnected', 'Your device timed out, likely due to inactivity, and you have been removed from the display session. Scan the QR code again to rejoin.');
                 //io.to(client.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
 
                 let display = findHostDisplayByRoomID(client.getRoom());
