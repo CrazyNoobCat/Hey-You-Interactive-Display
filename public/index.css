@@ -10,15 +10,11 @@ html, body, figure {
 }
 
 body {
-    background: url(uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
+    background: url(images/uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
     background-size: cover;
     
     font-family:     monospace;
     color:           #000000;
-
-    /*
-    background-blend-mode: darken;
-    */
 }
 
 .center {
