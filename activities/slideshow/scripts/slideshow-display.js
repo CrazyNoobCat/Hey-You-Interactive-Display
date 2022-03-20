@@ -2,9 +2,12 @@
 var viewportXDim = $(window).width();
 var viewportYDim = $(window).height();
 
-var SlideMaxXDim = (viewportXDim <= 1300) ? viewportXDim * 0.62 : viewportXDim * 0.9;
-var SlideMaxYDim = (viewportXDim <= 1300) ? viewportYDim * 0.62 : viewportYDim * 0.9;
-var QRDim = Math.max(viewportXDim * 0.12,260);
+var SlideMaxXDim = (viewportXDim <= 1300) ? viewportXDim * 0.8 : viewportXDim * 0.9;
+var SlideMaxYDim = (viewportXDim <= 1300) ? viewportYDim * 0.8 : viewportYDim * 0.9;
+var QRDim = Math.floor(viewportXDim * 0.12);
+//var QRDim = (viewportXDim <= 1300) ? viewportXDim * 0.12 : viewportYDim * 0.12;
+//var QRDim = Math.max(viewportXDim * 0.12,130);
+//var QRDim = 130;
 
 // State variables for slideshow activity
 var currentSlidePos = 0;
@@ -35,7 +38,6 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
     slideDir = "/" + slideshowName;
 
     slideDeck = slidesOverviewJSON.slides;
-    //slideExt = ".PNG";
     numSlides = slideDeck.length;
     
     defaultSlideTransition = slidesOverviewJSON.defaultSlideTransition;
@@ -47,26 +49,19 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
     var scaleXDim = SlideMaxXDim / actualSlideImageXDim ;
     var scaleYDim = SlideMaxYDim / actualSlideImageYDim ;
     
-    //var scaleTransform;
-    
     if (scaleXDim < scaleYDim) {
 	// Don't want to overflow, so scale by the smaller amount
 	displaySlideXDim = SlideMaxXDim;
 	displaySlideYDim = actualSlideImageYDim * scaleXDim;
-	//scaleTransform = "scale("+scaleXDim+")";
     }
     else {
 	displaySlideXDim = actualSlideImageXDim * scaleYDim;
 	displaySlideYDim = SlideMaxYDim;
-	//scaleTransform = "scale("+scaleYDim+")";
     }
     displaySlideXDim = Math.floor(displaySlideXDim);
     displaySlideYDim = Math.floor(displaySlideYDim);
     
-    //$('#currentslide-img').css("transform",scaleTransform);
-    //$('#overlayslide-img').css("transform",scaleTransform);
-    
-    
+    // following code used to be in dom.ready()
 
     $('#currentslide-img').css("width", displaySlideXDim+"px");
     $('#currentslide-img').css("height",displaySlideYDim+"px");
@@ -97,8 +92,7 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 	      
 	if (numSlides > 1) {
 	    // Get the next slide set up as the overlay, but need to wait until fadeIn done
-		  setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  
-	    
+		  setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  	    
 	}	  	      
     });
     
@@ -117,13 +111,6 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 
 function loadSlideshow(slideshowName)
 {
-    /*
-    $.ajax({
-	url: "/" + slideshowName + "/slidesOverview.json",
-	success: function(jsonResult) { activateSlideshow(slideshowName,jsonResult) }
-    });
-    */
-    
     $.getJSON("/"+slideshowName+"/slidesOverview.json")
 	.done(function(jsondata) {
 	    activateSlideshow(slideshowName,jsondata)

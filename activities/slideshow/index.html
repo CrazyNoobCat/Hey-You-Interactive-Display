@@ -105,7 +105,7 @@
     </script>
   </head>
   
-  <body style="height: 100vh;">
+  <body style="height: 100vh; background-color: #ffffff; margin: 0;">
 
     <div class="container"
 	 styleXX="display: flex; justify-content: center; align-items: center; flex-direction: column;"
@@ -130,13 +130,17 @@
       
     </div>
     
-    <div id="join-left-container" style="width: 260px; display: block; position: absolute; left:   7px; bottom: 7px; z-index: 3; background-color: #eee; padding: 6px;">
-      <div id="join-qrcode-div-left" style="position: relative; height: 260px;"><div id="join-qrcode-left"></div></div>
-      <h3  id="join-room-url-left"   style="position: relative;"></h3>
+    <div id="join-left-container" style="width: 270px; display: block; position: absolute; left:   7px; bottom: 7px; z-index: 3; background-color: transparent; padding: 6px;">
+      <div id="join-qrcode-div-left" style="position: relative; height: 270px;">
+	<div id="join-qrcode-left" style="widthXX: 130px; heightXX: 130px; position: absolute; bottom: 0; left: 0;"></div>
+      </div>
+      <h3 id="join-room-url-left" style="position: relative; background-color: #eee; padding: 4px;"></h3>
     </div>
-    <div id="join-right-container" style="width: 260px; display: block; position: absolute; right: 7px; bottom: 7px; z-index: 3; background-color: #eee; padding: 6px;">
-      <div id="join-qrcode-div-right" style="position: relative; height: 260px;"><div id="join-qrcode-right"></div></div>      
-      <h3  style="position: relative" id="join-room-url-right"></h3>
+    <div id="join-right-container" style="width: 270px; display: block; position: absolute; right: 7px; bottom: 7px; z-index: 3; background-color: transparent; padding: 6px;">
+      <div id="join-qrcode-div-right" style="position: relative; height: 270px;">
+	<div id="join-qrcode-right" style="widthXX: 130px; heightXX: 130px; position: absolute; bottom: 0; right: 0;"></div>
+      </div>      
+      <h3 id="join-room-url-right" style="position: relative; background-color: #eee; padding: 4px;"></h3>
     </div>
 
     <footer>
