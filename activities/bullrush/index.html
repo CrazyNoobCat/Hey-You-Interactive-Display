@@ -16,6 +16,7 @@
     <script type="text/javascript" src="socketCreation.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
+    <script type="text/javascript" src="display-utils.js"></script>
     <script type="text/javascript" src="/scripts/bullrush-utils.js"></script>
     <script type="text/javascript" src="/scripts/main.js"></script>
 	
@@ -24,11 +25,21 @@
           socket.onAny(anyListener); // Turns on the any listener
 	  
           socket.emit("displayLoaded");   
-	  
+
+	  var QRDim = 260;
+	  var displayHost = self.location.host;
+	  var roomID    = getCookie('roomID');
+	  var roomName  = getCookie('roomName');
+
+	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode");
+	  displayRoomURL(displayHost,roomName,"join-room-url");
+
+	  /*
           var nric = self.location.host;
-          var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=250x250';
+          var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=260x260';
           var $img = $('<img>').attr('src',url);
-          $('#barcode').html($img)             
+          $('#join-qrcode-div').html($img)             
+	  */
       }            
       
       function emitPlayerMarker(socketId, playerColor, playerType, playerLabel){
@@ -84,7 +95,17 @@
       </canvas>    
     </div>
     <div id="infobox" class="infobox"></div>
-    <div id="barcode" class="barcode-center"></div>
+<!--
+    <div id="qrcode" class="qrcode-center"></div>
+    -->
+    
+    <div id="join-container" class="qrcode-center" style="width: 260px; display: block; z-index: 3; background-color: #eee; padding: 6px; font-family: monospace;">
+      <div id="join-qrcode-div" style="position: relative; height: 260px;">
+	<div id="join-qrcode"></div>
+      </div>
+      <h3  id="join-room-url"   style="position: relative;"></h3>
+    </div>
+
     
     <footer>
       <script src="receiver.js"></script>

@@ -33,7 +33,7 @@
 
 div.eog-info-box {
     width: 240px;
-    background-color: #ffffff80;
+    background-color: #000000;
     font-family: monospace;
     font-size: 120%;
     color: #ffffff;
@@ -42,7 +42,7 @@ div.eog-info-box {
 p.eog-info-box-text {
   margin: 0;
   position: absolute;
-  top: 50%;
+  top:  50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
