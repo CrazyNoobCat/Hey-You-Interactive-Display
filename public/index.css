@@ -65,7 +65,7 @@ body {
 
 
 figure:nth-child(1) {
-    background: url(uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
+    background: url(images/uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
     background-size: cover;
     
     animation:         xfade 48s 0s infinite; /* name, duration, delay-start, iteration-count */
@@ -74,7 +74,7 @@ figure:nth-child(1) {
     -o-animation:      xfade 48s 0s infinite;
 }
 figure:nth-child(2) {
-    background: url(uow-background--for-the-people-red.png) no-repeat center center fixed;;
+    background: url(images/uow-background--for-the-people-red.png) no-repeat center center fixed;;
     background-size: cover;
 
     animation:         xfade 48s 12s infinite;
@@ -83,7 +83,7 @@ figure:nth-child(2) {
     -o-animation:      xfade 48s 12s infinite;
 }
 figure:nth-child(3) {
-    background: url(uow-background--for-the-people-yellow.png) no-repeat center center fixed;;
+    background: url(images/uow-background--for-the-people-yellow.png) no-repeat center center fixed;;
     background-size: cover;
 
     animation:         xfade 48s 24s infinite;
@@ -92,7 +92,7 @@ figure:nth-child(3) {
     -o-animation:      xfade 48s 24s infinite;
 }
 figure:nth-child(4) {
-    background: url(uow-background--ko-te-tangata-yellow.png) no-repeat center center fixed;;
+    background: url(images/uow-background--ko-te-tangata-yellow.png) no-repeat center center fixed;;
     background-size: cover;
     
     animation:         xfade 48s 36s infinite;
