@@ -20,7 +20,10 @@
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>    
 
     <script type="text/javascript" src="socketCreation.js"></script>
+    <!--
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    -->
+    <script type="text/javascript" src="/scripts/jquery-1.11.2.min.js"></script>
 
     <script type="text/javascript" src="display-utils.js"></script>
     <script type="text/javascript" src="/scripts/bullrush-utils.js"></script>
@@ -39,13 +42,6 @@
 
 	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode");
 	  displayRoomURL(displayHost,roomName,"join-room-url");
-
-	  /*
-          var nric = self.location.host;
-          var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '/join/' + getCookie('roomID') + '&size=260x260';
-          var $img = $('<img>').attr('src',url);
-          $('#join-qrcode-div').html($img)             
-	  */
       }            
       
       function emitPlayerMarker(socketId, playerColor, playerType, playerLabel){
