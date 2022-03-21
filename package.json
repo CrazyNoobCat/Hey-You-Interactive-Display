@@ -1,10 +1,11 @@
 {
     "name": "hey-you-interactive-display",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Hey You Interactive Display",
     "dependencies": {
-        "express":    "^4.17.1",
-        "socket.io":  "^4.0.2",
-	"image-size": "^1.0.1"
+	"express":    "^4.17.1",
+	"socket.io":  "^4.0.2"
+	"image-size": "^1.0.1",
+	"node-qr-image": "^0.0.1"
     }
 }
