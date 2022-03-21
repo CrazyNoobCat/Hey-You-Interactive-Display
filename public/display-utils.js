@@ -66,7 +66,8 @@ function displayRoomQRCode(displayHost,roomID,qrDim,elemId)
     // For the QR code, work directly with the roomID
     var full_room_id = displayHost + '/join/' + roomID;
 
-    var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
+    //var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
+    var url = '/qrcode/?data=' + full_room_id + '&size=' + qrDim;
     
     var $img = $('<img>').attr('src',url);
     $img.on("load", function() {
