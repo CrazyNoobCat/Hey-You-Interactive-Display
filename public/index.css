@@ -9,6 +9,33 @@ html, body, figure {
     align-items:     center;
 }
 
+h1 {
+    font-size: 170%;
+}
+																 
+h2 {
+    font-size: 150%;
+}
+
+h3 {
+    font-size: 130%;
+}
+
+@media screen and (max-width: 1300px) {
+    h1 {
+	font-size: 150%;
+    }
+
+    h2 {
+	font-size: 130%;
+    }
+    
+    h3 {
+	font-size: 110%;
+    }
+}
+
+
 body {
     background: url(images/uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
     background-size: cover;

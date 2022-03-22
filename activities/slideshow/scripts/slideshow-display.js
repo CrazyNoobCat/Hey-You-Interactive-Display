@@ -4,7 +4,7 @@ var viewportYDim = $(window).height();
 
 var SlideMaxXDim = (viewportXDim <= 1300) ? viewportXDim * 0.8 : viewportXDim * 0.9;
 var SlideMaxYDim = (viewportXDim <= 1300) ? viewportYDim * 0.8 : viewportYDim * 0.9;
-var QRDim = Math.floor(viewportXDim * 0.12);
+var QRDim = Math.floor(viewportXDim * 0.10);
 //var QRDim = (viewportXDim <= 1300) ? viewportXDim * 0.12 : viewportYDim * 0.12;
 //var QRDim = Math.max(viewportXDim * 0.12,130);
 //var QRDim = 130;

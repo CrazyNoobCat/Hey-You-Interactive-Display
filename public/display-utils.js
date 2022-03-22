@@ -32,7 +32,7 @@ function computeQRDimMaximizeHeight(viewportWidth,viewportHeight)
 	// all fit
 	
 	// => allow 20% space for text top and bottom, then equally split remaining space
-	qrDim = (viewportHeight * 0.8) / 2;
+	qrDim = (viewportHeight * 0.6) / 2; // used to be 0.8
     }
     else {
 	// Not such a big issue when viewPort is already tall and thin (more wiggle room)
@@ -66,8 +66,8 @@ function displayRoomQRCode(displayHost,roomID,qrDim,elemId)
     // For the QR code, work directly with the roomID
     var full_room_id = displayHost + '/join/' + roomID;
 
-    //var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
-    var url = '/qrcode/?data=' + full_room_id + '&size=' + qrDim;
+    var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
+    //var url = '/qrcode/?data=' + full_room_id + '&size=' + qrDim;
     
     var $img = $('<img>').attr('src',url);
     $img.on("load", function() {
@@ -75,7 +75,6 @@ function displayRoomQRCode(displayHost,roomID,qrDim,elemId)
     });
     $img.css("display","none"); // The on-load() callback above then fades it in!
     
-    //$('#barcode').html($img);
     $('#'+elemId).html($img);
 }
 
@@ -84,7 +83,6 @@ function displayRoomURL(displayHost,roomName, elemId)
     // For roomURL we work with the roomName to give a nicer URL to type in
     // This is subsequently mapped to the roomID URL by the server
     
-    messageHTML = 'Or visit on your phone: <span style="white-space: nowrap;">' + displayHost + '/join/' + roomName + '</span>';
+    messageHTML = 'Or visit on your phone:<br /> <span style="white-space: nowrap;">' + displayHost + '/join/' + roomName + '</span>';
     $('#'+elemId).html(messageHTML);
-    //$('#website').html('Or visit on your phone: <span style="white-space: nowrap;">' + displayHost + '/join/' + roomName + '</span>');
 }
