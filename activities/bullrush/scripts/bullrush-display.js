@@ -208,7 +208,8 @@ function generateRandomArrowPoints(arrowsXNum,xOrg,yOrg,xDim,yDim)
 function drawDirectionArrowHints(xOrg,yOrg,xDim,yDim)
 {
     var paddingX    = 60;
-    var paddingY    = 260;
+    //var paddingY    = 260;
+    var paddingY    = 130;
  
     // Reduce selection area for arrows to ensure they fit
     xOrg += paddingX;
