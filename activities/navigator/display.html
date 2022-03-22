@@ -1,33 +1,98 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Navigation | Hey You Interactive Display</title>
-    <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-    <link rel="stylesheet" href="index.css">
-    <script src="socketCreation.js"></script>
-    <script>
-        // Generic socket setup
-        setupConnection("display");  
-        function socketLoaded(anyListener){
-            socket.emit("displayLoaded");
-            //socket.onAny(anyListener); // Turns on the any listener must have socketUpdate(event, args) in main script
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-            // page specific functions    
-               
-            
-        }
-        
-        function reset(){
-            console.log("Display Reset Sent");
-            socket.emit('displayReset');                
-        }
-    </script>
+    <title>Slideshow | Hey You, Interact With Me!</title>
+
+    <link rel="icon" href="logo/heyyou-fav.ico" sizes="any" />
+
+    <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
+
+    <style>
+      body {
+          display: flex;
+          justify-content: center;
+	  font-family: monospace;
+	  color: #000000;
+      }
+      
+    </style>
+
+    <!-- Cast Debug Logger -->
+    <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
+    <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+
+    <script type="text/javascript" src="/scripts/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/socketCreation.js"></script>
+
+    <script type="text/javascript" src="/scripts/display-utils.js"></script>
+    <script type="text/javascript" src="/scripts/navigator-display.js"></script>
     
-</head>
-<body>
+    <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
+    <script>
+      // Custom socketLoaded() for slideshow activity
+      function socketLoaded(anyListener)
+      {
+          socket.onAny(anyListener); // Turns on the any listener
+          socket.emit("displayLoaded"); 
+
+          var displayHost = self.location.host;
+	  var roomID    = getCookie('roomID');
+	  var roomName  = getCookie('roomName');
+
+	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
+	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
+	  
+	  displayRoomURL(displayHost,roomName,"join-room-url-left");
+	  displayRoomURL(displayHost,roomName,"join-room-url-right");
+      } 
+
+      function socketUpdate(e, ...args)
+      {
+	  console.log("socketUpdate(): Not currently coded to process command '" + e + "'");
+      }
+
+      $(document).ready(function() {
+	  // Nothing to do currently
+      });
+      
+      // All displays need to defined a socketLoaded() function,
+      // and call socketConnection("display") to kick things off
+      setupConnection("display");
+      
+    </script>
+  </head>
+  
+  <body style="height: 100vh; background-color: #ffffff; margin: 0;">
+
+    <div class="container"
+	 styleXX="display: flex; justify-content: center; align-items: center; flex-direction: column;"
+	 styleXX="position: absolute;  top: 50%;  left: 50%;  transform: translate(-50%, -50%);" >
+      
+      <div id="content-showslide">
+	<h1>Navigator App Currently In Development</h1>
+      </div>
+      
+    </div>
+    
+    <div id="join-left-container" style="width: 270px; display: block; position: absolute; left:   20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
+      <div id="join-qrcode-div-left" style="position: relative; height: 270px;">
+	<div id="join-qrcode-left" style="position: absolute; bottom: 0; left: 0;"></div>
+      </div>
+      <h3 id="join-room-url-left" style="position: relative; background-color: #faaa33d0; padding: 4px;"></h3>
+    </div>
+    <div id="join-right-container" style="width: 270px; display: block; position: absolute; right: 20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
+      <div id="join-qrcode-div-right" style="position: relative; height: 270px;">
+	<div id="join-qrcode-right" style="position: absolute; bottom: 0; right: 0;"></div>
+      </div>      
+      <h3 id="join-room-url-right" style="position: relative; background-color: #faaa33d0; padding: 4px;"></h3>
+    </div>
+
     <footer>
-        <script src="receiver.js"></script>
+      <script src="/scripts/receiver.js"></script>
     </footer>
-</body>
+
+  </body>
 </html>
