@@ -29,17 +29,17 @@ const shortNames = new ShortNames('shortURLnames.txt');
 //  
 //   1. A 'display' starts by showing the home page to the activity-launcher
 //
-//   2. When a 'client' (phone-based user) connects via the QR code
+//   2. When a 'controller-client' (phone-based user) connects via the QR code
 //      (or else by entering the URL the activity-launcher displays) they
 //      are shown (on their phone) a list of apps that can be launched
 //
 //   3. Upon selecting an app (activity) from the list, the display is 
-//      send the relevent activities/<activity>/index.html and the
+//      send the relevent activities/<activity>/display.html and the
 //      phone changed to display the controller for the activity
-//      activities/<activity>client.html
+//      activities/<activity>/controller-client.html
 //
-//   4. If another client joins a display while it us running an app,
-//      then then client is directly provided the controller for
+//   4. If another controller-client joins a display while it us running an app,
+//      then the controller-client is directly provided the controller for
 //      that app
 
 
@@ -302,11 +302,11 @@ app.get('/', (req, res) => {
     if (activity != undefined) {
 	let activityLabel = activity;
         // Check if there is a unique client file in activity otherwise provide default
-        if (fs.existsSync(activityLocation + activity + '/client.html')) {
-            sendActivityFile(res, activityLocation + activity + '/client.html','/client.html',activityLabel);
+        if (fs.existsSync(activityLocation + activity + '/controller-client.html')) {
+            sendActivityFile(res, activityLocation + activity + '/controller-client.html','/controller-client.html',activityLabel);
 	}
         else  {
-            sendActivityFile(res, __dirname+defaultActivity+'/client.html','/client.html',activityLabel);
+            sendActivityFile(res, __dirname+defaultActivity+'/controller-client.html','/controller-client.html',activityLabel);
 	}
     } 
     else {
@@ -326,7 +326,7 @@ app.get('/', (req, res) => {
 	    let staticActivity = getCookie(req,"staticActivity");
 
 	    if ((roomID == undefined) && (staticActivity == undefined)) {
-		res.redirect("/disconnected/No active display connection found.  This can be caused by client controller inactivity. Scan the QR Code again to rejoin");
+		res.redirect("/disconnected/No active display connection found.  This can be caused by controller-client inactivity. Scan the QR Code again to rejoin");
 	    }
 	    else {
 		res.redirect("/error/No valid Display-id or Standalone App-id found. Try scanning an new QR Code.");
@@ -347,45 +347,20 @@ app.get('/activity', (req, res) => {
     
     if (activity != undefined) {
 	let activityLabel = activity;
-        if (fs.existsSync(activityLocation + activity +'/index.html')) {
-            sendActivityFile(res, activityLocation + activity +'/index.html','/index.html',activityLabel); // This is for reconecting displays
+        if (fs.existsSync(activityLocation + activity +'/display.html')) {
+            sendActivityFile(res, activityLocation + activity +'/display.html','/display.html',activityLabel); // This is for reconecting displays
 	}
         else {
-            sendActivityFile(res,__dirname + defaultActivity +'/index.html','/index.html',activityLabel); // This is for activities not existing  
+            sendActivityFile(res,__dirname + defaultActivity +'/display.html','/display.html',activityLabel); // This is for activities not existing  
             console.log("File Error: Activity (" + activity +") didn't exist so default was sent to device: " + req.params.roomID);
         }
     }
     else {
-	console.log("/activity serving up default activity index.html to client IP: " + req.ip);
+	console.log("/activity serving up default activity display.html to controller-client IP: " + req.ip);
 	console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
-        sendActivityFile(res, __dirname + defaultActivity +'/index.html', '/index.html', defaultActivityLabel); // This is for new displays
+        sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
     }   
 });
-
-
-
-/* similar to the above, but driven directly by URL provided by the top-level client */
-// ****
-// Currently not used (more testing and debugging needed)
-// ****
-
-/*
-app.get('/activities/:activity/:fileName', (req, res) => {
-    let activity = "/" + req.params.activity;
-    let fileName = "/" + req.params.fileName;
-
-    if (fileName == "/") {
-	fileName += "index.html";
-    }
-    
-    if (fs.existsSync(activityLocation + activity + fileName))
-        sendActivityFile(res, activityLocation + activity + fileName,fileName,activity); 
-    else{
-        console.log("File Error: requested file " + fileName + " did not exist for activity " + activity +".  Attempting to send default activity version to device: " + req.params.roomID);
-        sendActivityFile(res,__dirname + defaultActivity + fileName,fileName,activity); 
-    }
-});
-*/
 
 
 app.get('/scripts/:fileName', (req, res) => {
@@ -456,7 +431,7 @@ app.get('/qrcode', (req, res) => {
 
 
 app.get('*', (req, res) => {
-    // Send a file if it can be found inside either the public folder for the activity for the client or generic public folder
+    // Send a file if it can be found inside either the public folder for the activity for the controller-client or generic public folder
     // Requests from nonclients will be redirected to an error page
     let activity = getActivity(req);
     
@@ -670,7 +645,7 @@ io.on('connection', (socket, host) => {
     
                     if (!foundNewHost) {
                         
-                        //disconnect all clients from the display and send them back to another room (if sub room) ////////////////////
+                        //disconnect all controller-clients from the display and send them back to another room (if sub room) ////////////////////
                         // Otherwise drop connections and wait for 5min timeout to remove from connections
     
                     }
@@ -830,7 +805,7 @@ io.on('connection', (socket, host) => {
 
                 default:
 
-                    // Allow clients only sending to room displays which are the room host    
+                    // Allow cotroller-clients only sending to room displays which are the room host    
                     
                     client = findClientBySocketID(socket.id);
 
@@ -845,7 +820,7 @@ io.on('connection', (socket, host) => {
                         }
                     }
 		    else {
-                        console.log("Couldn't find client from SocketID: " + socket.id + "\tEvent: " + event);
+                        console.log("Couldn't find controller-client for SocketID: " + socket.id + "\tEvent: " + event);
                     }
     
                     break;
