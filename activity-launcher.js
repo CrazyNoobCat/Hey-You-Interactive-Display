@@ -46,16 +46,23 @@ const shortNames = new ShortNames('shortURLnames.txt');
 var displays = []; // An array containing all displays
 var clients  = []; // An array containing all the clients
 
-const defaultActivity      = '';
-const defaultActivityLabel = 'Activity-Launcher (Default)';
-const defaultCookieTimeout = 1 * 60 * 1000; // Number of milliseconds a cookie will last for
-const staticCookieValidMins = 120; // Valid for 2 hours by default
-const activityLocation = __dirname + '/activities';
 
-const start = new Date(); // This is the time which the server started. Use to reload connections after a restart
-const onStartReloadWindow = 2 * 60 * 1000
+const defaultActivity         = ''; // if ever make none empty, then needs to be of the form '/foo'
+const defaultActivityLabel    = 'Activity-Launcher (Default)';
+
+const defaultActivityLocation = __dirname + defaultActivity;
+const activityLocation        = __dirname + '/activities';
+
+const defaultCookieTimeout  = 1 * 60 * 1000; // Number of milliseconds a cookie will last for
+const staticCookieValidMins = 2 * 60;        // Valid for 2 hours by default
+
+const start                    = new Date();    // This is the time which the server started. Use to reload connections after a restart
+const onStartReloadWindowMSecs = 2 * 60 * 1000  // i.e. 2 mins
 
 console.log("Start time: " + start);
+
+const checkClientTimeoutMSecs  =  5 * 1000; // i.e.  5 seconds
+const checkDisplayTimeoutMSecs = 30 * 1000; // i.e. 30 seconds
 
 function getCookie(req,cookieName)
 {
@@ -171,7 +178,8 @@ function consoleInput() { // Console Commands
     const rl = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout
-    })
+    });
+    
     var exitCode = 0;
     return new Promise(function(resolve, reject) {
         rl.setPrompt('');
@@ -233,7 +241,7 @@ function consoleInput() { // Console Commands
         }).on('close',function() {
             resolve(exitCode) // this is the final result of the function
         });
-    })
+    });
 }
   
 async function enableConsole() {
@@ -242,7 +250,8 @@ async function enableConsole() {
         console.log('Exit Code: ', result)
         process.exit(result);
 
-    } catch(e) {
+    }
+    catch(e) {
         console.log('failed:', e)
     }
 }
@@ -279,16 +288,20 @@ app.get('/join/:roomID', (req, res) => {
     console.log("Room join request: " + req.params.roomID);
     if (findHostDisplayByRoomID(req.params.roomID) != undefined) {
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
-        res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
+
+	// Create a cookie which only works on this site and lasts for the default timeout
+        res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); 
         res.redirect('/'); // Prevents making a second cookie for a js file
         console.log("New device joined with roomID: " + req.params.roomID);
     }
     else if ((display = findHostDisplayByName(req.params.roomID)) != undefined) {
-        res.cookie('roomID', display.getDeviceID(), {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); // Create a cookie which only works on this site and lasts for the default timeout
+	// Create a cookie which only works on this site and lasts for the default timeout
+        res.cookie('roomID', display.getDeviceID(), {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); 
         res.redirect('/'); // Prevents making a second cookie for a js file
         console.log("New device joined with roomName: " + req.params.roomID);
     }  
-    else { // If room doesn't exit
+    else {
+	// If room doesn't exit
         res.redirect("/error/Unable to find that Display-id or Display-name");
     }    
 });
@@ -306,7 +319,7 @@ app.get('/', (req, res) => {
             sendActivityFile(res, activityLocation + activity + '/controller-client.html','/controller-client.html',activityLabel);
 	}
         else  {
-            sendActivityFile(res, __dirname+defaultActivity+'/controller-client.html','/controller-client.html',activityLabel);
+            sendActivityFile(res, __dirname + defaultActivity + '/controller-client.html','/controller-client.html',activityLabel);
 	}
     } 
     else {
@@ -318,7 +331,7 @@ app.get('/', (req, res) => {
                 sendActivityFile(res, activityLocation + activity + '/static.html', "/static.html", activityLabel);
 	    }
             else {
-                sendActivityFile(res, __dirname+defaultActivity+'/static.html', "static.html", defaultActivityLabel);
+                sendActivityFile(res, __dirname + defaultActivity + '/static.html', "static.html", defaultActivityLabel);
 	    }
         }
 	else {
@@ -384,15 +397,7 @@ app.get('/scripts/:fileName', (req, res) => {
     else {
 	let fullDefaultActivityFileName = __dirname + defaultActivity + '/scripts/' + fileName;
 	sendActivityFile(res, fullDefaultActivityFileName, fileName, defaultActivityLabel);
-    }
-    
-/*
-    let display = findHostDisplayByRoomID(getCookie(req,"roomID"));
-    if (display != undefined)
-        activity = display.getCurrentActivity();
-*/
-    
-
+    }       
 });
 
 // '/disconnected' is really an alias to /error, but is a preferred URL to show to the use
@@ -534,7 +539,7 @@ io.on('connection', (socket, host) => {
                 display.numOfClients++; // Increase client count for new room by one.
 
                 var currentTime = new Date();
-                if (currentTime - start < onStartReloadWindow) {
+                if (currentTime - start < onStartReloadWindowMSecs) {
                     client.message('reload');
                 }
 
@@ -592,7 +597,7 @@ io.on('connection', (socket, host) => {
             
 
             var currentTime = new Date();
-            if (currentTime - start < onStartReloadWindow) {
+            if (currentTime - start < onStartReloadWindowMSecs) {
                 display.message('reload');
             }
         }
@@ -643,12 +648,12 @@ io.on('connection', (socket, host) => {
                         }                    
                     }
     
-                    if (!foundNewHost) {
-                        
+                    if (!foundNewHost) {                        
                         //disconnect all controller-clients from the display and send them back to another room (if sub room) ////////////////////
                         // Otherwise drop connections and wait for 5min timeout to remove from connections
-    
+			console.log("**** Did not find new host");
                     }
+		    
                     return;
                 }    
             }
@@ -660,7 +665,7 @@ io.on('connection', (socket, host) => {
         // Check if socket is active (authorised)
         let active = true;
         let display = undefined;
-        let client = undefined;
+        let client  = undefined;
 	
         if (active) {
             var room = args[0];
@@ -833,7 +838,6 @@ server.listen(httpPort, () => {
     console.log('listening on *:' + httpPort);
 });
 
-clientTimeoutCheck(); // Call the next function and then let it loop
 
 // Checks every 5 to see if client is active
 async function clientTimeoutCheck()
@@ -858,17 +862,17 @@ async function clientTimeoutCheck()
             }
           });
         clientTimeoutCheck();
-    }, 5000);   
+    }, checkClientTimeoutMSecs);
 }
 
-displayHeartbeat();
 
 function displayHeartbeat()
 {
     setTimeout(() => {
         displays.forEach(function(display, index, object) {
             if (display.timedOut()) {
-                if (display.failedConsecutiveHeartBeat++ >= 10) { // (@30 secs => 5 mins) Note: used to be 2
+		display.failedConsecutiveHeartBeat++;
+                if (display.failedConsecutiveHeartBeat >= 10) { // (@30 secs => 5 mins) Note: used to be 2
                     // Forget the display, forcing it to reconnect
                     shortNames.release(display.getShortName());
                     object.splice(index, 1);
@@ -876,12 +880,18 @@ function displayHeartbeat()
 		else {
                     display.message('reload'); // Cause the display to catchup and keep ChromeCasts alive
                 }
-
             }
 	    else {
                 display.message('heartbeat');
             }
         });
         displayHeartbeat();
-    }, 30 * 1000); // 30 seconds
+    }, checkDisplayTimeoutMSecs);
 }
+
+// Endless looping calls using setTimeout() to check controller-clients
+clientTimeoutCheck(); 
+
+// Endless looping calls using setTime() to check displays
+displayHeartbeat();
+
