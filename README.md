@@ -74,7 +74,7 @@ All emit requests which don't fit one of the above values will be treated as a m
 The display will be sent (event, deviceID, args)
 
 **Server Emit Codes**
-- clidentDC Format: ('clientDC', clientDeviceID); --> Informs the display that a client has been disconnected from their activity
+- clidentDisconnect Format: ('clientDisconnect', clientDeviceID); --> Informs the display that a client has been disconnected from their activity
 
 **Notes**
 

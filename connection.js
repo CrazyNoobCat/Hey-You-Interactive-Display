@@ -1,6 +1,6 @@
 class Connection
 {
-    timeoutLimit;
+    timeoutLimitMSecs;
 
     // # before a variable here indicates private
 
@@ -26,12 +26,12 @@ class Connection
     // Only used for clients
     #lastInteractionTime;
     
-    constructor(io, socket, activity, timeoutLimit)
+    constructor(io, socket, activity, timeoutLimitMSecs)
     {
-	this.#io              = io;
-        this.#socket          = socket;
-        this.#currentActivity = activity; // Connection class itself;
-	this.timeoutLimit     = timeoutLimit;
+	this.#io               = io;
+        this.#socket           = socket;
+        this.#currentActivity  = activity; // Connection class itself;
+	this.timeoutLimitMSecs = timeoutLimitMSecs;
 	
         this.#room = socket.handshake.query.roomID;
 
@@ -41,7 +41,7 @@ class Connection
 
     timedOut()
     {
-        if (Date.now() - this.#lastInteractionTime > this.timeoutLimit) {
+        if (Date.now() - this.#lastInteractionTime > this.timeoutLimitMSecs) {
             return true;
 	}
         else {
@@ -90,12 +90,12 @@ class Connection
 
     setShortName(name)
      {
-        this.#shortName = name;
-        this.setCookie('roomName',name,this.timeoutLimit); // mins => 1 year
+         this.#shortName = name;
+         this.setCookieMins('roomName',name,this.timeoutLimitMSecs/(60*1000));
     };
 
-    setCookie(cName, cContent, cDurationMins){
-        this.message('setNewCookie', cName, cContent, cDurationMins);
+    setCookieMins(cName, cContent, cDurationMins){
+        this.message('setNewCookieMins', cName, cContent, cDurationMins);
     }
 
 
@@ -136,7 +136,7 @@ class Connection
     }
 
     resendShortName(){
-        this.setCookie('roomName',this.getShortName(),this.timeoutLimit);
+        this.setCookieMins('roomName',this.getShortName(),this.timeoutLimitMSecs/(60*1000));
     }
 
 }

@@ -3,6 +3,8 @@ const script = document.createElement('script');
 script.src = "/socket.io/socket.io.js";
 document.head.appendChild(script);
 
+const DisplayCookieTimeoutMins   = 10;
+
 var roomID;
 var socket;
 
@@ -19,9 +21,10 @@ function getVisitorID(type){
 function startSocket(visitorID, type)
 {
     if (type == "display"){
-        setCookie('roomID',visitorID,10);
+        setCookieMins('roomID',visitorID,DisplayCookieTimeoutMins);
         roomID = visitorID;
-    } else {
+    }
+    else {
         roomID = getCookie('roomID'); // Must be a client so get roomID
     }
 
@@ -65,24 +68,24 @@ function startSocket(visitorID, type)
     socket.on('disconnected', (message)=> {
         // Could go to an HTML page instead
         console.log("Disconnected: " + message);
-        setCookie('roomID','',0); // Cookie expiers instantly
+        setCookieMins('roomID','',0); // Cookie expiers instantly
         window.location.href = '/disconnected/'+ message;
     });
 
     socket.on('error', (message)=> {
         // Could go to an HTML page instead
         console.log("Error: " + message);
-        setCookie('roomID','',0); // Cookie expiers instantly
+        setCookieMins('roomID','',0); // Cookie expiers instantly
         window.location.href = '/error/'+ message;
     });
 
-    socket.on('extendRoom', (duration) => {
+    socket.on('extendRoom', (durationMins) => {
         console.log("Cookie duration extended");
         let cookieContent = getCookie('roomID');
-        setCookie('roomID',cookieContent, duration); // Extend cookie duration by above duration
+        setCookieMins('roomID',cookieContent, durationMins); // Extend cookie duration by above duration
         cookieContent = getCookie('roomName');
         if (cookieContent != '')
-            setCookie('roomName',cookieContent, duration); // Extend cookie duration by above duration
+            setCookieMins('roomName',cookieContent, durationMins); // Extend cookie duration by above duration
     });
 
     socket.on('heartbeat', () => {
@@ -90,8 +93,8 @@ function startSocket(visitorID, type)
         console.log("heartbeat");
     });
 
-    socket.on('setNewCookie', (cName, cContent, cDurationMins) => {
-        setCookie(cName,cContent, cDurationMins);
+    socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
+        setCookieMins(cName,cContent, cDurationMins);
     });
 
     const anyListener = (...args) => {
@@ -138,9 +141,9 @@ function listDecodedURICookies(){
     return decodedCookie.split(';');
 }
 
-function setCookie(cname, cvalue, exmins) {
+function setCookieMins(cname, cvalue, expireMins) {
     const d = new Date();
-    d.setTime(d.getTime() + (exmins*60*1000));
+    d.setTime(d.getTime() + (expireMins*60*1000));
     let expires = "expires="+ d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 

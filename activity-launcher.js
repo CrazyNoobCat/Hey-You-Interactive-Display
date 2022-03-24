@@ -53,8 +53,12 @@ const defaultActivityLabel    = 'Activity-Launcher (Default)';
 const defaultActivityLocation = __dirname + defaultActivity;
 const activityLocation        = __dirname + '/activities';
 
-const defaultCookieTimeout  = 1 * 60 * 1000; // Number of milliseconds a cookie will last for
-const staticCookieValidMins = 2 * 60;        // Valid for 2 hours by default
+const clientTimeoutMins          = 1;       // Number of mins a client controller will be displayed for, with no interactivity
+const defaultCookieTimeoutMins   = 5;       // Number of mins a client cookie will last for
+const staticCookieValidMins      = 2 * 60;  // Valid for 2 hours by default
+
+const clientTimeoutMSecs         = clientTimeoutMins * 60 * 1000;
+const defaultCookieTimeoutMSecs  = defaultCookieTimeoutMins * 60 * 1000;
 
 const start                    = new Date();    // This is the time which the server started. Use to reload connections after a restart
 const onStartReloadWindowMSecs = 2 * 60 * 1000  // i.e. 2 mins
@@ -153,8 +157,10 @@ function getStaticActivity(req)
 function getActivity(req)
 {
     let display = findHostDisplayByRoomID(getCookie(req,"roomID"));
-    if (display != undefined)
-        return display.getCurrentActivity();
+    if (display != undefined) {
+	let activity = display.getCurrentActivity();
+        return activity;
+    }
     
     return undefined;
 }
@@ -284,21 +290,23 @@ app.set('trust proxy', true)
 
 /* Restful HTTP responses triggered by incoming GET requests */
 
-app.get('/join/:roomID', (req, res) => {
-    console.log("Room join request: " + req.params.roomID);
-    if (findHostDisplayByRoomID(req.params.roomID) != undefined) {
+app.get('/join/:roomIdOrName', (req, res) => {
+    console.log("Room join request: " + req.params.roomIdOrName);
+    if (findHostDisplayByRoomID(req.params.roomIdOrName) != undefined) {
         // Set a cookie so that the device joins the room of the screen whos QR code was scanned
-
+	let roomID = req.params.roomIdOrName;
 	// Create a cookie which only works on this site and lasts for the default timeout
-        res.cookie('roomID', req.params.roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); 
+        res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
         res.redirect('/'); // Prevents making a second cookie for a js file
-        console.log("New device joined with roomID: " + req.params.roomID);
+        console.log("New device joined with roomID: " + roomID);
     }
-    else if ((display = findHostDisplayByName(req.params.roomID)) != undefined) {
+    else if ((display = findHostDisplayByName(req.params.roomIdOrName)) != undefined) {
 	// Create a cookie which only works on this site and lasts for the default timeout
-        res.cookie('roomID', display.getDeviceID(), {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))}); 
+	let roomName = req.params.roomIdOrName;
+	let roomID = display.getDeviceID();
+        res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
         res.redirect('/'); // Prevents making a second cookie for a js file
-        console.log("New device joined with roomName: " + req.params.roomID);
+        console.log("New device joined with roomName: " + roomName);
     }  
     else {
 	// If room doesn't exit
@@ -350,7 +358,24 @@ app.get('/', (req, res) => {
 
 // Shortcut for the accessing the top-level display
 app.get('/display', (req, res) => {
-    res.redirect('/activity');
+
+    // Start a display (forced refresh if necessary) with the default (i.e. top-level) activity
+
+    let roomID = getCookie(req,"roomID");
+    let display = findHostDisplayByRoomID(roomID);
+    
+    if (display != undefined) {
+	// Forced refresh => disconnect any any clients currently connected
+	
+	findAllClientsByRoomID(roomID).forEach(client => {
+	    display.message('clientDisconnect', client.getDeviceID());
+	});
+    }
+
+    display.activityChange(defaultActivity,null);
+    
+    console.log("/display serving up fresh default activity display.html to controller-client IP: " + req.ip);
+    sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
 });
 
 	
@@ -403,7 +428,7 @@ app.get('/scripts/:fileName', (req, res) => {
 // '/disconnected' is really an alias to /error, but is a preferred URL to show to the use
 // in certain situations
 app.get('*/disconnected/:error', (req, res) => {
-    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))});
+    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))});
     res.redirect('/disconnected');
 });
 
@@ -412,7 +437,7 @@ app.get('/disconnected', (req, res) => {
 });
 
 app.get('*/error/:error', (req, res) => {
-    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeout))});
+    res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))});
     res.redirect('/error');
 });
 
@@ -477,7 +502,7 @@ io.on('connection', (socket, host) => {
     var newConnection = true;
 
     if (socket.handshake.query.data == "client") {
-        for (let index = 0; index < clients.length; index++) {
+        for (let index=0; index<clients.length; index++) {
             const client = clients[index];
             if (client.getDeviceID() == socket.handshake.query.clientID) {
                 // Handle updating socket information for this reconnecting device
@@ -486,13 +511,13 @@ io.on('connection', (socket, host) => {
                     let display = findHostDisplayByRoomID(client.getRoom());
 
                     if (display != undefined) {
-                        display.message('clientDC', client.getDeviceID());
-                        //io.to(display.getRoom()).emit('clientDC', client.getDeviceID());
+                        display.message('clientDisconnect', client.getDeviceID());
+                        //io.to(display.getRoom()).emit('clientDisconnect', client.getDeviceID());
                         display.numOfClients--; // Reduce client count by one for old room.
                     }
 		    else {
                         // Error
-			console.error("io.on('connection'): When disconnecting old connection, did not find a display for roomID '" + client.getRoom());
+			console.error("io.on('connection'): When disconnecting an old connection, did not find a display for roomID '" + client.getRoom());
                     }
 
                     display = findHostDisplayByRoomID(client.getRoom());
@@ -520,7 +545,7 @@ io.on('connection', (socket, host) => {
         if (newConnection) {
             // Handle creating a new Connection instance for this device
 
-            var client = new Connection(io,socket,defaultActivity,defaultCookieTimeout);
+            var client = new Connection(io,socket,defaultActivity,clientTimeoutMSecs);
 	    
             // Add the new client to the list of clients
 
@@ -574,7 +599,7 @@ io.on('connection', (socket, host) => {
 
         if (newConnection) {
             // Handle creating a new Connection instance for this device
-            let display = new Connection(io,socket,defaultActivity,defaultCookieTimeout);
+            let display = new Connection(io,socket,defaultActivity,clientTimeoutMSecs);
 
             console.log("New Display: \t" + display.connectionInformation());
 	    
@@ -590,7 +615,7 @@ io.on('connection', (socket, host) => {
 
             display.setAsRoomHost();
             display.setRoom(roomID);
-            display.setCookie('roomID',roomID,defaultCookieTimeout) // mins => 1 day
+            display.setCookieMins('roomID',roomID,defaultCookieTimeoutMins)
 
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
@@ -794,8 +819,8 @@ io.on('connection', (socket, host) => {
                     // Set staticActivity cookie
                     client = findClientBySocketID(socket.id);
                     display = findHostDisplayByRoomID(client.getRoom());
-                    client.setCookie('staticActivity',display.getCurrentActivity(),staticCookieValidMins);
-                    client.setCookie("roomID",'',0); // Invalidate old cookie
+                    client.setCookieMins('staticActivity',display.getCurrentActivity(),staticCookieValidMins);
+                    client.setCookieMins("roomID",'',0); // Invalidate old cookie
 
                     // Remove client
                     clients.forEach(function(clientTemp, index, object) {
@@ -852,8 +877,8 @@ async function clientTimeoutCheck()
 
                 let display = findHostDisplayByRoomID(client.getRoom());
                 if (display != undefined) {
-                    display.message('clientDC', client.getDeviceID());
-                    //io.to(display.getSocketID()).emit('clientDC', client.getDeviceID()); // Inform the display to remove client
+                    display.message('clientDisconnect', client.getDeviceID());
+                    //io.to(display.getSocketID()).emit('clientDisconnect', client.getDeviceID()); // Inform the display to remove client
                     display.numOfClients--; // Reduce client count for room by one
                 }
 

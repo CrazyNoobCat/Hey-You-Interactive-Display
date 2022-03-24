@@ -82,7 +82,15 @@ function displayRoomURL(displayHost,roomName, elemId)
 {
     // For roomURL we work with the roomName to give a nicer URL to type in
     // This is subsequently mapped to the roomID URL by the server
+
+
     
-    messageHTML = 'Or visit on your phone:<br /> <span style="white-space: nowrap;">' + displayHost + '/join/' + roomName + '</span>';
+    messageHTML = 'Or visit on your phone:<br />';
+    messageHTML += '<span style="white-space: nowrap;">';
+    messageHTML +=   '<span class="globe-icon-bg" style="padding-right: 3px;"></span>';
+    //messageHTML +=   '<span style="color: #e03031">https://' + displayHost + '/join/' + roomName + '</span>';
+    messageHTML +=   '<span style="color: #e03031">' + displayHost + '/join/' + roomName + '</span>';
+    messageHTML += '</span>';
+    
     $('#'+elemId).html(messageHTML);
 }

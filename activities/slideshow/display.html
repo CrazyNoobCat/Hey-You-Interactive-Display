@@ -32,6 +32,15 @@
 	  font-family: monospace;
 	  color: #000000;
       }
+
+      /* Move the following to a central CSS file */
+      .globe-icon-bg {
+	  display: inline-block;
+	  width: 16px;
+	  height: 16px;
+	  background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAA8AAAAPAHqLqiNAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAq1JREFUOI11kzFIIwkUhr+ZhEPllAXPWwURlAQMwSSawsbCIjiR4bTRQr0Vr9ArLEY0lQjOhRQWWljZ2YiCWfFcWBWu0CiBEMEY9PBwkysUGxdEkjSukbytMuy6u3/3wf/ez/vhwQtNTU290TTtw8bGxsdisSiFQqEUDocfNE3LGIbx50u/JdM0f+np6cmoqirr6+sSjUZleXlZxsbGJBaLyfz8vAASCAT+n52dff1y+JXX680DMjMzI/v7+6KqqiwsLEhfX59UVFTI2dmZaJomgHg8nrxpmr8CKAB7e3vvzs/P+wAmJyfZ2tri7u6O7u5ubm9vyWazOBwOOjo6iEajALS1tb3Xdf03JRQKDafT6XWA0dFRbDYbOzs7AIyMjHB6ekoikQAgFApxcnLC8fExAD6f7w26rv8LCCDxeFza29ulzOUTyjwwMCArKysWB4PBK/Xq6soBoCgKLpeLdDr9w6KTySR+v9/iy8vLZvvg4OBPpVKJqqoqnp+fGR8ftww+n4/6+npcLhflEKfTycTEBAA2m81mz+fzpWKxaHt6evpuai6X4+HhAQC73Y6iKF8bnE7nJ0AURZH7+3vrvnIHwWDQ4ubmZkmlUhY7HI5Pamtr6wcAESGTyeB2u3/YQWdnJ6lU6svwrN3r9f7V0NDwFqBQKDA3N8fh4aHVQWVlJU1NTQAMDw9zc3NjdVBTUzOnRiKRLb/f/w/A9vY2uq5TV1f3Tbrb7aaxsZF4PF5evru4uPi3HeD6+no0kUhkLy4ufq6urqarq4v+/n5aWlqIxWIcHR2RTCYxDIPd3V08Hk+htrb2j68STNN81dvbe6mqqmxubsrq6qosLS3J0NCQHBwcSCQSsZ6p/Aff1fT09O+6rv+3trb28fHxsZjL5SQcDucDgUDWMIzxl/7PICg2UqwuxvwAAAAASUVORK5CYII=');
+	  background-repeat: no-repeat;
+      }
       
     </style>
 
@@ -133,14 +142,14 @@
       
     </div>
     
-    <div id="join-left-container" style="width: 270px; display: block; position: absolute; left:   20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
-      <div id="join-qrcode-div-left" style="position: relative; height: 270px;">
+    <div id="join-left-container" style="width: 280px; display: block; position: absolute; left:   20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
+      <div id="join-qrcode-div-left" style="position: relative; height: 280px;">
 	<div id="join-qrcode-left" style="position: absolute; bottom: 0; left: 0;"></div>
       </div>
       <h3 id="join-room-url-left" style="position: relative; background-color: #faaa33d0; padding: 4px;"></h3>
     </div>
-    <div id="join-right-container" style="width: 270px; display: block; position: absolute; right: 20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
-      <div id="join-qrcode-div-right" style="position: relative; height: 270px;">
+    <div id="join-right-container" style="width: 280px; display: block; position: absolute; right: 20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
+      <div id="join-qrcode-div-right" style="position: relative; height: 280px;">
 	<div id="join-qrcode-right" style="position: absolute; bottom: 0; right: 0;"></div>
       </div>      
       <h3 id="join-room-url-right" style="position: relative; background-color: #faaa33d0; padding: 4px;"></h3>
