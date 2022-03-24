@@ -370,9 +370,10 @@ app.get('/display', (req, res) => {
 	findAllClientsByRoomID(roomID).forEach(client => {
 	    display.message('clientDisconnect', client.getDeviceID());
 	});
+	
+	display.activityChange(defaultActivity,null);
     }
 
-    display.activityChange(defaultActivity,null);
     
     console.log("/display serving up fresh default activity display.html to controller-client IP: " + req.ip);
     sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
