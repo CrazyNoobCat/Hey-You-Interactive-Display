@@ -801,12 +801,12 @@ class player {
 
                 case "downOff":
                     this.moveDown = false;
-                break;
+                    break;
 		
                 case "clientDisconnect":
                     console.log("Controller-client disconnect signal recieved for player: " + this.socket + " for player type: " + this.type);
                     this.quit = true;
-                break;
+                    break;
 		
                 default:
                     break;

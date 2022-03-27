@@ -1,13 +1,10 @@
 // $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
-var viewportXDim = $(window).width();
-var viewportYDim = $(window).height();
+var ViewportXDim = $(window).width();
+var ViewportYDim = $(window).height();
 
-var SlideMaxXDim = (viewportXDim <= 1300) ? viewportXDim * 0.8 : viewportXDim * 0.9;
-var SlideMaxYDim = (viewportXDim <= 1300) ? viewportYDim * 0.8 : viewportYDim * 0.9;
-var QRDim = Math.floor(viewportXDim * 0.10);
-//var QRDim = (viewportXDim <= 1300) ? viewportXDim * 0.12 : viewportYDim * 0.12;
-//var QRDim = Math.max(viewportXDim * 0.12,130);
-//var QRDim = 130;
+var SlideMaxXDim = (ViewportXDim <= 1300) ? ViewportXDim * 0.8 : ViewportXDim * 0.9;
+var SlideMaxYDim = (ViewportXDim <= 1300) ? ViewportYDim * 0.8 : ViewportYDim * 0.9;
+var QRDim = Math.floor(ViewportXDim * 0.10);
 
 // State variables for slideshow activity
 var currentSlidePos = 0;
@@ -15,9 +12,11 @@ var overlaySlidePos = 1;
 var currentSlideFS  = currentSlidePos + 1;
 var overlaySlideFS  = overlaySlidePos + 1;
 
+var cleanSlidePassthrough    = true;
+var uninterruptedSlideCount = 0;
+
 var SlidesOverview = null;      
 var slideDir  = null;
-//var slideExt  = null;
 var numSlides = null;
 
 var actualSlideImageXDim = null;
@@ -83,9 +82,6 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 
     $currentSlideImg.attr("src", slideDir + "/" + currentSlideFile);
     $overlaySlideImg.attr("src", slideDir + "/" + overlaySlideFile);
-
-    //$currentSlideImg.attr("src", slideDir + "/Slide" + currentSlideFS + slideExt);
-    //$overlaySlideImg.attr("src", slideDir + "/Slide" + overlaySlideFS + slideExt);
     
     $currentSlideImg.on("load", function() {
 	$currentSlideImg.fadeIn(1000);
@@ -98,15 +94,23 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
     
     // https://stackoverflow.com/questions/6186454/is-there-a-callback-on-completion-of-a-css3-animation        
     $("#currentslide-li").bind('animationend oanimationend webkitAnimationEnd MSAnimationEnd', function() { 
-	startNextSlide() 
+	startNextSlide();
+
+	if (cleanSlidePassthrough) {
+	    uninterruptedSlideCount++;
+	    if (uninterruptedSlideCount == numSlides) {
+		// completed an uninterrupted passthrough
+		// disconnect slideshow display, to return to top-level dispay-home
+		displayReset();
+	    }
+	}
+	
     });
 
     var localSlideDuration   = slideDeck[currentSlidePos].slideDuration;
     var localSlideTransition = slideDeck[overlaySlidePos].slideTransition;
 
     doSlideTransition(localSlideDuration,localSlideTransition);
-
-    //doSlideTransition(slideDeck[overlaySlidePos].slideTransition,slideDeck[currentSlidePos].slideDuration);
 }
 
 function loadSlideshow(slideshowName)
@@ -174,7 +178,11 @@ function startNextSlide() {
     overlaySlidePos = (overlaySlidePos + 1) % numSlides;	    
     currentSlideFS = currentSlidePos + 1;
     overlaySlideFS = overlaySlidePos + 1;
-    
+
+    if (currentSlidePos == 0) {
+	cleanSlidePassthrough = true;
+    }
+
     // Set up the new overlay slide
     var overlaySlideFile = slideDeck[overlaySlidePos].file;
     $overlaySlideImg.attr("src", slideDir + "/" + overlaySlideFile);

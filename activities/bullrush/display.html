@@ -30,7 +30,8 @@
     <script type="text/javascript" src="/scripts/bullrush-display.js"></script>
 	
     <script>
-      function socketLoaded(anyListener){
+      function socketLoaded(anyListener)
+      {
           Socket.onAny(anyListener); // Turns on the any listener	  
           Socket.emit("displayLoaded");   
 
@@ -43,42 +44,50 @@
 	  displayRoomURL(displayHost,roomName,"join-room-url");
       }            
       
-      function emitPlayerMarker(socketId, playerColor, playerType, playerLabel){
+      function emitPlayerMarker(socketId, playerColor, playerType, playerLabel)
+      {
           console.log("Notifying Player of their allocated marker. Sending to socket-id '" + socketId +"': " + playerLabel + ", colour=" + playerColor + ", label=" + playerLabel);
           Socket.emit('displayEmit', socketId, 'playerMarker', playerColor, playerType, playerLabel);
       }
 
-      function emitInfoTopline(socketId,message){
+      function emitInfoTopline(socketId,message)
+      {
           console.log("Notifying Player of info topline message. Sending to socket-id: " + socketId + "message=" + message);
           Socket.emit('displayEmit', socketId, 'infoToplineMessage', message);
       }
       
-      function emitRunnerHasBeenTagged(socketId){
+      function emitRunnerHasBeenTagged(socketId)
+      {
           console.log("Notifying Runner that they have been tagged. Sending to socket-id: " + socketId);
           Socket.emit('displayEmit', socketId, 'playerTaggerContact','gotcha');
       }
 
-      function emitTaggerHasCaughtRunner(socketId){
+      function emitTaggerHasCaughtRunner(socketId)
+      {
 	  console.log("Notifying Tagger that they have caught a Runner. Sending to socket-id: " + socketId);
           Socket.emit('displayEmit', socketId, 'playerTaggerContact','collide');
       }
 
-      function emitWinner(socketId){
+      function emitWinner(socketId)
+      {
           console.log("Notifying Runner that they have won. Sending to socket-id: " + socketId);
           Socket.emit('displayEmit', socketId, 'endOfGame', "Last runner standing.<br/>Congratulations you win!", "winner");
       }
 
-      function emitYouWereCaught(socketId){
+      function emitYouWereCaught(socketId)
+      {
           console.log("Notifying a player than was originally a Runner that they have lost. Sending to socket-id: " + socketId);
           Socket.emit('displayEmit', socketId, 'endOfGame', "You started life as a Runner, but were caught by a tagger.");
       }
       
-      function emitEveryoneCaptured(socketId){
+      function emitEveryoneCaptured(socketId)
+      {
           console.log("Notifying Tagger that everyone is now caught. Sending to socket-id: " + socketId);
           Socket.emit('displayEmit', socketId, 'endOfGame', "As a Tagger, <i>Mission Accomplished!</i> Everyone has been caught.");
       }
       
-      function reset(){
+      function reset()
+      {
           console.log("Display Reset Sent");
           Socket.emit('displayReset');                
       }

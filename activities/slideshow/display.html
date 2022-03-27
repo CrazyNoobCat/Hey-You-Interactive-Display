@@ -79,10 +79,16 @@
 	      root.style.setProperty('--animation-play-state', 'running');
 	  }
           else if (e === "next") {
-	      startNextSlide("fromright");	      	      
+	      cleanSlidePassthrough   = false;
+	      uninterruptedSlideCount = 0;
+
+	      startNextSlide();
           }
 	  else if (e === "back") {
-	      startPrevSlide("fromright");	      
+	      cleanSlidePassthrough   = false;
+	      uninterruptedSlideCount = 0;
+
+	      startPrevSlide();
           }
 	  else if (e === "download") {
               console.log(args);
@@ -93,6 +99,12 @@
 	  else {
 	      console.log("socketUpdate(): Unrecognized command '" + e + "'");
 	  }
+      }
+
+      function displayReset()
+      {
+          console.log("Slideshow Display Reset Sent");
+          Socket.emit('displayReset');                
       }
 
       $(document).ready(function() {
