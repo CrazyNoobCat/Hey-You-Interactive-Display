@@ -97,7 +97,7 @@
 	      Socket.emit('displayEmit', args[0], 'download', $currentSlideImg.attr("src") );
           }
 	  else {
-	      console.log("socketUpdate(): Unrecognized command '" + e + "'");
+	      console.log("slideshow-display:socketUpdate(): '" + e + "' is not a custom command. Leaving to default Socket.on() routines to handle");
 	  }
       }
 

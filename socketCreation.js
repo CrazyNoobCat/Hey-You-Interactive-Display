@@ -48,7 +48,6 @@ function startSocket(visitorID, type)
 		full_href += "?" + optUrlParams;
 	    }
             window.location.href = full_href;
-	    //window.location.href = '/activity';
 	}
         else {
             window.location.href = '/';
@@ -91,7 +90,7 @@ function startSocket(visitorID, type)
     });
 
     Socket.on('heartbeat', () => {
-        Socket.emit('heartbeat'); // **** Can this be replaced with this.emit() ???
+        Socket.emit('heartbeat');
         console.log("heartbeat");
     });
 
@@ -119,6 +118,11 @@ function startSocket(visitorID, type)
 
 function selectActivity(activity,optUrlParams)
 {
+    if (typeof launchRandomActivityTimeout !== "undefined") {
+	console.log("Canceling launchRandomActivity");
+	clearTimeout(launchRandomActivityTimeout);
+    }
+        
     Socket.emit("selectActivity", RoomID, activity, optUrlParams, (response) => {
         console.log("Redirecting to " + activity);
         window.location.pathname = '/'; // Consider passing on the optUrlParms to the client web page also?

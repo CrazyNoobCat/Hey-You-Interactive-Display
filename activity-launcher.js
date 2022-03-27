@@ -745,24 +745,24 @@ io.on('connection', (socket, host) => {
 
                 case "selectActivity":
                     // Client has indicated an activity change
-                    var activitySelected = args[1];
-		    var optUrlParams     = args[2];
-                    var callback         = args[3];
+                    var newActivity  = args[1];
+		    var optUrlParams = args[2];
+                    var callback     = args[3];
 
                     client = findClientBySocketID(socket.id);
                     if (client != undefined) {
                         client.updateLastInteractionTime();
                         if (client.getRoomID() == roomID) {
-                            if (activitySelected == "/") {
-				activitySelected = defaultActivity;                    
+                            if (newActivity == "/") {
+				newActivity = defaultActivity;                    
 			    }
 
-			    var activitySelectedLabel = getActivityLabel(activitySelected)
-                            console.log("New activity: '" + activitySelectedLabel + "' for RoomID: " + roomID);
+			    var newActivityLabel = getActivityLabel(newActivity)
+                            console.log("New activity: '" + newActivityLabel + "' for RoomID: " + roomID);
     
                             display = findHostDisplayByRoomID(roomID);
                             if (display != undefined) {
-                                display.activityChange(activitySelected,optUrlParams);
+                                display.activityChange(newActivity,optUrlParams);
     
                                 // Nothing is done for any subdisplays who are apart of this roomID. Should this be assumed as part of the reload?
     
@@ -772,8 +772,10 @@ io.on('connection', (socket, host) => {
                             }        
                         }  
                     }
-                                              
-                    callback();
+
+		    if (typeof callback === "function") {
+			callback();
+		    }
                     break;
 
                 case "assignRoomName":
@@ -781,15 +783,15 @@ io.on('connection', (socket, host) => {
                     display = findDisplayBySocketID(socket.id);
 
                     // If no name could be found then assign new room name, else send current room name
-                if (display.getRoomName() == undefined) {
-		    let roomName = roomNames.nextFree();
+                    if (display.getRoomName() == undefined) {
+			let roomName = roomNames.nextFree();
                         display.setAndSendRoomName(roomName);
 		    }
                     else {
-                        display.resendRoomName();
+			display.resendRoomName();
 		    }
                     break;
-
+		
                 case "displayLoaded":
                     display = findDisplayBySocketID(socket.id);
 
@@ -835,6 +837,34 @@ io.on('connection', (socket, host) => {
                     }    
                     break;
 
+                case "displaySelectActivity":
+                    // Display has indicated an activity change
+                    var newActivity  = args[1];
+		    var optUrlParams = args[2];
+                    var callback     = args[3];
+
+                    if (newActivity == "/") {
+			newActivity = defaultActivity;                    
+		    }
+
+		    var newActivityLabel = getActivityLabel(newActivity)
+                    console.log("Display initiated new activity: '" + newActivityLabel + "' for RoomID: " + roomID);
+    
+                    display = findHostDisplayByRoomID(roomID);
+                    if (display != undefined) {
+			display.activityChange(newActivity,optUrlParams);
+			// Nothing is done for any subdisplays who are apart of this roomID. Should this be assumed as part of the reload?
+                    }
+		    else {
+			console.log("Display was undefined based on roomID for activity change. No change occured");
+                    }
+
+		    if (typeof callback === "function") {
+			callback();
+		    }
+                    break;
+
+		
                 case "displayReset":
                     // Reset the display back to the default activity and get clients to reload
                     display = findDisplayBySocketID(socket.id);

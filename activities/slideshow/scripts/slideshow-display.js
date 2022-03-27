@@ -94,17 +94,21 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
     
     // https://stackoverflow.com/questions/6186454/is-there-a-callback-on-completion-of-a-css3-animation        
     $("#currentslide-li").bind('animationend oanimationend webkitAnimationEnd MSAnimationEnd', function() { 
-	startNextSlide();
 
+	var doneDisplayReset = false;
 	if (cleanSlidePassthrough) {
 	    uninterruptedSlideCount++;
 	    if (uninterruptedSlideCount == numSlides) {
 		// completed an uninterrupted passthrough
 		// disconnect slideshow display, to return to top-level dispay-home
 		displayReset();
+		doneDisplayReset = true;
 	    }
 	}
-	
+
+	if (!doneDisplayReset) {
+	    startNextSlide();
+	}	
     });
 
     var localSlideDuration   = slideDeck[currentSlidePos].slideDuration;

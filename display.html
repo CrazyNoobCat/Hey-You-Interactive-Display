@@ -57,11 +57,36 @@
 	
 	// $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
 	
-	var viewportWidth  = $(window).width();
-	var viewportHeight = $(window).height();
+	var _viewportXDim = $(window).width();
+	var _viewportYDim = $(window).height();
 
-	QRDim = computeQRDimMaximizeHeight(viewportWidth,viewportHeight);
+	QRDim = computeQRDimMaximizeHeight(_viewportXDim,_viewportYDim);
+	
+	function displaySelectActivity(activity,optUrlParams)
+	{
+	    Socket.emit("displaySelectActivity", RoomID, activity, optUrlParams, (response) => {
+		//console.log("Redirecting to " + activity);
+		//window.location.pathname = '/activity'; // Consider passing on the optUrlParms to the client web page also?
+	    });   
+	}
+	
 
+	var randomActivities = [
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=waikato-uni-backgrounds"},
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=smoke-and-mirrors-sampler"},
+	    { "activity": "/bullrush",  "optUrlParams": null }
+	];
+
+	var launchRandomActivityTimeout = null;
+	function launchRandomActivity()
+	{
+	    console.log("**** launchRandomActivity called");
+	    var randomActivity = randomActivities[0];
+	    displaySelectActivity(randomActivity.activity,randomActivity.optUrlParams);
+
+	    //setCookieMins("activity",randomActivity.activity,DisplayCookieTimeoutMins);
+	    //Socket.emit("reload", randomActivity.optUrlParams)
+	}
 	
 	$(document).ready(function () {
 	    var logoDim = Math.min(QRDim,250)
@@ -73,6 +98,9 @@
 	    $('#qrcode').height(QRDim);
 	    $('#qrcode-loading').width(QRDim);
 	    $('#qrcode-loading').height(QRDim);
+
+
+	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, 60 * 1000); // After 60 secs
 	    
 	});
 	
