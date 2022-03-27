@@ -15,13 +15,13 @@ class Connection
     #io;
     #socket;
     #roomID;
-    ready = true;
+    #roomName;
+    ready;
 
     // Only used for displays
     #host        = false;
     #messages    = []; // All messages which the display hasn't recieved due to it not being ready 
     numOfClients = 0;
-    #shortName   = null;
     failedConsecutiveHeartBeat = 0;
     
     // Only used for clients
@@ -31,14 +31,17 @@ class Connection
     {
 	this.#io               = io;
         this.#socket           = socket;
-        this.#currentActivity  = activity; // Connection class itself;
+        this.#currentActivity  = activity; // Connection class itself
 	this.timeoutLimitMSecs = timeoutLimitMSecs;
 	this.timeoutLimitMins  = timeoutLimitMSecs/(60*1000);
 	
-        this.#roomID = socket.handshake.query.roomID;
-
+        this.#roomID   = socket.handshake.query.roomID;
+	this.#roomName = null;
+	
         this.#initalConnectionTime = Date.parse(socket.handshake.time);
         this.updateLastInteractionTime();
+
+	this.ready = true;
     }
 
     timedOut()
@@ -84,21 +87,20 @@ class Connection
 
     addMessage(...args)
     {
-
         this.#messages.push([...args]);
     }
     
     clearMessages() { this.#messages = []} ;
 
-    setShortName(name)
+    setAndSendRoomName(name)
     {
-        this.#shortName = name;
+        this.#roomName = name;
         this.setCookieMins('roomName',name,this.timeoutLimitMins);
     }
 
-    resendShortName()
+    resendRoomName()
     {
-        this.setCookieMins('roomName',this.getShortName(),this.timeoutLimitMins);
+        this.setCookieMins('roomName',this.getRoomName(),this.timeoutLimitMins);
     }
 
     
@@ -107,32 +109,34 @@ class Connection
         this.message('setNewCookieMins', cName, cContent, cDurationMins);
     }
 
-
+    //
     // Getters
+    //
+    getDeviceID(){ return this.#socket.handshake.query.clientID;}
+    getSocketID(){ return this.#socket.id;}
+    getType()    { return this.#socket.handshake.query.data;}
 
-    getDeviceID(){return this.#socket.handshake.query.clientID;}
-    getSocketID(){return this.#socket.id;}
-    getType()    {return this.#socket.handshake.query.data;}
+    getCurrentActivity() { return this.#currentActivity;      } // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
+    getLastActivity()    { return this.#lastActivity;         }
+    getInitalConnection(){ return this.#initalConnectionTime; }
+    getLastInteraction() { return this.#lastInteractionTime;  }
 
-    getCurrentActivity() {return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
-    getLastActivity()    {return this.#lastActivity;}
-    getInitalConnection(){return this.#initalConnectionTime;}
-    getLastInteraction() {return this.#lastInteractionTime;}
-
-    getRoomID()   {return this.#roomID;    }
-    isRoomHost()  {return this.#host;      }
-    getMessages() {return this.#messages;  }
-    getShortName(){return this.#shortName; }
+    getRoomID()   { return this.#roomID;   }
+    getRoomName() { return this.#roomName; }
+    isRoomHost()  { return this.#host;     }
+    getMessages() { return this.#messages; }
 
     // Debug information
 
-    connectionInformation() {
+    connectionInformation()
+    {
         var debugText = "DeviceID: " + this.getDeviceID() + "\tRoom ID: " + this.getRoomID();
         return debugText;
     }
 
     // Functions
-    message(...args){ // Handles sending socket updates to device
+    message(...args)
+    { // Handles sending socket updates to device
         if(this.ready){
             console.log("Message sent to: " + this.getDeviceID() + "\tArgs: " + args);
             this.#io.to(this.getSocketID()).emit(...args);

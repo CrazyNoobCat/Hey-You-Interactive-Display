@@ -1,10 +1,9 @@
 const fs = require('fs');
 
-class ShortNames
+class RoomNames
 {
     #freeNames;
     #usedNames = [];
-
 
     constructor (fileName) {
 
@@ -27,22 +26,22 @@ class ShortNames
         return fn
     }
 
-    release(shortName)
+    release(roomName)
     {
         // Mark name as unused
-        let xName = (element) => element === shortName
+        let xName = (element) => element === roomName
         let index = this.#usedNames.findIndex(xName)
         
         if (index != -1){
             this.#usedNames.splice(index,1);
-            this.#freeNames.push(shortName);
+            this.#freeNames.push(roomName);
         }
 	else {
-            return "shortName not in use"
+            return "roomName not in use"
         }
 
         // Return result i.e. success or failure/abort reasoning
     }
 }
 
-module.exports = ShortNames;
+module.exports = RoomNames;

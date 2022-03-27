@@ -138,41 +138,41 @@ $(document).ready(function() {
         //Left and Right
         if(joystick1.xPlace < -0.25 && joystick1.left == false){
           joystick1.right = false;
-          socket.emit('leftOn', roomID);
-          socket.emit('rightOff', roomID);
+          Socket.emit('leftOn', roomID);
+          Socket.emit('rightOff', roomID);
           joystick1.left = true;
         }
         if(joystick1.xPlace > 0.25 && joystick1.right == false){
           joystick1.left = false;
-          socket.emit('rightOn', roomID);
-          socket.emit('leftOff', roomID);
+          Socket.emit('rightOn', roomID);
+          Socket.emit('leftOff', roomID);
           joystick1.right = true;
         }
         if(joystick1.xPlace > -0.25 && joystick1.xPlace < 0.25 && (joystick1.left == true || joystick1.right == true)){
           joystick1.left = false;
           joystick1.right = false;
-          socket.emit('rightOff', roomID);
-          socket.emit('leftOff', roomID);
+          Socket.emit('rightOff', roomID);
+          Socket.emit('leftOff', roomID);
         }
 
         //Up and down
         if(joystick1.yPlace < -0.25 && joystick1.up == false){
           joystick1.down = false;
-          socket.emit('upOn', roomID);
-          socket.emit('downOff', roomID);
+          Socket.emit('upOn', roomID);
+          Socket.emit('downOff', roomID);
           joystick1.up = true;
         }
         if(joystick1.yPlace > 0.25 && joystick1.down == false){
           joystick1.up = false;
-          socket.emit('downOn', roomID);
-          socket.emit('upOff', roomID);
+          Socket.emit('downOn', roomID);
+          Socket.emit('upOff', roomID);
           joystick1.down = true;
         }
         if(joystick1.yPlace > -0.25 && joystick1.yPlace < 0.25 && (joystick1.up == true || joystick1.down == true)){
           joystick1.up = false;
           joystick1.down = false;
-          socket.emit('upOff', roomID);
-          socket.emit('downOff', roomID);
+          Socket.emit('upOff', roomID);
+          Socket.emit('downOff', roomID);
         }
       }
 
@@ -181,28 +181,28 @@ $(document).ready(function() {
         if (e.key == 'ArrowLeft'){
           console.log('Left');
           document.getElementById("left").style.backgroundColor = "burlywood";
-          socket.emit('left key down');
+          Socket.emit('left key down');
         }
         if (e.key == 'ArrowRight'){
           console.log('Right');
           document.getElementById("right").style.backgroundColor = "burlywood";
-          socket.emit('right key down');
+          Socket.emit('right key down');
         }
         //alert("Key pressed: "+ e.key)
-        //socket.emit('key down', e.key);
+        //Socket.emit('key down', e.key);
       }
 
       function buttonup(e) {
         if (e.key == 'ArrowLeft'){
           document.getElementById("left").style.backgroundColor = "cadetblue";
-          socket.emit('left key up');
+          Socket.emit('left key up');
         }
         if (e.key == 'ArrowRight'){
           document.getElementById("right").style.backgroundColor = "cadetblue";
-          socket.emit('right key up');
+          Socket.emit('right key up');
         }
         //alert("Key pressed: "+ e.key)
-        //socket.emit('key up', e.key);
+        //Socket.emit('key up', e.key);
       }
 
     function init()

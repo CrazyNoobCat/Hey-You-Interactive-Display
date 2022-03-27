@@ -12,8 +12,8 @@ const qr      = require('node-qr-image');
 const { Server }  = require("socket.io");
 const { Console } = require('console');
 
-const Connection = require('./connection');
-const ShortNames = require('./shortNames')
+const Connection = require('./Connection');
+const RoomNames = require('./RoomNames')
 
 
 const app    = express();
@@ -23,7 +23,7 @@ const io     = new Server(server);
 const httpPort = process.env.PORT || 3000;
 const publicDirectory = "/public";
 
-const shortNames = new ShortNames('shortURLnames.txt');
+const roomNames = new RoomNames('joinRoomNames.txt');
 
 // The general setup of Hey You is as follows:
 //  
@@ -60,10 +60,10 @@ const staticCookieValidMins      = 2 * 60;  // Valid for 2 hours by default
 const clientTimeoutMSecs         = clientTimeoutMins * 60 * 1000;
 const defaultCookieTimeoutMSecs  = defaultCookieTimeoutMins * 60 * 1000;
 
-const start                    = new Date();    // This is the time which the server started. Use to reload connections after a restart
+const ServerEpochStartTime     = new Date();    // This is the time which the server started. Use to reload connections after a restart
 const onStartReloadWindowMSecs = 2 * 60 * 1000  // i.e. 2 mins
 
-console.log("Start time: " + start);
+console.log("Server Epoch Start Time: " + ServerEpochStartTime);
 
 const checkClientTimeoutMSecs  =  5 * 1000; // i.e.  5 seconds
 const checkDisplayTimeoutMSecs = 30 * 1000; // i.e. 30 seconds
@@ -100,7 +100,7 @@ function findHostDisplayByName(name)
 {
     for (let index = 0; index < displays.length; index++) {
         const display = displays[index];
-        if (display.getShortName() == name) {
+        if (display.getRoomName() == name) {
             return display;
         }                    
     }
@@ -165,16 +165,20 @@ function getActivity(req)
     return undefined;
 }
 
+function getActivityLabel(activity)
+{
+    return (activity == defaultActivity) ? defaultActivityLabel : activity;
+}
 
 function sendActivityFile(res, path, fileName, activityLabel)
 {
     if (fs.existsSync(path)) {
         res.sendFile(path);
-        console.log("File sent: " + fileName + "\t\tActivity: " + activityLabel);
+        console.log("sendActivityFile() Activity: '" + activityLabel +"' File sent: " + fileName);
     } 
     else {
         res.sendStatus(404);
-        console.log("Failed file retrival: " + fileName + "(File not found) \t\tActivity: " + activityLabel);
+        console.error("sendActivityFile() Activity: '" + activityLabel +"' Failed file retrival: " + fileName + "(File not found)");
     }
     
 }
@@ -237,7 +241,7 @@ function consoleInput() { // Console Commands
             }
             else if (line === "displays") {                
                 displays.forEach(display => {
-                    console.log("DeviceID: " + display.getDeviceID() +"\tRoomName: " + display.getShortName());
+                    console.log("DeviceID: " + display.getDeviceID() +"\tRoomName: " + display.getRoomName());
                 });
             }
             else {
@@ -322,13 +326,13 @@ app.get('/', (req, res) => {
     let activity = getActivity(req);
 
     if (activity != undefined) {
-	let activityLabel = activity;
+	let activityLabel = getActivityLabel(activity);
         // Check if there is a unique client file in activity otherwise provide default
         if (fs.existsSync(activityLocation + activity + '/controller-client.html')) {
             sendActivityFile(res, activityLocation + activity + '/controller-client.html','/controller-client.html',activityLabel);
 	}
         else  {
-            sendActivityFile(res, __dirname + defaultActivity + '/controller-client.html','/controller-client.html',activityLabel);
+            sendActivityFile(res, __dirname + defaultActivity + '/controller-client.html','/controller-client.html',defaultActivityLabel);
 	}
     } 
     else {
@@ -340,7 +344,7 @@ app.get('/', (req, res) => {
                 sendActivityFile(res, activityLocation + activity + '/static.html', "/static.html", activityLabel);
 	    }
             else {
-                sendActivityFile(res, __dirname + defaultActivity + '/static.html', "static.html", defaultActivityLabel);
+                sendActivityFile(res, __dirname + defaultActivity + '/static.html', "/static.html", defaultActivityLabel);
 	    }
         }
 	else {
@@ -386,18 +390,27 @@ app.get('/activity', (req, res) => {
     let activity = getActivity(req);
     
     if (activity != undefined) {
-	let activityLabel = activity;
-        if (fs.existsSync(activityLocation + activity +'/display.html')) {
-            sendActivityFile(res, activityLocation + activity +'/display.html','/display.html',activityLabel); // This is for reconecting displays
+	// This is for reconecting displays
+	
+	let activityLabel = getActivityLabel(activity);
+
+	if (activity == defaultActivity) {
+	    sendActivityFile(res,__dirname + defaultActivity +'/display.html','/display.html',defaultActivityLabel); 
+	}	
+        else if (fs.existsSync(activityLocation + activity +'/display.html')) {
+            sendActivityFile(res, activityLocation + activity +'/display.html','/display.html',activityLabel); 
 	}
-        else {
-            sendActivityFile(res,__dirname + defaultActivity +'/display.html','/display.html',activityLabel); // This is for activities not existing  
-            console.log("File Error: Activity (" + activity +") didn't exist so default was sent to device: " + req.params.roomID);
+	else {
+	    let roomID = getCookie(req,"roomID");
+	    console.error("404 Error: Failed file retrival '" + req.path + "' (File not found) \tActivity: " + activity + "roomID:" + roomID);
+            res.sendStatus(404);
+	    //sendActivityFile(res,__dirname + defaultActivity +'/display.html','/display.html',defaultActivityLabel); 
+	    //console.error("File Error: Activity (" + activity +") didn't exist so default was sent to device: " + roomID);
         }
     }
     else {
-	console.log("/activity serving up default activity display.html to controller-client IP: " + req.ip);
-	console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
+	console.log("/activity serving up default activity display.html to display IP: " + req.ip);
+	//console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
         sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
     }   
 });
@@ -407,22 +420,22 @@ app.get('/scripts/:fileName', (req, res) => {
     // Allow only files from verifiable activities
     let activity = getActivity(req)
 
-    let fileName = req.params.fileName;
+    let fileName = "/scripts/"+req.params.fileName;
     
     if (activity != undefined) {
-	let activityLabel = activity;
-	let fullActivityFileName = activityLocation + activity + '/scripts/' + fileName;
+	let activityLabel = getActivityLabel(activity);	
+	let fullActivityFileName = activityLocation + activity + fileName;
 	
 	if (fs.existsSync(fullActivityFileName)) {
 	    sendActivityFile(res, fullActivityFileName, fileName, activityLabel);
 	}
 	else {
-	    let fullDefaultFileName = __dirname + defaultActivity + '/scripts/' + fileName;
-	    sendActivityFile(res, fullDefaultFileName, fileName, activityLabel);
+	    let fullDefaultFileName = __dirname + defaultActivity + fileName;
+	    sendActivityFile(res, fullDefaultFileName, fileName, defaultActivityLabel);
 	}	    
     }
     else {
-	let fullDefaultActivityFileName = __dirname + defaultActivity + '/scripts/' + fileName;
+	let fullDefaultActivityFileName = __dirname + defaultActivity + fileName;
 	sendActivityFile(res, fullDefaultActivityFileName, fileName, defaultActivityLabel);
     }       
 });
@@ -473,7 +486,7 @@ app.get('*', (req, res) => {
     // lead to mal-funtioning code
     //if (activity != undefined || req.params.roomName != undefined) {
     if (activity != undefined) {
-	let activityLabel = activity;
+	let activityLabel = getActivityLabel(activity);
 	
 	let activityPublicPath = activityLocation + activity + publicDirectory + req.path;
 	let defaultPublicPath  = __dirname + publicDirectory + req.path;
@@ -482,7 +495,7 @@ app.get('*', (req, res) => {
             sendActivityFile(res, activityPublicPath, req.path, activityLabel);
 	}
         else if (fs.existsSync(defaultPublicPath)) {
-            sendActivityFile(res,defaultPublicPath, activityLabel);
+            sendActivityFile(res, defaultPublicPath, req.path, defaultActivityLabel);
 	}
         else {
             console.error("404 Error: Failed file retrival '" + req.path + "' (File not found) \tActivity: " + activity);
@@ -509,6 +522,8 @@ io.on('connection', (socket, host) => {
     var newConnection = true;
 
     if (socket.handshake.query.data == "client") {
+	console.log("io.on('connection'): Handling controller-client connection");
+	
         for (let index=0; index<clients.length; index++) {
             const client = clients[index];
             if (client.getDeviceID() == socket.handshake.query.clientID) {
@@ -530,7 +545,7 @@ io.on('connection', (socket, host) => {
                     display = findHostDisplayByRoomID(client.getRoomID());
 
                     if (display != undefined) {
-                        client.setRoom(socket.handshake.query.roomID);
+                        client.setRoomID(socket.handshake.query.roomID);
                         display.numOfClients++; // Increase client count for new room by one.
                     }
 		    else {
@@ -567,13 +582,15 @@ io.on('connection', (socket, host) => {
                 socket.join(client.getRoomID());
                 socket.join(client.getDeviceID())
 
-                display = findHostDisplayByRoomID(client.getRoom());
+                display = findHostDisplayByRoomID(client.getRoomID());
                 display.numOfClients++; // Increase client count for new room by one.
 
+		/*
                 var currentTime = new Date();
-                if (currentTime - start < onStartReloadWindowMSecs) {
+                if (currentTime - ServerEpochStartTime < onStartReloadWindowMSecs) {
                     client.message('reload');
                 }
+		*/
 
             }
 	    else {
@@ -583,7 +600,8 @@ io.on('connection', (socket, host) => {
         }
     } 
     else if (socket.handshake.query.data == "display") {
-        
+        console.log("io.on('connection'): Handling display connection");
+	
         for (let index=0; index<displays.length; index++) {
             const display = displays[index];
             if (display.getDeviceID() == socket.handshake.query.clientID) {
@@ -592,13 +610,20 @@ io.on('connection', (socket, host) => {
 
                 display.setNewSocket(socket);
 
-                socket.join(display.getRoomID());
+		display.ready = true;		
+		display.updateLastInteractionTime();
+		
+		//console.log("*** display = " + JSON.stringify(display));
+		let roomID   = display.getRoomID();
+                socket.join(roomID);
 
-                if (Date.now() - display.getLastInteraction() > 10000) {
+		/*
+                if (Date.now() - display.getLastInteraction() > 10000) { // ****
                     io.to(socket.id).emit("reload");
                     display.updateLastInteractionTime();
                 } // 10 seconds // ****
-
+		*/
+		
                 newConnection = false;
                 break;
             }
@@ -613,26 +638,28 @@ io.on('connection', (socket, host) => {
             // Add the new display to the list of displays
             displays.push(display);
 
-            // Assign the shortname to the display
-	    let roomName = shortNames.nextFree();
-            display.setShortName(roomName);
+            // Assign the roomName to the display
+	    let roomName = roomNames.nextFree();
+            display.setAndSendRoomName(roomName);
 
             // Using deviceID as the room identifier
 	    let roomID = display.getDeviceID();
             socket.join(roomID);
 
             display.setAsRoomHost();
-            display.setRoom(roomID);
+            display.setRoomID(roomID);
             display.setCookieMins('roomID',roomID,defaultCookieTimeoutMins)
 
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
             display.updateLastInteractionTime();
             
-
+/*
             var currentTime = new Date();
-            if (currentTime - start < onStartReloadWindowMSecs) {
+            if (currentTime - ServerEpochStartTime < onStartReloadWindowMSecs) {
                 display.message('reload');
             }
+*/
+	    
         }
     }
     else {
@@ -662,14 +689,16 @@ io.on('connection', (socket, host) => {
             }
         }
 	else if (socket.handshake.query.data == "display") {
-            for (let index = 0; index < displays.length; index++) {
+            for (let index=0; index<displays.length; index++) {
                 const display = displays[index];
                 if (display.getSocketID() == socket.id) {
+		    // Found that display that this 'disconnect' refers to
                     display.updateLastInteractionTime();
     
-                    var foundNewHost = false;
                     // Check if there is another display that can be made the host
-                    for (let y = 0; y < displays.length; y++) {
+                    var foundNewHost = false;
+
+                    for (let y=0; y<displays.length; y++) {
                         const displayNew = displays[y];
                         if (displayNew.getRoomID() == display.getRoomID() && displayNew.getSocketID() != socket.id) {
                             displayNew.setAsRoomHost();
@@ -680,11 +709,15 @@ io.on('connection', (socket, host) => {
                             break;
                         }                    
                     }
-    
-                    if (!foundNewHost) {                        
+
+		    if (foundNewHost) {
+			console.log("socket.on('disconnect'): Found alternative display, and made it the host");
+		    }
+		    else {
                         //disconnect all controller-clients from the display and send them back to another room (if sub room) ////////////////////
-                        // Otherwise drop connections and wait for 5min timeout to remove from connections
-			console.log("**** Did not find new host");
+                        // Otherwise drop connections and wait for clientTimeoutCheck() to remove from connections
+			
+			console.log("socket.on('disconnect'): No alternative display found to transfer to => Display is disconnected. ");
                     }
 		    
                     return;
@@ -723,8 +756,9 @@ io.on('connection', (socket, host) => {
                             if (activitySelected == "/") {
 				activitySelected = defaultActivity;                    
 			    }
-			    
-                            console.log("New activity: " + activitySelected + "\tRoomID: " + roomID);
+
+			    var activitySelectedLabel = getActivityLabel(activitySelected)
+                            console.log("New activity: '" + activitySelectedLabel + "' for RoomID: " + roomID);
     
                             display = findHostDisplayByRoomID(roomID);
                             if (display != undefined) {
@@ -746,12 +780,13 @@ io.on('connection', (socket, host) => {
                     // Only displays will call this as per socketCreation.js
                     display = findDisplayBySocketID(socket.id);
 
-                    // If no name could be found then assign new short name, else send current shortname
-                    if (display.getShortName == undefined) {
-                        display.setShortName(shortNames.nextFree());
+                    // If no name could be found then assign new room name, else send current room name
+                if (display.getRoomName() == undefined) {
+		    let roomName = roomNames.nextFree();
+                        display.setAndSendRoomName(roomName);
 		    }
                     else {
-                        display.resendShortName();
+                        display.resendRoomName();
 		    }
                     break;
 
@@ -871,7 +906,7 @@ server.listen(httpPort, () => {
 });
 
 
-// Checks every 5 to see if client is active
+// Checks every 5 mins to see if client is active
 async function clientTimeoutCheck()
 {
     setTimeout(() => {
@@ -906,7 +941,7 @@ function displayHeartbeat()
 		display.failedConsecutiveHeartBeat++;
                 if (display.failedConsecutiveHeartBeat >= 10) { // (@30 secs => 5 mins) Note: used to be 2
                     // Forget the display, forcing it to reconnect
-                    shortNames.release(display.getShortName());
+                    roomNames.release(display.getRoomName());
                     object.splice(index, 1);
                 }
 		else {
