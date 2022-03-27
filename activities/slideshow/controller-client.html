@@ -33,7 +33,7 @@
       function socketLoaded(){
 	  console.log("Socket finished loading");
 
-          socket.on('download', (url) => {
+          Socket.on('download', (url) => {
               console.log(url);
               download(url);
           });   	  
@@ -41,7 +41,7 @@
 
       function send(e)
       {
-        socket.emit(e);
+        Socket.emit(e);
       }
 
       function sendPause()

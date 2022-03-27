@@ -47,9 +47,8 @@
       
       // Page specific functions ...
       function socketLoaded(){
-          socket.emit('clientConnected');
 	  
-          socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
+          Socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
               console.log("For player type '" + playerType + "' Setting colour to: " + playerCol);
 	      document.getElementById("stick1-loading").style.display = "none";
 	      
@@ -74,12 +73,12 @@
 	      
           });
 
-          socket.on('infoToplineMessage', (message) => {
+          Socket.on('infoToplineMessage', (message) => {
 	      $('#info-topline').html(message);
 	      $('#info-topline').slideDown();
 	  });
 	  	      
-	  socket.on('playerTaggerContact', (audioId) => {
+	  Socket.on('playerTaggerContact', (audioId) => {
 	      console.log("Player-Tagger contact!");
 
 	      if (typeof navigator.vibrate === "function") {
@@ -89,7 +88,7 @@
 	      optPlayAudio(audioId);
 	  });
 
-	  socket.on('endOfGame', (message, audioId) => {
+	  Socket.on('endOfGame', (message, audioId) => {
 
 	      $('#stick1').fadeOut();
 	      // eog => end of game 
@@ -98,7 +97,8 @@
 
 	      optPlayAudio(audioId);
 	  });
-	  
+
+	  Socket.emit('clientConnected');
           console.log("Socket finished loading");	  
       }
     </script>
@@ -117,7 +117,7 @@
 
           <button onclick="selectActivity('/')" type="button"><img class="home-img" src="icons/back.svg"></button>
           <h1 class="text">Hey There, Interact With Me!</h1>
-          <img class="uni_img" src="icon/uni_logo.svg">
+          <img class="uni_img" src="icons/uni_logo.svg">
 	</div>
 
 	<div class="heading">

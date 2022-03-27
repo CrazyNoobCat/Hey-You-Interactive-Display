@@ -54,8 +54,8 @@
       // Custom socketLoaded() for slideshow activity
       function socketLoaded(anyListener)
       {
-          socket.onAny(anyListener); // Turns on the any listener
-          socket.emit("displayLoaded"); 
+          Socket.onAny(anyListener); // Turns on the any listener
+          Socket.emit("displayLoaded"); 
 
           var displayHost = self.location.host;
 	  var roomID    = getCookie('roomID');
@@ -88,7 +88,7 @@
               console.log(args);
 	      
 	      var $currentSlideImg = $('#currentslide-img');
-	      socket.emit('displayEmit', args[0], 'download', $currentSlideImg.attr("src") );
+	      Socket.emit('displayEmit', args[0], 'download', $currentSlideImg.attr("src") );
           }
 	  else {
 	      console.log("socketUpdate(): Unrecognized command '" + e + "'");

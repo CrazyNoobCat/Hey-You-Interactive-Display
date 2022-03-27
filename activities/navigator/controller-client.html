@@ -48,9 +48,9 @@
       
       // Page specific functions ...
       function socketLoaded(){
-          socket.emit('clientConnected');
+          Socket.emit('clientConnected');
 	  
-          socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
+          Socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
 	      /*
               console.log("For player type '" + playerType + "' Setting colour to: " + playerCol);
 	      document.getElementById("stick1-loading").style.display = "none";

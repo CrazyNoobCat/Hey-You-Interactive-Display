@@ -36,8 +36,8 @@
       // Custom socketLoaded() for slideshow activity
       function socketLoaded(anyListener)
       {
-          socket.onAny(anyListener); // Turns on the any listener
-          socket.emit("displayLoaded"); 
+          Socket.onAny(anyListener); // Turns on the any listener
+          Socket.emit("displayLoaded"); 
 
           var displayHost = self.location.host;
 	  var roomID    = getCookie('roomID');

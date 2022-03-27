@@ -32,10 +32,10 @@
 	{
 	    var displayHost = self.location.host;
 	    
-	    console.log("socketLoaded: Display hostname: " + displayHost);
-	    console.log("socketLoaded: Room ID: " + getCookie('roomID'));
+	    console.log("socketLoaded(): Display hostname: " + displayHost);
+	    console.log("socketLoaded(): Room ID: " + getCookie('roomID'));
 	    
-	    socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
+	    Socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
 		if (cName == "roomName") {
 		    displayRoomURL(displayHost,cContent,"join-room-url");
 		}

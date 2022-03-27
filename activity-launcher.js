@@ -90,7 +90,7 @@ function findHostDisplayByRoomID(roomID)
 {
     for (let index = 0; index < displays.length; index++) {
         const display = displays[index];
-        if (display.getRoom() == roomID && display.isRoomHost()) {
+        if (display.getRoomID() == roomID && display.isRoomHost()) {
             return display;
         }
     }
@@ -121,7 +121,7 @@ function findAllClientsByRoomID(roomID)
     let foundClients = [];
     for (let index = 0; index < clients.length; index++) {
         const client = clients[index];
-        if (client.getRoom() == roomID) {
+        if (client.getRoomID() == roomID) {
             foundClients.push(client);
         }                    
     }
@@ -130,7 +130,7 @@ function findAllClientsByRoomID(roomID)
 
 function findAllClientsByRoomName(roomName)
 {
-    let roomID = findHostDisplayByName(roomName).getRoom();
+    let roomID = findHostDisplayByName(roomName).getRoomID();
     return findAllClientsByRoomID(roomID);
 }
 
@@ -205,7 +205,7 @@ function consoleInput() { // Console Commands
                 if (identifier != undefined) {
                     if (identifier === "all") {
                         clients.forEach(client => {
-                            console.log("DeviceID: " + client.getDeviceID() +"\tRoom: " + client.getRoom());
+                            console.log("DeviceID: " + client.getDeviceID() +"\tRoom: " + client.getRoomID());
                         });
                     }
                     else if (identifier.length > 15) { // For roomIDs
@@ -293,18 +293,19 @@ app.set('trust proxy', true)
 app.get('/join/:roomIdOrName', (req, res) => {
     console.log("Room join request: " + req.params.roomIdOrName);
     if (findHostDisplayByRoomID(req.params.roomIdOrName) != undefined) {
-        // Set a cookie so that the device joins the room of the screen whos QR code was scanned
 	let roomID = req.params.roomIdOrName;
+
 	// Create a cookie which only works on this site and lasts for the default timeout
         res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
         res.redirect('/'); // Prevents making a second cookie for a js file
         console.log("New device joined with roomID: " + roomID);
     }
-    else if ((display = findHostDisplayByName(req.params.roomIdOrName)) != undefined) {
-	// Create a cookie which only works on this site and lasts for the default timeout
+    else if ((display = findHostDisplayByName(req.params.roomIdOrName)) != undefined) {	
 	let roomName = req.params.roomIdOrName;
-	let roomID = display.getDeviceID();
-        res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
+	let roomID   = display.getDeviceID();
+
+        // Create a cookie which only works on this site and lasts for the default timeout
+	res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
         res.redirect('/'); // Prevents making a second cookie for a js file
         console.log("New device joined with roomName: " + roomName);
     }  
@@ -357,7 +358,7 @@ app.get('/', (req, res) => {
 });
 
 // Shortcut for the accessing the top-level display
-app.get('/display', (req, res) => {
+app.get('/display-home', (req, res) => {
 
     // Start a display (forced refresh if necessary) with the default (i.e. top-level) activity
 
@@ -375,7 +376,7 @@ app.get('/display', (req, res) => {
     }
 
     
-    console.log("/display serving up fresh default activity display.html to controller-client IP: " + req.ip);
+    console.log("/display-home serving up fresh default activity display.html to controller-client IP: " + req.ip);
     sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
 });
 
@@ -465,8 +466,13 @@ app.get('*', (req, res) => {
     // Send a file if it can be found inside either the public folder for the activity for the controller-client or generic public folder
     // Requests from nonclients will be redirected to an error page
     let activity = getActivity(req);
-    
-    if (activity != undefined || req.params.roomName != undefined) {
+
+    // ****
+    // Not clear why req.params.roomName was being check for in the following if-statement,
+    // as it is then never used.  As written it could allow an undefined activity through
+    // lead to mal-funtioning code
+    //if (activity != undefined || req.params.roomName != undefined) {
+    if (activity != undefined) {
 	let activityLabel = activity;
 	
 	let activityPublicPath = activityLocation + activity + publicDirectory + req.path;
@@ -508,20 +514,20 @@ io.on('connection', (socket, host) => {
             if (client.getDeviceID() == socket.handshake.query.clientID) {
                 // Handle updating socket information for this reconnecting device
 
-                if (client.getRoom() != socket.handshake.query.roomID) {
-                    let display = findHostDisplayByRoomID(client.getRoom());
+                if (client.getRoomID() != socket.handshake.query.roomID) {
+                    let display = findHostDisplayByRoomID(client.getRoomID());
 
                     if (display != undefined) {
                         display.message('clientDisconnect', client.getDeviceID());
-                        //io.to(display.getRoom()).emit('clientDisconnect', client.getDeviceID());
+                        //io.to(display.getRoomID()).emit('clientDisconnect', client.getDeviceID());
                         display.numOfClients--; // Reduce client count by one for old room.
                     }
 		    else {
                         // Error
-			console.error("io.on('connection'): When disconnecting an old connection, did not find a display for roomID '" + client.getRoom());
+			console.error("io.on('connection'): When disconnecting an old connection, did not find a display for roomID '" + client.getRoomID());
                     }
 
-                    display = findHostDisplayByRoomID(client.getRoom());
+                    display = findHostDisplayByRoomID(client.getRoomID());
 
                     if (display != undefined) {
                         client.setRoom(socket.handshake.query.roomID);
@@ -529,13 +535,13 @@ io.on('connection', (socket, host) => {
                     }
 		    else {
                         // Error
-			console.error("io.on('connection'): When setting up new conection, did not find a display for roomID '" + client.getRoom());
+			console.error("io.on('connection'): When setting up new conection, did not find a display for roomID '" + client.getRoomID());
                     }                    
                 }
 
                 client.setNewSocket(socket);
 
-                socket.join(client.getRoom());
+                socket.join(client.getRoomID());
                 socket.join(client.getDeviceID());
 
                 console.log("Client rejoined: \t" + client.connectionInformation());
@@ -550,7 +556,7 @@ io.on('connection', (socket, host) => {
 	    
             // Add the new client to the list of clients
 
-            let display = findHostDisplayByRoomID(client.getRoom());
+            let display = findHostDisplayByRoomID(client.getRoomID());
 
             if (display != undefined) {
                 console.log("New Client: \t" + client.connectionInformation());
@@ -558,7 +564,7 @@ io.on('connection', (socket, host) => {
                 clients.push(client);
 
                 //Join client to room
-                socket.join(client.getRoom());
+                socket.join(client.getRoomID());
                 socket.join(client.getDeviceID())
 
                 display = findHostDisplayByRoomID(client.getRoom());
@@ -572,13 +578,13 @@ io.on('connection', (socket, host) => {
             }
 	    else {
                 // Could send error since there is no valid display for the client //////////////////////////
-		console.error("io.on('connection'): Unable to form client-display socket connection, as no display found for for roomID '" + client.getRoom());
+		console.error("io.on('connection'): Unable to form client-display socket connection, as no display found for for roomID '" + client.getRoomID());
             }            
         }
     } 
     else if (socket.handshake.query.data == "display") {
         
-        for (let index = 0; index < displays.length; index++) {
+        for (let index=0; index<displays.length; index++) {
             const display = displays[index];
             if (display.getDeviceID() == socket.handshake.query.clientID) {
                 // Handle updating socket information for this reconnecting device
@@ -586,12 +592,12 @@ io.on('connection', (socket, host) => {
 
                 display.setNewSocket(socket);
 
-                socket.join(display.getRoom());
+                socket.join(display.getRoomID());
 
                 if (Date.now() - display.getLastInteraction() > 10000) {
                     io.to(socket.id).emit("reload");
                     display.updateLastInteractionTime();
-                } // 10 seconds
+                } // 10 seconds // ****
 
                 newConnection = false;
                 break;
@@ -608,10 +614,11 @@ io.on('connection', (socket, host) => {
             displays.push(display);
 
             // Assign the shortname to the display
-            display.setShortName(shortNames.nextFree());
+	    let roomName = shortNames.nextFree();
+            display.setShortName(roomName);
 
             // Using deviceID as the room identifier
-	        let roomID = display.getDeviceID();
+	    let roomID = display.getDeviceID();
             socket.join(roomID);
 
             display.setAsRoomHost();
@@ -664,7 +671,7 @@ io.on('connection', (socket, host) => {
                     // Check if there is another display that can be made the host
                     for (let y = 0; y < displays.length; y++) {
                         const displayNew = displays[y];
-                        if (displayNew.getRoom() == display.getRoom() && displayNew.getSocketID() != socket.id) {
+                        if (displayNew.getRoomID() == display.getRoomID() && displayNew.getSocketID() != socket.id) {
                             displayNew.setAsRoomHost();
                             
                             displayNew.message("host",true);
@@ -694,7 +701,7 @@ io.on('connection', (socket, host) => {
         let client  = undefined;
 	
         if (active) {
-            var room = args[0];
+            var roomID = args[0];
 	    
             switch (event) {   
                 case "heartbeat":
@@ -712,18 +719,18 @@ io.on('connection', (socket, host) => {
                     client = findClientBySocketID(socket.id);
                     if (client != undefined) {
                         client.updateLastInteractionTime();
-                        if (client.getRoom() == room) {
+                        if (client.getRoomID() == roomID) {
                             if (activitySelected == "/") {
 				activitySelected = defaultActivity;                    
 			    }
 			    
-                            console.log("New activity: " + activitySelected + "\tRoom: " + room);
+                            console.log("New activity: " + activitySelected + "\tRoomID: " + roomID);
     
-                            display = findHostDisplayByRoomID(room);
+                            display = findHostDisplayByRoomID(roomID);
                             if (display != undefined) {
                                 display.activityChange(activitySelected,optUrlParams);
     
-                                // Nothing is done for any subdisplays who are apart of this room.. Should this be assumed as part of the reload?
+                                // Nothing is done for any subdisplays who are apart of this roomID. Should this be assumed as part of the reload?
     
                             }
 			    else {
@@ -732,7 +739,6 @@ io.on('connection', (socket, host) => {
                         }  
                     }
                                               
-
                     callback();
                     break;
 
@@ -740,7 +746,7 @@ io.on('connection', (socket, host) => {
                     // Only displays will call this as per socketCreation.js
                     display = findDisplayBySocketID(socket.id);
 
-                    // If no name could befound then assign new short name, else send current shortname
+                    // If no name could be found then assign new short name, else send current shortname
                     if (display.getShortName == undefined) {
                         display.setShortName(shortNames.nextFree());
 		    }
@@ -761,7 +767,7 @@ io.on('connection', (socket, host) => {
 
                         // Send saved messages to display if there are any
                         if (messages != null) {
-                            console.log("Forwarding saved messages for display host to room: " + display.getRoom());
+                            console.log("Forwarding saved messages for display host to roomID: " + display.getRoomID());
                             messages.forEach(message => {
                                 display.message(...message);
                                 //io.to(display.getSocketID()).emit(event, clientDeviceID);
@@ -775,7 +781,7 @@ io.on('connection', (socket, host) => {
                 case "displayEmit":    
                     // Indicate an event that the display wants to send to a client or the whole room
 
-                    // Format ('displayEmit',room/socket to send to,event,args for event...)
+                    // Format ('displayEmit',roomID/socket to send to,event,args for event...)
                     //              event          0                 1       2
                     eventToSend = args[1];
                     eventArgs   = args.slice(2);
@@ -784,13 +790,13 @@ io.on('connection', (socket, host) => {
                     display = findDisplayBySocketID(socket.id); // using socket.id as no gaurantee room will be display
 		
                     if (display != undefined && display.isRoomHost()) {
-                        console.log("Re-emitted display event: " + eventToSend + "\t Args: "+ eventArgs + "\t\tRoom/Socket: " + room);
+                        console.log("Re-emitted display event: " + eventToSend + "\t Args: "+ eventArgs + "\t\tRoomID/Socket: " + roomID);
                         
-                        socket.to(room).emit(eventToSend,...eventArgs);
+                        socket.to(roomID).emit(eventToSend,...eventArgs);
                     } else {
 
                         // New logic has to be written to retrieve who the request was suppoesdly made
-                        //console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoom: " + room + "\tDevice ID: " + findClientBySocketID);
+                        //console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoomID: " + roomID + "\tDevice ID: " + findClientBySocketID);
                     }    
                     break;
 
@@ -800,7 +806,7 @@ io.on('connection', (socket, host) => {
                     if (display != undefined) {
                         display.activityChange(defaultActivity,null); // Set to default, no optUrlParam to top-level default display
                         display.messageRoom('reload');
-                        //io.to(display.getRoom()).emit('reload'); // Tell all devices to reload
+                        //io.to(display.getRoomID()).emit('reload'); // Tell all devices to reload
                     }
                     break;
 
@@ -819,7 +825,7 @@ io.on('connection', (socket, host) => {
                 case 'static':
                     // Set staticActivity cookie
                     client = findClientBySocketID(socket.id);
-                    display = findHostDisplayByRoomID(client.getRoom());
+                    display = findHostDisplayByRoomID(client.getRoomID());
                     client.setCookieMins('staticActivity',display.getCurrentActivity(),staticCookieValidMins);
                     client.setCookieMins("roomID",'',0); // Invalidate old cookie
 
@@ -841,13 +847,13 @@ io.on('connection', (socket, host) => {
                     client = findClientBySocketID(socket.id);
 
                     if (client != undefined) {
-                        display = findHostDisplayByRoomID(client.getRoom());
+                        display = findHostDisplayByRoomID(client.getRoomID());
                         if (display != undefined) {
                             display.message(event, client.getDeviceID(), ...args);
                             client.updateLastInteractionTime();                                
                         }
 			else {
-                            console.log("Undefined display for RoomID: " + client.getRoom() + '\tEvent: ' + event);
+                            console.log("Undefined display for RoomID: " + client.getRoomID() + '\tEvent: ' + event);
                         }
                     }
 		    else {
@@ -876,7 +882,7 @@ async function clientTimeoutCheck()
                 client.message('disconnected', 'Your device timed out, likely due to inactivity, and you have been removed from the display session. Scan the QR code again to rejoin.');
                 //io.to(client.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
 
-                let display = findHostDisplayByRoomID(client.getRoom());
+                let display = findHostDisplayByRoomID(client.getRoomID());
                 if (display != undefined) {
                     display.message('clientDisconnect', client.getDeviceID());
                     //io.to(display.getSocketID()).emit('clientDisconnect', client.getDeviceID()); // Inform the display to remove client

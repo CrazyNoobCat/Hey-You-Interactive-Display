@@ -87,8 +87,9 @@ function displayRoomURL(displayHost,roomName, elemId)
     
     messageHTML = 'Or visit on your phone:<br />';
     messageHTML += '<span style="white-space: nowrap;">';
-    messageHTML +=   '<span class="globe-icon-bg" style="padding-right: 3px;"></span>';
-    messageHTML +=   '<span style="color: #e03031; font-size: 90%; font-style: italic;">https://' + displayHost + '/join/' + roomName + '</span>';
+    //messageHTML +=   '<span class="globe-icon-bg" style="padding-right: 3px;"></span>';
+    messageHTML +=   '<img width="16" height="16" src="icons/globe-solid.svg" style="padding-right: 3px;"/>';
+    messageHTML +=   '<span style="color: #e03031; font-size: 85%; font-style: italic;">https://' + displayHost + '/join/' + roomName + '</span>';
     //messageHTML +=   '<span style="color: #e03031">' + displayHost + '/join/' + roomName + '</span>';
     messageHTML += '</span>';
     

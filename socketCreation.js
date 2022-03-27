@@ -5,8 +5,8 @@ document.head.appendChild(script);
 
 const DisplayCookieTimeoutMins   = 10;
 
-var roomID;
-var socket;
+var RoomID;
+var Socket;
 
 // Get the visitor identifier when you need it.
 function getVisitorID(type){
@@ -20,27 +20,28 @@ function getVisitorID(type){
 
 function startSocket(visitorID, type)
 {
-    if (type == "display"){
+    console.log("startSocket(): Visitor ID: " + visitorID + " (type=" + type + ")");
+
+    if (type == "display") {
         setCookieMins('roomID',visitorID,DisplayCookieTimeoutMins);
-        roomID = visitorID;
+        RoomID = visitorID;
+	console.log("startSocket(): Set Room ID to be:" + RoomID);	
     }
     else {
-        roomID = getCookie('roomID'); // Must be a client so get roomID
+        RoomID = getCookie('roomID'); // Must be a client so get roomID
+	console.log("startSocket(): From Cookie, Room ID:" + RoomID);	
     }
 
-    console.log("startSocket: Device ID: " + visitorID);
-    console.log("startSocket: Room ID:   " + roomID);
-
     var url = window.location.host;
-    socket = io(url , {
+    Socket = io(url , {
         query: {
-            "data" : type,
+            "data"     : type,
             "clientID" : visitorID,
-            "roomID" : roomID
+            "roomID"   : RoomID
         }
     });
 
-    socket.on('reload', (optUrlParams) => {
+    Socket.on('reload', (optUrlParams) => {
         if (type == "display") {
 	    let full_href = "/activity";
 	    if (optUrlParams !== null) {
@@ -54,46 +55,47 @@ function startSocket(visitorID, type)
 	}
     }); 
 
-    socket.on('reconnect', () => {
+    Socket.on('reconnect', () => {
         if (type == "display")
             window.location.href = '/activity';
         else
             window.location.href = '/';
     }); 
 
-    socket.on('loadPage', (page) => {
+    Socket.on('loadPage', (page) => {
         window.location.href = page;
     }); 
 
-    socket.on('disconnected', (message)=> {
+    Socket.on('disconnected', (message)=> {
         // Could go to an HTML page instead
         console.log("Disconnected: " + message);
-        setCookieMins('roomID','',0); // Cookie expiers instantly
+        setCookieMins('roomID','',0); // Cookie expires instantly
         window.location.href = '/disconnected/'+ message;
     });
 
-    socket.on('error', (message)=> {
+    Socket.on('error', (message)=> {
         // Could go to an HTML page instead
         console.log("Error: " + message);
-        setCookieMins('roomID','',0); // Cookie expiers instantly
+        setCookieMins('roomID','',0); // Cookie expires instantly
         window.location.href = '/error/'+ message;
     });
 
-    socket.on('extendRoom', (durationMins) => {
-        console.log("Cookie duration extended");
+    Socket.on('extendRoom', (durationMins) => {
+        console.log("Cookie duration extended for roomID and roomName (if defined)");
         let cookieContent = getCookie('roomID');
         setCookieMins('roomID',cookieContent, durationMins); // Extend cookie duration by above duration
         cookieContent = getCookie('roomName');
-        if (cookieContent != '')
+        if (cookieContent != '') {
             setCookieMins('roomName',cookieContent, durationMins); // Extend cookie duration by above duration
+	}
     });
 
-    socket.on('heartbeat', () => {
-        socket.emit('heartbeat');
+    Socket.on('heartbeat', () => {
+        Socket.emit('heartbeat'); // **** Can this be replaced with this.emit() ???
         console.log("heartbeat");
     });
 
-    socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
+    Socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
         setCookieMins(cName,cContent, cDurationMins);
     });
 
@@ -102,12 +104,14 @@ function startSocket(visitorID, type)
         socketUpdate(...args); // This function must exist otherwise sockets will not work
     } // Off by default
 
+    
     // Ensure roomName is present before returning
 
-    if (type == 'display'){
+    if (type == 'display') {
         roomName = getCookie('roomName')
-        if (roomName == '')
-            socket.emit('assignRoomName');
+        if (roomName == '') {
+            Socket.emit('assignRoomName');
+	}
     }
 
     socketLoaded(anyListener);
@@ -115,7 +119,7 @@ function startSocket(visitorID, type)
 
 function selectActivity(activity,optUrlParams)
 {
-    socket.emit("selectActivity", roomID, activity, optUrlParams, (response) => {
+    Socket.emit("selectActivity", RoomID, activity, optUrlParams, (response) => {
         console.log("Redirecting to " + activity);
         window.location.pathname = '/'; // Consider passing on the optUrlParms to the client web page also?
     });   
@@ -161,9 +165,9 @@ function setupConnection(type){
 }
 
 function vote(userDecision){
-    socket.emit('vote');
+    Socket.emit('vote');
 }
 
 function static(){
-    socket.emit('static');
+    Socket.emit('static');
 }

@@ -1,6 +1,7 @@
 class Connection
 {
     timeoutLimitMSecs;
+    timeoutLimitMins;
 
     // # before a variable here indicates private
 
@@ -13,7 +14,7 @@ class Connection
     // Connection variables
     #io;
     #socket;
-    #room;
+    #roomID;
     ready = true;
 
     // Only used for displays
@@ -32,8 +33,9 @@ class Connection
         this.#socket           = socket;
         this.#currentActivity  = activity; // Connection class itself;
 	this.timeoutLimitMSecs = timeoutLimitMSecs;
+	this.timeoutLimitMins  = timeoutLimitMSecs/(60*1000);
 	
-        this.#room = socket.handshake.query.roomID;
+        this.#roomID = socket.handshake.query.roomID;
 
         this.#initalConnectionTime = Date.parse(socket.handshake.time);
         this.updateLastInteractionTime();
@@ -65,13 +67,13 @@ class Connection
         this.#lastInteractionTime = Date.now();
     } // Occurs on connection change or region
 
-    setRoom(room)
+    setRoomID(roomID)
     {
-        // Should probably have some logic for removing from the old room
-        this.#room = room;
+        // Should probably have some logic for removing from the old roomID
+        this.#roomID = roomID;
     }
 
-    setAsRoomHost()    { this.#host = true; }
+    setAsRoomHost()    { this.#host = true;  }
     removeAsRoomHost() { this.#host = false; }
     
     updateLastInteractionTime()
@@ -89,12 +91,19 @@ class Connection
     clearMessages() { this.#messages = []} ;
 
     setShortName(name)
-     {
-         this.#shortName = name;
-         this.setCookieMins('roomName',name,this.timeoutLimitMSecs/(60*1000));
-    };
+    {
+        this.#shortName = name;
+        this.setCookieMins('roomName',name,this.timeoutLimitMins);
+    }
 
-    setCookieMins(cName, cContent, cDurationMins){
+    resendShortName()
+    {
+        this.setCookieMins('roomName',this.getShortName(),this.timeoutLimitMins);
+    }
+
+    
+    setCookieMins(cName, cContent, cDurationMins)
+    {
         this.message('setNewCookieMins', cName, cContent, cDurationMins);
     }
 
@@ -103,20 +112,22 @@ class Connection
 
     getDeviceID(){return this.#socket.handshake.query.clientID;}
     getSocketID(){return this.#socket.id;}
-    getType(){return this.#socket.handshake.query.data;}
-    getCurrentActivity(){return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
-    getLastActivity(){return this.#lastActivity;}
+    getType()    {return this.#socket.handshake.query.data;}
+
+    getCurrentActivity() {return this.#currentActivity;} // Should I be treating this as another connection class?? Or should I have its own class for activities or displays?
+    getLastActivity()    {return this.#lastActivity;}
     getInitalConnection(){return this.#initalConnectionTime;}
-    getLastInteraction(){return this.#lastInteractionTime;}
-    getRoom(){return this.#room;}
-    isRoomHost(){return this.#host;}
-    getMessages(){return this.#messages;}
-    getShortName(){return this.#shortName;}
+    getLastInteraction() {return this.#lastInteractionTime;}
+
+    getRoomID()   {return this.#roomID;    }
+    isRoomHost()  {return this.#host;      }
+    getMessages() {return this.#messages;  }
+    getShortName(){return this.#shortName; }
 
     // Debug information
 
-    connectionInformation(){
-        var debugText = "DeviceID: " + this.getDeviceID() + "\tRoom ID: " + this.getRoom();
+    connectionInformation() {
+        var debugText = "DeviceID: " + this.getDeviceID() + "\tRoom ID: " + this.getRoomID();
         return debugText;
     }
 
@@ -131,14 +142,10 @@ class Connection
         }   
     }   
 
-    messageRoom(...args){
-        this.#io.to(this.getRoom()).emit(...args);
+    messageRoom(...args)
+    {
+        this.#io.to(this.getRoomID()).emit(...args);
     }
-
-    resendShortName(){
-        this.setCookieMins('roomName',this.getShortName(),this.timeoutLimitMSecs/(60*1000));
-    }
-
 }
 
 module.exports = Connection;
