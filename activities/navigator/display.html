@@ -43,11 +43,17 @@
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
+	  /*
 	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
 	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
 	  
 	  displayRoomURL(displayHost,roomName,"join-room-url-left");
 	  displayRoomURL(displayHost,roomName,"join-room-url-right");
+	  */
+	  
+	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
+	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
+	  
       } 
 
       function socketUpdate(e, ...args)

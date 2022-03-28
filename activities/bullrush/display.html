@@ -40,8 +40,11 @@
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode");
-	  displayRoomURL(displayHost,roomName,"join-room-url");
+	  //displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode");
+	  //displayRoomURL(displayHost,roomName,"join-room-url");
+
+	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode","join-room-url");
+	  
       }            
       
       function emitPlayerMarker(socketId, playerColor, playerType, playerLabel)

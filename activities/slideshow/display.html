@@ -61,11 +61,15 @@
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
+	  /*
 	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
 	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
 	  
 	  displayRoomURL(displayHost,roomName,"join-room-url-left");
 	  displayRoomURL(displayHost,roomName,"join-room-url-right");
+	  */
+	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
+	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
       } 
 
       function socketUpdate(e, ...args)
@@ -104,7 +108,8 @@
       function displayReset()
       {
           console.log("Slideshow Display Reset Sent");
-          Socket.emit('displayReset');                
+	  $('#slideshow-body').animate({'opacity': 0});
+          Socket.emit('displayReset');
       }
 
       $(document).ready(function() {
@@ -121,7 +126,7 @@
     </script>
   </head>
   
-  <body style="height: 100vh; background-color: #ffffff; margin: 0;">
+  <body id="slideshow-body" style="height: 100vh; background-color: #ffffff; margin: 0;">
 
     <div class="container"
 	 styleXX="display: flex; justify-content: center; align-items: center; flex-direction: column;"

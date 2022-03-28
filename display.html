@@ -31,24 +31,26 @@
 	function socketLoaded(anyListener)
 	{
 	    var displayHost = self.location.host;
-	    
+	    var roomID = getCookie('roomID');
+
 	    console.log("socketLoaded(): Display hostname: " + displayHost);
-	    console.log("socketLoaded(): Room ID: " + getCookie('roomID'));
+	    console.log("socketLoaded(): Room ID: " + roomID);
 	    
 	    Socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
 		if (cName == "roomName") {
-		    displayRoomURL(displayHost,cContent,"join-room-url");
+		    //displayRoomURL(displayHost,cContent,"join-room-url");
+		    displayJoinURL(displayHost,roomID,roomName, QRDim,"qrcode","join-room-url");
 		}
 	    });
 	    
-	    var roomID = getCookie('roomID');
-	    displayRoomQRCode(displayHost,roomID,QRDim,"qrcode");
+	    //displayRoomQRCode(displayHost,roomID,QRDim,"qrcode");
 	    
 	    if (getCookie('roomName') != "") {
 		console.log("socketLoaded(): roomName = " + getCookie('roomName'));
 		
 		var roomName = getCookie('roomName');
-		displayRoomURL(displayHost,roomName,"join-room-url");
+		//displayRoomURL(displayHost,roomName,"join-room-url");
+		displayJoinURL(displayHost,roomID,roomName, QRDim,"qrcode","join-room-url");
 	    }
 	    else {
 		console.log("socketLoaded(): roomName not defined");
@@ -69,6 +71,17 @@
 	    { "activity": "/slideshow", "optUrlParams": "slidedeck=smoke-and-mirrors-sampler" , "loadingLabel": "About Smoke and Mirrors Projects"},
 	    { "activity": "/bullrush",  "optUrlParams": null,                                   "loadingLabel": "Bullrush multiplayer game"}
 	];
+
+	// https://www.indifferentlanguages.com/words/i%27m_bored#region-6
+	var multilingualIAB = [
+	    "I'm bored!",
+	    "Saya bosan!",          // Malay
+	    "Au hōhā ahau!",        // Maori
+	    "Leiloa se mea a fai!", // Samoan
+	    "Mi enuas!",            // Esperanto
+	    "Mwen raz!",            // Haitian Creole
+	    "Me taedet!"            // Latin
+	];
 	
 	var launchRandomActivityTimeout = null;
 
@@ -82,7 +95,8 @@
 	    var optUrlParams = randomActivity.optUrlParams;
 	    var loadingLabel = randomActivity.loadingLabel;
 
-	    var boredMessage = "I'm bored! Loading '" + loadingLabel + "' ...";
+	    var randomIAB = randomArrayEntry(multilingualIAB);
+	    var boredMessage = randomIAB + " Loading '" + loadingLabel + "' ...";
 	    
 	    $('#join-room-url').html(boredMessage);
 	    $('#qrcode-loading').hide();

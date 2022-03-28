@@ -2,8 +2,8 @@
 //
 // Timeout Constants
 //
-var IAmBoredTimeoutMSecs = 15 * 1000;
-//var IAmBoredTimeoutMSecs = 120 * 1000;
+//var IAmBoredTimeoutMSecs = 15 * 1000;
+var IAmBoredTimeoutMSecs = 2 * 60 * 1000; // 2 mins
 
 
 function getURLParams()
@@ -89,8 +89,6 @@ function displayRoomURL(displayHost,roomName, elemId)
 {
     // For roomURL we work with the roomName to give a nicer URL to type in
     // This is subsequently mapped to the roomID URL by the server
-
-
     
     messageHTML = 'Or visit on your phone:<br />';
     messageHTML += '<span style="white-space: nowrap;">';
@@ -101,4 +99,32 @@ function displayRoomURL(displayHost,roomName, elemId)
     messageHTML += '</span>';
     
     $('#'+elemId).html(messageHTML);
+}
+
+
+function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomNameElemId)
+{
+    // Fallback to 'roomID' if 'roomName' for some reason is not set
+    var roomNameSafe = ((roomName !== null) && (roomName != "")) ? roomName : roomID;
+    
+    var joinRoomURL = displayHost + '/join/' + roomNameSafe;
+
+    var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + joinRoomURL + '&size=' + qrDim +'x' + qrDim;
+    //var url = '/qrcode/?data=' + joinRoomURL + '&size=' + qrDim;
+    
+    var $img = $('<img>').attr('src',url);
+    $img.on("load", function() {
+	$img.fadeIn(1000);
+    });
+    $img.css("display","none"); // The on-load() callback above then fades it in!
+    
+    $('#'+roomIdElemId).html($img);
+    
+    messageHTML = 'Or visit on your phone:<br />';
+    messageHTML += '<span style="white-space: nowrap;">';
+    messageHTML +=   '<img width="16" height="16" src="icons/globe-solid.svg" style="padding-right: 3px;"/>';
+    messageHTML +=   '<span style="color: #e03031; font-size: 85%; font-style: italic;">https://' + displayHost + '/join/' + roomNameSafe + '</span>';
+    messageHTML += '</span>';
+    
+    $('#'+roomNameElemId).html(messageHTML);
 }
