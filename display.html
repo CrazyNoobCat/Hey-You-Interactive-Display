@@ -74,6 +74,7 @@
 
 	function launchRandomActivity()
 	{
+	    //var randomActivity = randomActivities[0];
 	    //var randomActivity = randomActivities[2];
 	    var randomActivity = randomArrayEntry(randomActivities)
 
@@ -103,9 +104,7 @@
 	    $('#qrcode-loading').width(QRDim);
 	    $('#qrcode-loading').height(QRDim);
 
-
-	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, 15 * 1000);
-	    
+	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, IAmBoredTimeoutMSecs);	    
 	});
 	
 	// All displays need to defined a socketLoaded() function,

@@ -1,4 +1,11 @@
 
+//
+// Timeout Constants
+//
+var IAmBoredTimeoutMSecs = 15 * 1000;
+//var IAmBoredTimeoutMSecs = 120 * 1000;
+
+
 function getURLParams()
 {
     var urlParams = {};

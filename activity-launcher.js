@@ -1,4 +1,3 @@
-
 const fs      = require('fs');
 const express = require('express');
 const http    = require('http');
@@ -15,7 +14,22 @@ const { Console } = require('console');
 const Connection = require('./Connection');
 const RoomNames = require('./RoomNames')
 
+//
+// Timeout Constants
+//
+const clientTimeoutMins          =  1;        // Number of mins a client controller will be displayed for, with no interactivity
+const defaultCookieTimeoutMins   =  5;        // Number of mins a client cookie will last for
+const staticCookieValidMins      =  2 * 60;   // Valid for 2 hours by default
 
+const checkClientTimeoutMSecs    =  5 * 1000; // i.e.  5 seconds
+const checkDisplayTimeoutMSecs   = 30 * 1000; // i.e. 30 seconds
+
+const clientTimeoutMSecs         = clientTimeoutMins * 60 * 1000;
+const defaultCookieTimeoutMSecs  = defaultCookieTimeoutMins * 60 * 1000;
+
+//
+// Get web-server and web-sockets instantiated
+//
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server);
@@ -53,20 +67,12 @@ const defaultActivityLabel    = 'Activity-Launcher (Default)';
 const defaultActivityLocation = __dirname + defaultActivity;
 const activityLocation        = __dirname + '/activities';
 
-const clientTimeoutMins          = 1;       // Number of mins a client controller will be displayed for, with no interactivity
-const defaultCookieTimeoutMins   = 5;       // Number of mins a client cookie will last for
-const staticCookieValidMins      = 2 * 60;  // Valid for 2 hours by default
-
-const clientTimeoutMSecs         = clientTimeoutMins * 60 * 1000;
-const defaultCookieTimeoutMSecs  = defaultCookieTimeoutMins * 60 * 1000;
 
 const ServerEpochStartTime     = new Date();    // This is the time which the server started. Use to reload connections after a restart
-const onStartReloadWindowMSecs = 2 * 60 * 1000  // i.e. 2 mins
+//const onStartReloadWindowMSecs = 2 * 60 * 1000  // i.e. 2 mins
 
 console.log("Server Epoch Start Time: " + ServerEpochStartTime);
 
-const checkClientTimeoutMSecs  =  5 * 1000; // i.e.  5 seconds
-const checkDisplayTimeoutMSecs = 30 * 1000; // i.e. 30 seconds
 
 function getCookie(req,cookieName)
 {

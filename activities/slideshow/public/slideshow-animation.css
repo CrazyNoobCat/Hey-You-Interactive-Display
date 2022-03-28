@@ -77,6 +77,36 @@
 }
 
 
+/* lastslide-exit */
+
+@keyframes lastslide-exit-currentslide {
+     0% { left:   0px; opacity: 1; z-index: 0; }
+   100% { left:   0px; opacity: 1; z-index: 0; } 
+}
+@-moz-keyframes lastslide-exit-currentslide {
+     0% { left:   0px; opacity: 1; z-index: 0; }
+   100% { left:   0px; opacity: 1; z-index: 0; } 
+}
+@-webkit-keyframes lastslide-exit-currentslide {
+     0% { left:   0px; opacity: 1; z-index: 0; }
+   100% { left:   0px; opacity: 1; z-index: 0; } 
+}
+
+@keyframes lastslide-exit-overlayslide {
+     0% { left:   0px; opacity: 0; z-index:-1; }
+   100% { left:   0px; opacity: 0; z-index:-1; } 
+}
+@-moz-keyframes lastslide-exit-overlayslide {
+     0% { left:   0px; opacity: 0; z-index:-1; }
+   100% { left:   0px; opacity: 0; z-index:-1; } 
+}
+@-webkit-keyframes lastslide-exit-overlayslide {
+     0% { left:   0px; opacity: 0; z-index:-1; } 
+   100% { left:   0px; opacity: 0; z-index:-1; } 
+}
+
+
+
 /* Animated timeline to slide change */
 @keyframes timeline {
      0% { width:   0%; opacity: 0.7; }

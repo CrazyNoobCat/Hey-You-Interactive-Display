@@ -88,7 +88,7 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 	      
 	if (numSlides > 1) {
 	    // Get the next slide set up as the overlay, but need to wait until fadeIn done
-		  setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  	    
+	    setTimeout(() => { $overlaySlideImg.css("display", "block"); }, 1000);		  	    
 	}	  	      
     });
     
@@ -202,7 +202,15 @@ function startNextSlide() {
 
     var localSlideDuration   = slideDeck[currentSlidePos].slideDuration;
     var localSlideTransition = slideDeck[overlaySlidePos].slideTransition;
-    
+
+    if (cleanSlidePassthrough) {
+	if (uninterruptedSlideCount == numSlides-1) {
+	    // Away to auto-exit slideshow at the end of this side (uninterrupted clean passthrough)
+	    // => Override slideDeck transition with one that doesn't start keyframe change to the next (overlay) slide
+	    localSlideTransition = "lastslide-exit";
+	}
+    }
+		
     setTimeout(() => { doSlideTransition(localSlideDuration,localSlideTransition) }, 100); 
 };
 
