@@ -61,31 +61,35 @@
 	var _viewportYDim = $(window).height();
 
 	QRDim = computeQRDimMaximizeHeight(_viewportXDim,_viewportYDim);
-	
-	function displaySelectActivity(activity,optUrlParams)
-	{
-	    Socket.emit("displaySelectActivity", RoomID, activity, optUrlParams, (response) => {
-		//console.log("Redirecting to " + activity);
-		//window.location.pathname = '/activity'; // Consider passing on the optUrlParms to the client web page also?
-	    });   
-	}
-	
 
+	const randomArrayEntry = (array) => array[Math.floor(Math.random()*array.length)];
+	
 	var randomActivities = [
-	    { "activity": "/slideshow", "optUrlParams": "slidedeck=waikato-uni-backgrounds"},
-	    { "activity": "/slideshow", "optUrlParams": "slidedeck=smoke-and-mirrors-sampler"},
-	    { "activity": "/bullrush",  "optUrlParams": null }
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=waikato-uni-backgrounds",    "loadingLabel": "Campus Photos Slideshow"},
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=smoke-and-mirrors-sampler" , "loadingLabel": "About Smoke and Mirrors Projects"},
+	    { "activity": "/bullrush",  "optUrlParams": null,                                   "loadingLabel": "Bullrush multiplayer game"}
 	];
-
+	
 	var launchRandomActivityTimeout = null;
+
 	function launchRandomActivity()
 	{
-	    console.log("**** launchRandomActivity called");
-	    var randomActivity = randomActivities[0];
-	    displaySelectActivity(randomActivity.activity,randomActivity.optUrlParams);
+	    //var randomActivity = randomActivities[2];
+	    var randomActivity = randomArrayEntry(randomActivities)
 
-	    //setCookieMins("activity",randomActivity.activity,DisplayCookieTimeoutMins);
-	    //Socket.emit("reload", randomActivity.optUrlParams)
+	    var newActivity  = randomActivity.activity;
+	    var optUrlParams = randomActivity.optUrlParams;
+	    var loadingLabel = randomActivity.loadingLabel;
+
+	    var boredMessage = "I'm bored! Loading '" + loadingLabel + "' ...";
+	    
+	    $('#join-room-url').html(boredMessage);
+	    $('#qrcode-loading').hide();
+	    $('#qrcode').animate({ opacity: 0 }, 600)
+
+	    setTimeout(function() {
+		Socket.emit("displaySelectActivity", RoomID, newActivity,optUrlParams);
+	    }, 6 * 1000); 
 	}
 	
 	$(document).ready(function () {
@@ -100,7 +104,7 @@
 	    $('#qrcode-loading').height(QRDim);
 
 
-	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, 60 * 1000); // After 60 secs
+	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, 15 * 1000);
 	    
 	});
 	
