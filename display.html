@@ -37,8 +37,10 @@
 	    console.log("socketLoaded(): Room ID: " + roomID);
 	    
 	    Socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
+		console.log("**** setNewCookieMins() " + cName + " = " + cContent);
 		if (cName == "roomName") {
 		    //displayRoomURL(displayHost,cContent,"join-room-url");
+		    var roomName = cContent;
 		    displayJoinURL(displayHost,roomID,roomName, QRDim,"qrcode","join-room-url");
 		}
 	    });

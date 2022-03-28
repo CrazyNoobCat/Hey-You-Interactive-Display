@@ -37,7 +37,7 @@ const io     = new Server(server);
 const httpPort = process.env.PORT || 3000;
 const publicDirectory = "/public";
 
-const roomNames = new RoomNames('joinRoomNames.txt');
+const roomNames = new RoomNames('joinRoomNames.txt','joinRoomNamesFixed.json');
 
 // The general setup of Hey You is as follows:
 //  
@@ -421,7 +421,7 @@ app.get('/activity', (req, res) => {
     }
     else {
 	console.log("/activity serving up default activity display.html to display IP: " + req.ip);
-	//console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
+	console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
         sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
     }   
 });
@@ -650,7 +650,25 @@ io.on('connection', (socket, host) => {
             displays.push(display);
 
             // Assign the roomName to the display
-	    let roomName = roomNames.nextFree();
+	    //var address = socket.handshake.address;
+	    //console.log('New connection from ' + address.address + ':' + address.port);
+	    //console.log("Or for newer version, remoteAddress IP = " + socket.request.connection.remoteAddress);
+
+	    //var socketId = socket.id;
+	    //console.log("**** Socket dump = ");
+
+	    //console.log(socket);
+	    
+	    //var ipAddresses = socket.handshake.headers['x-forwarded-for'];
+	    //var ipAddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]
+	    //console.log("*** ipAddresses = " + ipAddresses);
+	    //console.log("*** ipAddress = " + ipAddress);
+
+	    // ****
+	    // https://stackoverflow.com/questions/6458083/get-the-clients-ip-address-in-socket-io
+	    var forIPaddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]	    
+
+	    let roomName = roomNames.nextFree(forIPaddress);
             display.setAndSendRoomName(roomName);
 
             // Using deviceID as the room identifier
@@ -794,8 +812,9 @@ io.on('connection', (socket, host) => {
                     display = findDisplayBySocketID(socket.id);
 
                     // If no name could be found then assign new room name, else send current room name
-                    if (display.getRoomName() == undefined) {
-			let roomName = roomNames.nextFree();
+                if (display.getRoomName() == undefined) {
+		        var forIPaddress = socket.handshake.headers['x-forwarded-for'].split(',')[0];		    
+			let roomName = roomNames.nextFree(forIPaddress);
                         display.setAndSendRoomName(roomName);
 		    }
                     else {

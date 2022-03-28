@@ -67,7 +67,7 @@ function computeQRDimMaximizeHeight(viewportWidth,viewportHeight)
     return qrDim;
 }
 
-    
+ /*   
 function displayRoomQRCode(displayHost,roomID,qrDim,elemId)
 {
     // For the QR code, work directly with the roomID
@@ -100,12 +100,16 @@ function displayRoomURL(displayHost,roomName, elemId)
     
     $('#'+elemId).html(messageHTML);
 }
+ */
 
 
 function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomNameElemId)
 {
     // Fallback to 'roomID' if 'roomName' for some reason is not set
-    var roomNameSafe = ((roomName !== undefined) && (roomName != "")) ? roomName : roomID;
+    console.log("**** displayJoinURL() roomID = " + roomID + " roomName = " + roomName);
+    
+    //var roomNameSafe = ((roomName != undefined) && (roomName != "")) ? roomName : roomID;
+    var roomNameSafe = (roomName != "") ? roomName : roomID;
     
     var joinRoomURL = displayHost + '/join/' + roomNameSafe;
 
