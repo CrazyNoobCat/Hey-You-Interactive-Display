@@ -367,6 +367,11 @@ app.get('/', (req, res) => {
     }    
 });
 
+app.get('/display', (req, res) => {
+    res.redirect("/activity");
+});
+	
+    
 // Shortcut for the accessing the top-level display
 app.get('/display-home', (req, res) => {
 
