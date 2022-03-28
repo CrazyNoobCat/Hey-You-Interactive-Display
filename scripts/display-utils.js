@@ -105,7 +105,7 @@ function displayRoomURL(displayHost,roomName, elemId)
 function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomNameElemId)
 {
     // Fallback to 'roomID' if 'roomName' for some reason is not set
-    var roomNameSafe = ((roomName !== null) && (roomName != "")) ? roomName : roomID;
+    var roomNameSafe = ((roomName !== undefined) && (roomName != "")) ? roomName : roomID;
     
     var joinRoomURL = displayHost + '/join/' + roomNameSafe;
 
