@@ -37,7 +37,7 @@ const io     = new Server(server);
 const httpPort = process.env.PORT || 3000;
 const publicDirectory = "/public";
 
-const roomNames = new RoomNames('joinRoomNames.txt','joinRoomNamesFixed.json');
+const roomNames = new RoomNames('etc/room-names-dynamic.txt','etc/room-names-preallocated.json');
 
 // The general setup of Hey You is as follows:
 //  
