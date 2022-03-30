@@ -21,7 +21,15 @@ Or
 
 The sourced script is designed to check for a few, to help identify some
 common-place issues.  If everything checks out, then you environment
-is set up to run NodeJS (the binary 'node' is now on your PATH).
+is set up to run both NodeJS (the binary 'node' is now on your PATH)
+and its package manager, 'npm'.
+
+To install the NodeJS packages used by Hey You enter:
+
+    npm install
+
+This is a one-time setup set, and does not need to be repeated
+subsequently.
 
 You can start the Hey You server with:
 
@@ -44,6 +52,8 @@ Debian ...
     tar xvf node-v16.13.2-linux-x64.tar.xz
     cd ..
 
+    npm install
+    
 **Start up the web server**
 
     ./heyyou-start-server.sh &
