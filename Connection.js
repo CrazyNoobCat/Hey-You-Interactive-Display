@@ -21,10 +21,10 @@ class Connection
     // Only used for displays
     #host        = false;
     #messages    = []; // All messages which the display hasn't recieved due to it not being ready 
-    numOfClients = 0;
+    numOfClients = 0; // **** // Is this ever used????
     failedConsecutiveHeartBeat = 0;
     
-    // Only used for clients
+    // Only used for controllers
     #lastInteractionTime;
     
     constructor(io, socket, activity, timeoutLimitMSecs)
@@ -112,7 +112,7 @@ class Connection
     //
     // Getters
     //
-    getDeviceID(){ return this.#socket.handshake.query.clientID;}
+    getDeviceID(){ return this.#socket.handshake.query.controllerID;}
     getSocketID(){ return this.#socket.id;}
     getType()    { return this.#socket.handshake.query.data;}
 

@@ -8,8 +8,8 @@
 
     <!--<link rel="manifest" href="/manifest.webmanifest">-->
 
-    <link rel="stylesheet" media="screen"                               href="client_min.css" /> <!-- think of CSS as client/controller-core.css -->
-    <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="client.css"     /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
+    <link rel="stylesheet" media="screen"                               href="controller_min.css"       /> <!-- think of CSS as controller-core.css -->
+    <link rel="stylesheet" media="screen and (min-device-width: 800px)" href="controller_fakephone.css" /> <!-- on a desktop => CSS to emulate phone size, shape, and appearance -->
 
     <!-- 
 	 Consider determine is phone/desktop by media rule that test for hover and pointer as discussed at:
@@ -18,7 +18,7 @@
       -->
 
     <!--
-    <link rel="stylesheet" href="navigator-client.css" />
+    <link rel="stylesheet" href="navigator-controller.css" />
     -->
 
     <script
@@ -33,12 +33,12 @@
 
     <!--
     <script type="text/javascript" src="/scripts/navigator-utils.js"></script>
-    <script type="text/javascript" src="/scripts/navigator-client.js"></script>
+    <script type="text/javascript" src="/scripts/navigator-controller.js"></script>
     -->
     
     <script>
       // Generic socket setup      
-      setupConnection("client");  
+      setupConnection("controller");  
 
       var roomID   = getCookie('roomID');
       var roomName = getCookie('roomName');
@@ -48,7 +48,7 @@
       
       // Page specific functions ...
       function socketLoaded(){
-          Socket.emit('clientConnected');
+          Socket.emit('controllerConnected');
 	  
           Socket.on('playerMarker', (playerCol, playerType, playerLabel) => {
 	      /*
@@ -87,7 +87,7 @@
 
     <div class="smartphone">
       <div id="mobile_page">
-        <div id="client_header" class="header" style="width: 100%;">
+        <div id="controller_header" class="header" style="width: 100%;">
 
           <button onclick="selectActivity('/')" type="button"><img class="home-img" src="icons/back.svg"></button>
           <h1 class="text">Hey There, Interact With Me!</h1>

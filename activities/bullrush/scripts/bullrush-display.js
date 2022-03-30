@@ -478,7 +478,7 @@ function playerAdd(newSocket) {
         }
     }
     else {
-        console.log("New client already existed. Resent colour");
+        console.log("New controller already existed. Resent colour");
         emitPlayerMarker(socketID, p.colour, p.type, p.playerLabel);
     }
 }
@@ -645,9 +645,9 @@ function include(file) {
 }
 
 function socketUpdate(e, ...args) {
-    if (e == 'clientConnected'){
+    if (e == 'controllerConnected'){
         var id = args[0];
-        console.log("New client: " + id);
+        console.log("New controller: " + id);
         playerAdd(id);
     }
     else {
@@ -803,8 +803,8 @@ class player {
                     this.moveDown = false;
                     break;
 		
-                case "clientDisconnect":
-                    console.log("Controller-client disconnect signal recieved for player: " + this.socket + " for player type: " + this.type);
+                case "controllerDisconnect":
+                    console.log("Controller disconnect signal recieved for player: " + this.socket + " for player type: " + this.type);
                     this.quit = true;
                     break;
 		

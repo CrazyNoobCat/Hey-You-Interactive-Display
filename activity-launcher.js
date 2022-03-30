@@ -17,15 +17,15 @@ const RoomNames = require('./RoomNames')
 //
 // Timeout Constants
 //
-const clientTimeoutMins          =  1;        // Number of mins a client controller will be displayed for, with no interactivity
-const defaultCookieTimeoutMins   =  5;        // Number of mins a client cookie will last for
-const staticCookieValidMins      =  2 * 60;   // Valid for 2 hours by default
+const controllerTimeoutMins       =  1;        // Number of mins a controller will be displayed for, with no interactivity
+const defaultCookieTimeoutMins    =  5;        // Number of mins a controller cookie will last for
+const staticCookieValidMins       =  2 * 60;   // Valid for 2 hours by default
 
-const checkClientTimeoutMSecs    =  5 * 1000; // i.e.  5 seconds
-const checkDisplayTimeoutMSecs   = 30 * 1000; // i.e. 30 seconds
+const checkControllerTimeoutMSecs =  5 * 1000; // The time between scans, checking for remaining active controllers
+const checkDisplayTimeoutMSecs    = 30 * 1000; // The time between scans, checking that a display is still present
 
-const clientTimeoutMSecs         = clientTimeoutMins * 60 * 1000;
-const defaultCookieTimeoutMSecs  = defaultCookieTimeoutMins * 60 * 1000;
+const controllerTimeoutMSecs      = controllerTimeoutMins * 60 * 1000;
+const defaultCookieTimeoutMSecs   = defaultCookieTimeoutMins * 60 * 1000;
 
 //
 // Get web-server and web-sockets instantiated
@@ -43,22 +43,22 @@ const roomNames = new RoomNames('etc/room-names-dynamic.txt','etc/room-names-pre
 //  
 //   1. A 'display' starts by showing the home page to the activity-launcher
 //
-//   2. When a 'controller-client' (phone-based user) connects via the QR code
+//   2. When a 'controller' (phone-based user) connects via the QR code
 //      (or else by entering the URL the activity-launcher displays) they
 //      are shown (on their phone) a list of apps that can be launched
 //
 //   3. Upon selecting an app (activity) from the list, the display is 
 //      send the relevent activities/<activity>/display.html and the
 //      phone changed to display the controller for the activity
-//      activities/<activity>/controller-client.html
+//      activities/<activity>/controller.html
 //
-//   4. If another controller-client joins a display while it us running an app,
-//      then the controller-client is directly provided the controller for
+//   4. If another controller joins a display while it us running an app,
+//      then the controller is directly provided the controller for
 //      that app
 
 
-var displays = []; // An array containing all displays
-var clients  = []; // An array containing all the clients
+var displays    = []; // An array containing all the displays
+var controllers = []; // An array containing all the controllers
 
 
 const defaultActivity         = ''; // if ever make none empty, then needs to be of the form '/foo'
@@ -122,30 +122,30 @@ function findDisplayBySocketID(socketID)
     }
 }
 
-function findAllClientsByRoomID(roomID)
+function findAllControllersByRoomID(roomID)
 {
-    let foundClients = [];
-    for (let index = 0; index < clients.length; index++) {
-        const client = clients[index];
-        if (client.getRoomID() == roomID) {
-            foundClients.push(client);
+    let foundControllers = [];
+    for (let index = 0; index < controllers.length; index++) {
+        const controller = controllers[index];
+        if (controller.getRoomID() == roomID) {
+            foundControllers.push(controller);
         }                    
     }
-    return foundClients;
+    return foundControllers;
 }
 
-function findAllClientsByRoomName(roomName)
+function findAllControllersByRoomName(roomName)
 {
     let roomID = findHostDisplayByName(roomName).getRoomID();
-    return findAllClientsByRoomID(roomID);
+    return findAllControllersByRoomID(roomID);
 }
 
-function findClientBySocketID(socketID)
+function findControllerBySocketID(socketID)
 {
-    for (let index = 0; index < clients.length; index++) {
-        const client = clients[index];
-        if (client.getSocketID() == socketID) {
-            return client;
+    for (let index = 0; index < controllers.length; index++) {
+        const controller = controllers[index];
+        if (controller.getSocketID() == socketID) {
+            return controller;
         }                    
     }
 }
@@ -207,25 +207,25 @@ function consoleInput() { // Console Commands
                 return; // bail here, so rl.prompt() isn't called again
             } 
             else if (line === "help" || line === '?') {
-                console.log(`Commands:\n\tclients {roomName/ID}/all\n\texit\n\tclear\n\tchangeActivity {roomName} {optUrlParams}\n\tdisplays\n`);
+                console.log(`Commands:\n\tcontrollers {roomName/ID}/all\n\texit\n\tclear\n\tchangeActivity {roomName} {optUrlParams}\n\tdisplays\n`);
             } 
-            else if (line.startsWith("clients",0)) {
-                console.log("Clients: ")
+            else if (line.startsWith("controllers",0)) {
+                console.log("Controllers: ")
                 let identifier = line.split(" ")[1]; // Get the 2nd parsed value
                 if (identifier != undefined) {
                     if (identifier === "all") {
-                        clients.forEach(client => {
-                            console.log("DeviceID: " + client.getDeviceID() +"\tRoom: " + client.getRoomID());
+                        controllers.forEach(controller => {
+                            console.log("DeviceID: " + controller.getDeviceID() +"\tRoom: " + controller.getRoomID());
                         });
                     }
                     else if (identifier.length > 15) { // For roomIDs
-                        findAllClientsByRoomID(identifier).forEach(client => {
-                            console.log(client.getDeviceID());
+                        findAllControllersByRoomID(identifier).forEach(controller => {
+                            console.log(controller.getDeviceID());
                         });
                     } 
                     else { // For roomNames
-                        findAllClientsByRoomName(identifier).forEach(client => {
-                            console.log(client.getDeviceID());
+                        findAllControllersByRoomName(identifier).forEach(controller => {
+                            console.log(controller.getDeviceID());
                         });
                     }  
                 }
@@ -333,12 +333,12 @@ app.get('/', (req, res) => {
 
     if (activity != undefined) {
 	let activityLabel = getActivityLabel(activity);
-        // Check if there is a unique client file in activity otherwise provide default
-        if (fs.existsSync(activityLocation + activity + '/controller-client.html')) {
-            sendActivityFile(res, activityLocation + activity + '/controller-client.html','/controller-client.html',activityLabel);
+        // Check if there is a unique controller file in activity otherwise provide default
+        if (fs.existsSync(activityLocation + activity + '/controller.html')) {
+            sendActivityFile(res, activityLocation + activity + '/controller.html','/controller.html',activityLabel);
 	}
         else  {
-            sendActivityFile(res, __dirname + defaultActivity + '/controller-client.html','/controller-client.html',defaultActivityLabel);
+            sendActivityFile(res, __dirname + defaultActivity + '/controller.html','/controller.html',defaultActivityLabel);
 	}
     } 
     else {
@@ -358,7 +358,7 @@ app.get('/', (req, res) => {
 	    let staticActivity = getCookie(req,"staticActivity");
 
 	    if ((roomID == undefined) && (staticActivity == undefined)) {
-		res.redirect("/disconnected/No active display connection found.  This can be caused by controller-client inactivity. Scan the QR Code again to rejoin");
+		res.redirect("/disconnected/No active display connection found.  This can be caused by controller inactivity. Scan the QR Code again to rejoin");
 	    }
 	    else {
 		res.redirect("/error/No valid Display-id or Standalone App-id found. Try scanning an new QR Code.");
@@ -381,17 +381,17 @@ app.get('/display-home', (req, res) => {
     let display = findHostDisplayByRoomID(roomID);
     
     if (display != undefined) {
-	// Forced refresh => disconnect any any clients currently connected
+	// Forced refresh => disconnect any any controllers currently connected
 	
-	findAllClientsByRoomID(roomID).forEach(client => {
-	    display.message('clientDisconnect', client.getDeviceID());
+	findAllControllersByRoomID(roomID).forEach(controller => {
+	    display.message('controllerDisconnect', controller.getDeviceID());
 	});
 	
 	display.activityChange(defaultActivity,null);
     }
 
     
-    console.log("/display-home serving up fresh default activity display.html to controller-client IP: " + req.ip);
+    console.log("/display-home serving up fresh default activity display.html to controller IP: " + req.ip);
     sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
 });
 
@@ -487,8 +487,8 @@ app.get('/qrcode', (req, res) => {
 
 
 app.get('*', (req, res) => {
-    // Send a file if it can be found inside either the public folder for the activity for the controller-client or generic public folder
-    // Requests from nonclients will be redirected to an error page
+    // Send a file if it can be found inside either the public folder for the activity for the controller or generic public folder
+    // Requests from non-controller files will be redirected to an error page
     let activity = getActivity(req);
 
     // ****
@@ -532,45 +532,45 @@ io.on('connection', (socket, host) => {
 
     var newConnection = true;
 
-    if (socket.handshake.query.data == "client") {
-	console.log("io.on('connection'): Handling controller-client connection");
+    if (socket.handshake.query.data == "controller") {
+	console.log("io.on('connection'): Handling controller connection");
 	
-        for (let index=0; index<clients.length; index++) {
-            const client = clients[index];
-            if (client.getDeviceID() == socket.handshake.query.clientID) {
+        for (let index=0; index<controllers.length; index++) {
+            const controller = controllers[index];
+            if (controller.getDeviceID() == socket.handshake.query.controllerID) {
                 // Handle updating socket information for this reconnecting device
 
-                if (client.getRoomID() != socket.handshake.query.roomID) {
-                    let display = findHostDisplayByRoomID(client.getRoomID());
+                if (controller.getRoomID() != socket.handshake.query.roomID) {
+                    let display = findHostDisplayByRoomID(controller.getRoomID());
 
                     if (display != undefined) {
-                        display.message('clientDisconnect', client.getDeviceID());
-                        //io.to(display.getRoomID()).emit('clientDisconnect', client.getDeviceID());
-                        display.numOfClients--; // Reduce client count by one for old room.
+                        display.message('controllerDisconnect', controller.getDeviceID());
+                        //io.to(display.getRoomID()).emit('controllerDisconnect', controller.getDeviceID());
+                        display.numOfControllers--; // Reduce controller count by one for old room.
                     }
 		    else {
                         // Error
-			console.error("io.on('connection'): When disconnecting an old connection, did not find a display for roomID '" + client.getRoomID());
+			console.error("io.on('connection'): When disconnecting an old connection, did not find a display for roomID '" + controller.getRoomID());
                     }
 
-                    display = findHostDisplayByRoomID(client.getRoomID());
+                    display = findHostDisplayByRoomID(controller.getRoomID());
 
                     if (display != undefined) {
-                        client.setRoomID(socket.handshake.query.roomID);
-                        display.numOfClients++; // Increase client count for new room by one.
+                        controller.setRoomID(socket.handshake.query.roomID);
+                        display.numOfControllers++; // Increase controller count for new room by one.
                     }
 		    else {
                         // Error
-			console.error("io.on('connection'): When setting up new conection, did not find a display for roomID '" + client.getRoomID());
+			console.error("io.on('connection'): When setting up new conection, did not find a display for roomID '" + controller.getRoomID());
                     }                    
                 }
 
-                client.setNewSocket(socket);
+                controller.setNewSocket(socket);
 
-                socket.join(client.getRoomID());
-                socket.join(client.getDeviceID());
+                socket.join(controller.getRoomID());
+                socket.join(controller.getDeviceID());
 
-                console.log("Client rejoined: \t" + client.connectionInformation());
+                console.log("Controller rejoined: \t" + controller.connectionInformation());
                 newConnection = false ;
             }
         }
@@ -578,35 +578,35 @@ io.on('connection', (socket, host) => {
         if (newConnection) {
             // Handle creating a new Connection instance for this device
 
-            var client = new Connection(io,socket,defaultActivity,clientTimeoutMSecs);
+            var controller = new Connection(io,socket,defaultActivity,controllerTimeoutMSecs);
 	    
-            // Add the new client to the list of clients
+            // Add the new controller to the list of controllers
 
-            let display = findHostDisplayByRoomID(client.getRoomID());
+            let display = findHostDisplayByRoomID(controller.getRoomID());
 
             if (display != undefined) {
-                console.log("New Client: \t" + client.connectionInformation());
+                console.log("New Controller: \t" + controller.connectionInformation());
 
-                clients.push(client);
+                controllers.push(controller);
 
-                //Join client to room
-                socket.join(client.getRoomID());
-                socket.join(client.getDeviceID())
+                //Join controller to room
+                socket.join(controller.getRoomID());
+                socket.join(controller.getDeviceID())
 
-                display = findHostDisplayByRoomID(client.getRoomID());
-                display.numOfClients++; // Increase client count for new room by one.
+                display = findHostDisplayByRoomID(controller.getRoomID());
+                display.numOfControllers++; // Increase controller count for new room by one.
 
 		/*
                 var currentTime = new Date();
                 if (currentTime - ServerEpochStartTime < onStartReloadWindowMSecs) {
-                    client.message('reload');
+                    controller.message('reload');
                 }
 		*/
 
             }
 	    else {
-                // Could send error since there is no valid display for the client //////////////////////////
-		console.error("io.on('connection'): Unable to form client-display socket connection, as no display found for for roomID '" + client.getRoomID());
+                // Could send error since there is no valid display for the controller //////////////////////////
+		console.error("io.on('connection'): Unable to form controller-display socket connection, as no display found for for roomID '" + controller.getRoomID());
             }            
         }
     } 
@@ -615,7 +615,7 @@ io.on('connection', (socket, host) => {
 	
         for (let index=0; index<displays.length; index++) {
             const display = displays[index];
-            if (display.getDeviceID() == socket.handshake.query.clientID) {
+            if (display.getDeviceID() == socket.handshake.query.controllerID) {
                 // Handle updating socket information for this reconnecting device
                 console.log("Socket update for display (device id): " + display.getDeviceID());
 
@@ -642,7 +642,7 @@ io.on('connection', (socket, host) => {
 
         if (newConnection) {
             // Handle creating a new Connection instance for this device
-            let display = new Connection(io,socket,defaultActivity,clientTimeoutMSecs);
+            let display = new Connection(io,socket,defaultActivity,controllerTimeoutMSecs);
 
             console.log("New Display: \t" + display.connectionInformation());
 	    
@@ -703,13 +703,13 @@ io.on('connection', (socket, host) => {
     })
 
     socket.on('disconnect', () => {
-        console.log('Device disconnect: ' + socket.handshake.query.clientID);
+        console.log('Device disconnect: ' + socket.handshake.query.controllerID);
 
-        if (socket.handshake.query.data == "client") {
-            for (let index = 0; index < clients.length; index++) {
-                const client = clients[index];
-                if (client.getSocketID() == socket.id) {
-                    client.updateLastInteractionTime();                    
+        if (socket.handshake.query.data == "controller") {
+            for (let index = 0; index < controllers.length; index++) {
+                const controller = controllers[index];
+                if (controller.getSocketID() == socket.id) {
+                    controller.updateLastInteractionTime();                    
                     
                     // Removes itself from room after disconnect is complete
     
@@ -743,8 +743,8 @@ io.on('connection', (socket, host) => {
 			console.log("socket.on('disconnect'): Found alternative display, and made it the host");
 		    }
 		    else {
-                        //disconnect all controller-clients from the display and send them back to another room (if sub room) ////////////////////
-                        // Otherwise drop connections and wait for clientTimeoutCheck() to remove from connections
+                        //disconnect all controllers from the display and send them back to another room (if sub room) ////////////////////
+                        // Otherwise drop connections and wait for controllerTimeoutCheck() to remove from connections
 			
 			console.log("socket.on('disconnect'): No alternative display found to transfer to => Display is disconnected. ");
                     }
@@ -759,8 +759,8 @@ io.on('connection', (socket, host) => {
 
         // Check if socket is active (authorised)
         let active = true;
-        let display = undefined;
-        let client  = undefined;
+        let display     = undefined;
+        let controller  = undefined;
 	
         if (active) {
             var roomID = args[0];
@@ -773,15 +773,15 @@ io.on('connection', (socket, host) => {
                     break;
 
                 case "selectActivity":
-                    // Client has indicated an activity change
+                    // Controller has indicated an activity change
                     var newActivity  = args[1];
 		    var optUrlParams = args[2];
                     var callback     = args[3];
 
-                    client = findClientBySocketID(socket.id);
-                    if (client != undefined) {
-                        client.updateLastInteractionTime();
-                        if (client.getRoomID() == roomID) {
+                    controller = findControllerBySocketID(socket.id);
+                    if (controller != undefined) {
+                        controller.updateLastInteractionTime();
+                        if (controller.getRoomID() == roomID) {
                             if (newActivity == "/") {
 				newActivity = defaultActivity;                    
 			    }
@@ -837,7 +837,7 @@ io.on('connection', (socket, host) => {
                             console.log("Forwarding saved messages for display host to roomID: " + display.getRoomID());
                             messages.forEach(message => {
                                 display.message(...message);
-                                //io.to(display.getSocketID()).emit(event, clientDeviceID);
+                                //io.to(display.getSocketID()).emit(event, controllerDeviceID);
                             });
                             display.clearMessages();
                         }
@@ -846,7 +846,7 @@ io.on('connection', (socket, host) => {
                     break;
     
                 case "displayEmit":    
-                    // Indicate an event that the display wants to send to a client or the whole room
+                    // Indicate an event that the display wants to send to a controller or the whole room
 
                     // Format ('displayEmit',roomID/socket to send to,event,args for event...)
                     //              event          0                 1       2
@@ -863,7 +863,7 @@ io.on('connection', (socket, host) => {
                     } else {
 
                         // New logic has to be written to retrieve who the request was suppoesdly made
-                        //console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoomID: " + roomID + "\tDevice ID: " + findClientBySocketID);
+                        //console.lost("Non host display attempted to send displayEmit event: " + event + "\tRoomID: " + roomID + "\tDevice ID: " + findControllerBySocketID);
                     }    
                     break;
 
@@ -896,7 +896,7 @@ io.on('connection', (socket, host) => {
 
 		
                 case "displayReset":
-                    // Reset the display back to the default activity and get clients to reload
+                    // Reset the display back to the default activity and get controllers to reload
                     display = findDisplayBySocketID(socket.id);
                     if (display != undefined) {
                         display.activityChange(defaultActivity,null); // Set to default, no optUrlParam to top-level default display
@@ -919,14 +919,14 @@ io.on('connection', (socket, host) => {
 
                 case 'static':
                     // Set staticActivity cookie
-                    client = findClientBySocketID(socket.id);
-                    display = findHostDisplayByRoomID(client.getRoomID());
-                    client.setCookieMins('staticActivity',display.getCurrentActivity(),staticCookieValidMins);
-                    client.setCookieMins("roomID",'',0); // Invalidate old cookie
+                    controller = findControllerBySocketID(socket.id);
+                    display = findHostDisplayByRoomID(controller.getRoomID());
+                    controller.setCookieMins('staticActivity',display.getCurrentActivity(),staticCookieValidMins);
+                    controller.setCookieMins("roomID",'',0); // Invalidate old cookie
 
-                    // Remove client
-                    clients.forEach(function(clientTemp, index, object) {
-                        if (clientTemp == client) {
+                    // Remove controller
+                    controllers.forEach(function(controllerTemp, index, object) {
+                        if (controllerTemp == controller) {
                             object.splice(index,1);
                         }
                     });
@@ -937,22 +937,22 @@ io.on('connection', (socket, host) => {
 
                 default:
 
-                    // Allow cotroller-clients only sending to room displays which are the room host    
+                    // Allow controllers to only sending to room displays which are the room host    
                     
-                    client = findClientBySocketID(socket.id);
+                    controller = findControllerBySocketID(socket.id);
 
-                    if (client != undefined) {
-                        display = findHostDisplayByRoomID(client.getRoomID());
+                    if (controller != undefined) {
+                        display = findHostDisplayByRoomID(controller.getRoomID());
                         if (display != undefined) {
-                            display.message(event, client.getDeviceID(), ...args);
-                            client.updateLastInteractionTime();                                
+                            display.message(event, controller.getDeviceID(), ...args);
+                            controller.updateLastInteractionTime();                                
                         }
 			else {
-                            console.log("Undefined display for RoomID: " + client.getRoomID() + '\tEvent: ' + event);
+                            console.log("Undefined display for RoomID: " + controller.getRoomID() + '\tEvent: ' + event);
                         }
                     }
 		    else {
-                        console.log("Couldn't find controller-client for SocketID: " + socket.id + "\tEvent: " + event);
+                        console.log("Couldn't find controller for SocketID: " + socket.id + "\tEvent: " + event);
                     }
     
                     break;
@@ -966,30 +966,31 @@ server.listen(httpPort, () => {
 });
 
 
-// Checks every 5 mins to see if client is active
-async function clientTimeoutCheck()
+// Checks every few mins (checkControllerTimeoutMSecs)to see which controllers are still is active
+// Remove ones that aren't active
+async function controllerTimeoutCheck()
 {
     setTimeout(() => {
-        clients.forEach(function(client, index, object) {
-            if (client.timedOut()) {
+        controllers.forEach(function(controller, index, object) {
+            if (controller.timedOut()) {
                 object.splice(index, 1);
 
-                client.message('disconnected', 'Your device timed out, likely due to inactivity, and you have been removed from the display session. Scan the QR code again to rejoin.');
-                //io.to(client.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
+                controller.message('disconnected', 'Your device timed out, likely due to inactivity, and you have been removed from the display session. Scan the QR code again to rejoin.');
+                //io.to(controller.getSocketID()).emit('error', 'Your device timed out & you have been removed from the session. Scan another QR code to rejoin.');
 
-                let display = findHostDisplayByRoomID(client.getRoomID());
+                let display = findHostDisplayByRoomID(controller.getRoomID());
                 if (display != undefined) {
-                    display.message('clientDisconnect', client.getDeviceID());
-                    //io.to(display.getSocketID()).emit('clientDisconnect', client.getDeviceID()); // Inform the display to remove client
-                    display.numOfClients--; // Reduce client count for room by one
+                    display.message('controllerDisconnect', controller.getDeviceID());
+                    //io.to(display.getSocketID()).emit('controllerDisconnect', controller.getDeviceID()); // Inform the display to remove controller
+                    display.numOfControllers--; // Reduce controller count for room by one
                 }
 
-                console.log("Removed connection: " + client.getDeviceID());
+                console.log("Removed connection: " + controller.getDeviceID());
 
             }
           });
-        clientTimeoutCheck();
-    }, checkClientTimeoutMSecs);
+        controllerTimeoutCheck();
+    }, checkControllerTimeoutMSecs);
 }
 
 
@@ -1016,8 +1017,8 @@ function displayHeartbeat()
     }, checkDisplayTimeoutMSecs);
 }
 
-// Endless looping calls using setTimeout() to check controller-clients
-clientTimeoutCheck(); 
+// Endless looping calls using setTimeout() to check controllers
+controllerTimeoutCheck(); 
 
 // Endless looping calls using setTime() to check displays
 displayHeartbeat();

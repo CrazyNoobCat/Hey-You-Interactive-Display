@@ -28,16 +28,16 @@ function startSocket(visitorID, type)
 	console.log("startSocket(): Set Room ID to be:" + RoomID);	
     }
     else {
-        RoomID = getCookie('roomID'); // Must be a client so get roomID
+        RoomID = getCookie('roomID'); // Must be a controller so get roomID
 	console.log("startSocket(): From Cookie, Room ID:" + RoomID);	
     }
 
     var url = window.location.host;
     Socket = io(url , {
         query: {
-            "data"     : type,
-            "clientID" : visitorID,
-            "roomID"   : RoomID
+            "data"         : type,
+            "controllerID" : visitorID,
+            "roomID"       : RoomID
         }
     });
 
@@ -125,7 +125,7 @@ function selectActivity(activity,optUrlParams)
         
     Socket.emit("selectActivity", RoomID, activity, optUrlParams, (response) => {
         console.log("Redirecting to " + activity);
-        window.location.pathname = '/'; // Consider passing on the optUrlParms to the client web page also?
+        window.location.pathname = '/'; // Consider passing on the optUrlParms to the controller web page also?
     });   
 }
 
