@@ -17,7 +17,7 @@ const RoomNames = require('./RoomNames')
 //
 // Timeout Constants
 //
-const controllerTimeoutMins       =  1;        // Number of mins a controller will be displayed for, with no interactivity
+const controllerTimeoutMins       =  4;        // Number of mins a controller will be displayed for, with no interactivity
 const defaultCookieTimeoutMins    =  5;        // Number of mins a controller cookie will last for
 const staticCookieValidMins       =  2 * 60;   // Valid for 2 hours by default
 
