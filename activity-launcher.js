@@ -190,6 +190,30 @@ function sendActivityFile(res, path, fileName, activityLabel)
 }
 
 
+function getVisitorSocketIPAddress(socket)
+{
+    // In Hey You, we use 'visitor' when the in-coming connection could be either a
+    // display or controller
+    
+    // The following is the recommended way to get a connecting client's IP address
+    // However, it only works in the case of a direct connection between client and server
+    // => commenting this out and using the next technique
+    let remoteAddressIP = socket.request.connection.remoteAddress;
+
+    // The initialization code below for our Express server does:
+    //    app.set('trust proxy', true)
+    // (because we're the ones that have stood up the Apache web server that operates as the proxy)
+    // This means we can determine the connecting client's IP address form the x-forward-for header
+    // information
+
+    // For more details, see:
+    //   https://stackoverflow.com/questions/6458083/get-the-clients-ip-address-in-socket-io
+
+    let ipAddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]
+
+    return ipAddress;
+}
+
 function consoleInput() { // Console Commands
     const rl = require('readline').createInterface({
         input: process.stdin,
@@ -307,7 +331,7 @@ app.get('/join/:roomIdOrName', (req, res) => {
 
 	// Create a cookie which only works on this site and lasts for the default timeout
         res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
-        res.redirect('/'); // Prevents making a second cookie for a js file
+        res.redirect('/controller'); // Prevents making a second cookie for a javascript file
         console.log("New device joined with roomID: " + roomID);
     }
     else if ((display = findHostDisplayByName(req.params.roomIdOrName)) != undefined) {	
@@ -316,7 +340,7 @@ app.get('/join/:roomIdOrName', (req, res) => {
 
         // Create a cookie which only works on this site and lasts for the default timeout
 	res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
-        res.redirect('/'); // Prevents making a second cookie for a js file
+        res.redirect('/controller'); // Prevents making a second cookie for a javascript file
         console.log("New device joined with roomName: " + roomName);
     }  
     else {
@@ -326,8 +350,7 @@ app.get('/join/:roomIdOrName', (req, res) => {
 });
 
 
-
-app.get('/', (req, res) => {
+app.get('/controller', (req, res) => {
     // Currently checking if the cookie is undefined in getCookie. If undefined then returns undefined
     let activity = getActivity(req);
 
@@ -367,12 +390,8 @@ app.get('/', (req, res) => {
     }    
 });
 
-app.get('/display', (req, res) => {
-    res.redirect("/activity");
-});
-	
     
-// Shortcut for the accessing the top-level display
+// A "circuit-breaker" URL => disconnect all controllers, and return the HTML page for the top-level/default activity display
 app.get('/display-home', (req, res) => {
 
     // Start a display (forced refresh if necessary) with the default (i.e. top-level) activity
@@ -395,8 +414,11 @@ app.get('/display-home', (req, res) => {
     sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
 });
 
-	
 app.get('/activity', (req, res) => {
+    res.redirect("/display");
+});
+	
+app.get('/display', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
     let activity = getActivity(req);
     
@@ -483,6 +505,10 @@ app.get('/qrcode', (req, res) => {
     var qrcode = qr.image(data, { type: 'png', ec_level: 'M', size: size, margin: 0 });
     res.setHeader('Content-type', 'image/png');
     qrcode.pipe(res);
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
 });
 
 
@@ -649,25 +675,7 @@ io.on('connection', (socket, host) => {
             // Add the new display to the list of displays
             displays.push(display);
 
-            // Assign the roomName to the display
-	    //var address = socket.handshake.address;
-	    //console.log('New connection from ' + address.address + ':' + address.port);
-	    //console.log("Or for newer version, remoteAddress IP = " + socket.request.connection.remoteAddress);
-
-	    //var socketId = socket.id;
-	    //console.log("**** Socket dump = ");
-
-	    //console.log(socket);
-	    
-	    //var ipAddresses = socket.handshake.headers['x-forwarded-for'];
-	    //var ipAddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]
-	    //console.log("*** ipAddresses = " + ipAddresses);
-	    //console.log("*** ipAddress = " + ipAddress);
-
-	    // ****
-	    // https://stackoverflow.com/questions/6458083/get-the-clients-ip-address-in-socket-io
-	    var forIPaddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]	    
-
+	    var forIPaddress = getVisitorSocketIPAddress(socket);
 	    let roomName = roomNames.nextFree(forIPaddress);
             display.setAndSendRoomName(roomName);
 
@@ -781,6 +789,7 @@ io.on('connection', (socket, host) => {
                     controller = findControllerBySocketID(socket.id);
                     if (controller != undefined) {
                         controller.updateLastInteractionTime();
+
                         if (controller.getRoomID() == roomID) {
                             if (newActivity == "/") {
 				newActivity = defaultActivity;                    
@@ -813,7 +822,7 @@ io.on('connection', (socket, host) => {
 
                     // If no name could be found then assign new room name, else send current room name
                 if (display.getRoomName() == undefined) {
-		        var forIPaddress = socket.handshake.headers['x-forwarded-for'].split(',')[0];		    
+		        var forIPaddress = getVisitorSocketIPAddress(socket)
 			let roomName = roomNames.nextFree(forIPaddress);
                         display.setAndSendRoomName(roomName);
 		    }

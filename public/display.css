@@ -40,7 +40,7 @@ body {
     background: url(images/uow-background--ko-te-tangata-red.png) no-repeat center center fixed;;
     background-size: cover;
     
-    font-family:     monospace;
+    font-family:     'Inconsolata', Arial, Helvetica, sans-serif;
     color:           #000000;
 }
 

@@ -59,7 +59,7 @@ div.qrcode-center {
 /* top-right */
 
 div.infobox {
-    font-family: monospace;
+    font-family: 'Inconsolata', Arial, Helvetica, sans-serif;
     font-size:   150%;
     
     display:    block;

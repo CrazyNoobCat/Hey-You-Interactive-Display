@@ -12,7 +12,7 @@
 .dot, .dotcanvas {
     position: absolute; 
     left:   0px; 
-    top:    340px; 
+    top:    400px; 
     right:  0px; 
     bottom: 0px;
     margin: auto; 
@@ -27,14 +27,14 @@
     background-color: #ffffff80;
 
     font-size:   120%;
-    font-family: monospace;
+    font-family: 'Inconsolata', Arial, Helvetica, sans-serif;
     color:       #ffffff;
 }
 
 div.eog-info-box {
     width: 240px;
     background-color: #000000;
-    font-family: monospace;
+    font-family: 'Inconsolata', Arial, Helvetica, sans-serif;
     font-size: 120%;
     color: #ffffff;
 }

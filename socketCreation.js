@@ -43,22 +43,22 @@ function startSocket(visitorID, type)
 
     Socket.on('reload', (optUrlParams) => {
         if (type == "display") {
-	    let full_href = "/activity";
+	    let full_href = "/display";
 	    if (optUrlParams !== null) {
 		full_href += "?" + optUrlParams;
 	    }
             window.location.href = full_href;
 	}
         else {
-            window.location.href = '/';
+            window.location.href = '/controller';
 	}
     }); 
 
     Socket.on('reconnect', () => {
         if (type == "display")
-            window.location.href = '/activity';
+            window.location.href = '/display';
         else
-            window.location.href = '/';
+            window.location.href = '/controller';
     }); 
 
     Socket.on('loadPage', (page) => {
@@ -125,7 +125,7 @@ function selectActivity(activity,optUrlParams)
         
     Socket.emit("selectActivity", RoomID, activity, optUrlParams, (response) => {
         console.log("Redirecting to " + activity);
-        window.location.pathname = '/'; // Consider passing on the optUrlParms to the controller web page also?
+        window.location.pathname = '/controller'; // Consider passing on the optUrlParms to the controller web page also?
     });   
 }
 
