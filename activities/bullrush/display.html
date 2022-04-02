@@ -23,7 +23,7 @@
     <!--<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>    
 
-    <script type="text/javascript" src="/scripts/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/scripts/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>    
     <script type="text/javascript" src="/socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
 
@@ -94,6 +94,7 @@
       function reset()
       {
           console.log("Display Reset Sent");
+	  $('#activity-body').animate({'opacity': 0});
           Socket.emit('displayReset');                
       }
 
@@ -103,7 +104,7 @@
     
   </head>
   
-  <body>
+  <body id="activity-body">
     <div class="fullscreen-canvas-container">
       <canvas id="gameCanvas" class="canvas-bg-waves-monochrome">
 	Your browser does not support the HTML5 canvas tag.
