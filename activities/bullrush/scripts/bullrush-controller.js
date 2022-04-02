@@ -131,7 +131,7 @@ $(document).ready(function() {
       }
       ///////////////////////////////////////////////////////////////////////
 
-      let joystick1 = new JoystickController("stick1", 200, 8);
+      let joystick1 = new JoystickController("stick1", 120, 8);
 
       function update()
       {
