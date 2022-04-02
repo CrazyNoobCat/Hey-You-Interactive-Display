@@ -27,8 +27,11 @@
       <script type="text/javascript" src="/scripts/display-utils.js"></script>
       
       <script>
-	var QRDim = null;
-	
+	var _viewportXDim = window.innerWidth;
+	var _viewportYDim = window.innerHeight;
+
+	var QRDim = computeQRDimMaximizeHeight(_viewportXDim,_viewportYDim);
+
 	// Custom socketLoaded() for top-level activity launcher	
 	function socketLoaded(anyListener)
 	{
@@ -61,12 +64,6 @@
 	    }
 	}
 	
-	// $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
-	
-	var _viewportXDim = $(window).width();
-	var _viewportYDim = $(window).height();
-
-	QRDim = computeQRDimMaximizeHeight(_viewportXDim,_viewportYDim);
 
 	const randomArrayEntry = (array) => array[Math.floor(Math.random()*array.length)];
 	

@@ -1,6 +1,6 @@
-// $(window).width() and window.height() are available from the get-go (i.e., don't need to wait for DOM ready)
-var ViewportXDim = $(window).width();
-var ViewportYDim = $(window).height();
+
+var ViewportXDim = window.innerWidth;
+var ViewportYDim = window.innerHeight;
 
 var SlideMaxXDim = (ViewportXDim <= 1300) ? ViewportXDim * 0.8 : ViewportXDim * 0.9;
 var SlideMaxYDim = (ViewportXDim <= 1300) ? ViewportYDim * 0.8 : ViewportYDim * 0.9;

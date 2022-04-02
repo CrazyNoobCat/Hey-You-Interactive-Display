@@ -153,8 +153,17 @@ function setCookieMins(cname, cvalue, expireMins) {
     const d = new Date();
     d.setTime(d.getTime() + (expireMins*60*1000));
     let expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 
+    // For details about SameSite, see:
+    //   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+    
+    var cookie = cname + "=" + cvalue + "; "
+    if (window.location.protocol == "https:") {
+	cookie += "SameSite=Strict; Secure; "
+    }
+    cookie += expires + "; path=/";
+
+    document.cookie = cookie
     console.log(`set/update cookie: ${cname}=${cvalue} (${expires})`);
 }
 
