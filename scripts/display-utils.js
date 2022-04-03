@@ -106,17 +106,20 @@ function displayRoomURL(displayHost,roomName, elemId)
 function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomNameElemId)
 {
     // Fallback to 'roomID' if 'roomName' for some reason is not set
-    console.log("**** displayJoinURL() roomID = " + roomID + " roomName = " + roomName);
+    //console.log("**** displayJoinURL() roomID = " + roomID + " roomName = " + roomName);
     
     //var roomNameSafe = ((roomName != undefined) && (roomName != "")) ? roomName : roomID;
     var roomNameSafe = (roomName != "") ? roomName : roomID;
     
     var joinRoomURL = displayHost + '/join/' + roomNameSafe;
 
-    var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + joinRoomURL + '&size=' + qrDim +'x' + qrDim;
-    //var url = '/qrcode/?data=' + joinRoomURL + '&size=' + qrDim;
+    //var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + joinRoomURL + '&size=' + qrDim +'x' + qrDim;
+    var url = '/qrcode/?data=' + joinRoomURL + '&size=' + qrDim;
     
     var $img = $('<img>').attr('src',url);
+    $img.css("width", "100%");
+    $img.css("height","100%");
+    
     $img.on("load", function() {
 	$img.fadeIn(1000);
     });

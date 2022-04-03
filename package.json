@@ -3,9 +3,11 @@
     "version": "0.0.3",
     "description": "Hey You Interactive Display",
     "dependencies": {
-	"express":    "^4.17.1",
-	"socket.io":  "^4.0.2",
+	"express": "^4.17.1",
+	"uuid": "^8.3.2",
+	"express-session": "^1.17.2",
+	"socket.io": "^4.0.2",
 	"image-size": "^1.0.1",
-	"node-qr-image": "^0.0.1"
+	"qr-image": "^3.2.0"
     }
 }

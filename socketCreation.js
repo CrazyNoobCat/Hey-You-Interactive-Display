@@ -9,7 +9,8 @@ var RoomID;
 var Socket;
 
 // Get the visitor identifier when you need it.
-function getVisitorID(type){
+function getVisitorIDOpenFP(type)
+{
     const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
     .then(FingerprintJS => FingerprintJS.load());
     
@@ -18,6 +19,25 @@ function getVisitorID(type){
     .then(result => startSocket(result.visitorId, type))    
 }
 
+function getVisitorID(type)
+{
+    var request = $.ajax({
+	method: "GET",
+	url:    "/getSessionID",
+	dataType: "json"
+    });
+
+    request.done(function(jsonData) {
+	console.log( "getVisitorID() JSON data returned: " + JSON.stringify(jsonData) );
+	var visitorID = type + "-" + jsonData.sessionID;
+	startSocket(visitorID, type);	
+    });
+
+    request.fail(function(jqXHR,textStatus) {
+	alert( "/getSessionID request failed: " + textStatus );
+    });    
+}
+    
 function startSocket(visitorID, type)
 {
     console.log("startSocket(): Visitor ID: " + visitorID + " (type=" + type + ")");

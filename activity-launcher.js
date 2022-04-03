@@ -1,15 +1,13 @@
 const fs      = require('fs');
 const express = require('express');
+const session = require('express-session');
 const http    = require('http');
 
-// The following is a customized version of 'qr-image' which has the property we desire,
-//   which is 'size' specifies image size (width and height), not a single pixel size
-//   (which is what the original version of the nodejs package does)
+const qr      = require('qr-image'); 
 
-const qr      = require('node-qr-image'); 
-
-const { Server }  = require("socket.io");
-const { Console } = require('console');
+const { v4: uuidv4 } = require('uuid');
+const { Server }     = require("socket.io");
+const { Console }    = require('console');
 
 const Connection = require('./Connection');
 const RoomNames = require('./RoomNames')
@@ -27,12 +25,24 @@ const checkDisplayTimeoutMSecs    = 30 * 1000; // The time between scans, checki
 const controllerTimeoutMSecs      = controllerTimeoutMins * 60 * 1000;
 const defaultCookieTimeoutMSecs   = defaultCookieTimeoutMins * 60 * 1000;
 
+// Other constants you might be interested in tweaking, depending on your installation
+
+const isBehindHttpsProxy = true;
+
 //
 // Get web-server and web-sockets instantiated
 //
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server);
+
+
+var   sessionOptions = { secret: 'keyboard cat',
+			 saveUninitialized: true,
+			 resave: true,
+			 cookie: {} }
+// ?? resave: false,
+// ?? saveUninitialized: true,
 
 const httpPort = process.env.PORT || 3000;
 const publicDirectory = "/public";
@@ -305,14 +315,49 @@ if (cmdline_args[0] == "-console") {
     enableConsole()
 }
 
-//
-// Based on discussion at:
-//   https://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
-//
-// Make it easy to look up a client's IP, even when we are routing the request to HeyYou
-// through a front-end web server (Apache2 in our case)
-//
-app.set('trust proxy', true)
+
+if (isBehindHttpsProxy) {
+    console.log("Server is set to operate behind a secure (https) proxy");
+    //
+    // Based on discussion at:
+    //   https://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
+    //
+    // Make it easy to look up a client's IP, even when we are routing the request to HeyYou
+    // through a front-end web server (Apache2 in our case)
+    //
+    
+    app.set('trust proxy', 1);
+
+    
+    // As we're using servier-side session IDs (to generate RoomIDs), need the following
+    //sessionOptions.cookie.sameSite = true;
+    // //sessionOption.cookie.sameSite = "strict";
+    //sessionOptions.cookie.httpOnly = false;
+
+    //sessionOptions.proxy = true;
+    //sessionOptions.cookie.secure = true;
+
+    //sessionOptions.key =  'session.sid';
+    //sessionOptions.store = new sessionStore();      
+    
+}
+
+// UUID details based on
+//   https://medium.com/@mfahadqureshi786/creating-session-in-nodejs-a72d5544e4d1
+
+/*
+sessionOptions.name = "heyYouSessionID";
+
+sessionOptions.genid =  function(req) {
+    let uuid = uuidv4();
+    console.log('Express session id created: ' + uuid);
+    return uuid;
+}
+*/
+
+
+app.use(session(sessionOptions));
+
 
 //
 // To support a dedicated list of Chromecast around the devices being served fix IPs
@@ -390,6 +435,9 @@ app.get('/controller', (req, res) => {
     }    
 });
 
+app.get('/display-reset', (req, res) => {
+    res.redirect("/display-home");
+});
     
 // A "circuit-breaker" URL => disconnect all controllers, and return the HTML page for the top-level/default activity display
 app.get('/display-home', (req, res) => {
@@ -499,13 +547,45 @@ app.get('/socketCreation.js', (req,res) => {
 
 
 app.get('/qrcode', (req, res) => {
-    let data = req.query.data || "https://interactwith.us/about";
-    let size = parseInt(req.query.size) || 250;
+    let data = req.query.data || "https://interactwith.us/index.html";
+    let xDim = parseInt(req.query.size) || 250;
 
-    var qrcode = qr.image(data, { type: 'png', ec_level: 'M', size: size, margin: 0 });
+    // We a QR code set based on overall image width/height, however the 'qr-image' mode
+    // is driven by the dimension of a single pixel
+    // => create the raw underlying matrix the qr-image uses first, which sets the
+    //    overall size of the QR code, and from that work back to how big a single
+    //    pixel needs to be
+
+    var calibrateMatrix = qr.matrix(data, 'M', false); // (text, ec_level, parse_url)
+    var calibrateSize = calibrateMatrix.length;
+    
+    var requiredPixelSize = Math.max(1,Math.floor(xDim / calibrateSize));
+    
+    var qrcode = qr.image(data, { type: 'png', ec_level: 'M', size: requiredPixelSize, margin: 0 });
+
     res.setHeader('Content-type', 'image/png');
     qrcode.pipe(res);
 });
+
+app.get('/getSessionID', (req, res) => {
+        
+    let sess = req.session;
+    console.log("session = " + JSON.stringify(sess));
+    
+    if (sess.sessionID) {
+	console.log("Returning previously allocated sessionID = " + sess.sessionID);
+    }
+    else {
+	sess.sessionID = uuidv4();
+	console.log("Allocating new sessionID = " + sess.sessionID);
+    }
+
+    returnJSON = { "sessionID": sess.sessionID }
+
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify(returnJSON));    
+});
+
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
