@@ -533,7 +533,7 @@ app.get('/socketCreation.js', (req,res) => {
 
 
 app.get('/qrcode', (req, res) => {
-    let data = req.query.data || "https://interactwith.us/index.html";
+    let data = req.query.data || "https://interactwith.us/about.html";
     let xDim = parseInt(req.query.size) || 250;
 
     // We a QR code set based on overall image width/height, however the 'qr-image' mode
@@ -574,7 +574,7 @@ app.get('/getSessionID', (req, res) => {
 
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/about.html');
 });
 
 
@@ -1043,7 +1043,7 @@ server.listen(httpPort, () => {
 
 // Checks every few mins (checkControllerTimeoutMSecs)to see which controllers are still is active
 // Remove ones that aren't active
-async function controllerTimeoutCheck()
+function controllerTimeoutCheck()
 {
     setTimeout(() => {
         controllers.forEach(function(controller, index, object) {
