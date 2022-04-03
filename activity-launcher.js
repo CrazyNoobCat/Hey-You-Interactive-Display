@@ -10,7 +10,7 @@ const { Server }     = require("socket.io");
 const { Console }    = require('console');
 
 const Connection = require('./Connection');
-const RoomNames = require('./RoomNames')
+const RoomNames  = require('./RoomNames')
 
 //
 // Timeout Constants
@@ -22,7 +22,7 @@ const staticCookieValidMins       =  2 * 60;   // Valid for 2 hours by default
 const checkControllerTimeoutMSecs =  5 * 1000; // The time between scans, checking for remaining active controllers
 const checkDisplayTimeoutMSecs    = 30 * 1000; // The time between scans, checking that a display is still present
 
-const controllerTimeoutMSecs      = controllerTimeoutMins * 60 * 1000;
+const controllerTimeoutMSecs      = controllerTimeoutMins    * 60 * 1000;
 const defaultCookieTimeoutMSecs   = defaultCookieTimeoutMins * 60 * 1000;
 
 // Other constants you might be interested in tweaking, depending on your installation
@@ -36,13 +36,8 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server);
 
-
-var   sessionOptions = { secret: 'keyboard cat',
-			 saveUninitialized: true,
-			 resave: true,
+var   sessionOptions = { secret: 'keyboard cat', // ****
 			 cookie: {} }
-// ?? resave: false,
-// ?? saveUninitialized: true,
 
 const httpPort = process.env.PORT || 3000;
 const publicDirectory = "/public";
@@ -224,7 +219,10 @@ function getVisitorSocketIPAddress(socket)
     return ipAddress;
 }
 
-function consoleInput() { // Console Commands
+function consoleInput()
+{
+    // Console Commands
+    
     const rl = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout
@@ -294,7 +292,8 @@ function consoleInput() { // Console Commands
     });
 }
   
-async function enableConsole() {
+async function enableConsole()
+{
     try {
         let result = await consoleInput()
         console.log('Exit Code: ', result)
@@ -326,20 +325,7 @@ if (isBehindHttpsProxy) {
     // through a front-end web server (Apache2 in our case)
     //
     
-    app.set('trust proxy', 1);
-
-    
-    // As we're using servier-side session IDs (to generate RoomIDs), need the following
-    //sessionOptions.cookie.sameSite = true;
-    // //sessionOption.cookie.sameSite = "strict";
-    //sessionOptions.cookie.httpOnly = false;
-
-    //sessionOptions.proxy = true;
-    //sessionOptions.cookie.secure = true;
-
-    //sessionOptions.key =  'session.sid';
-    //sessionOptions.store = new sessionStore();      
-    
+    app.set('trust proxy', 1);    
 }
 
 // UUID details based on
