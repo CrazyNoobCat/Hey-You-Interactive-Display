@@ -149,7 +149,8 @@ function selectActivity(activity,optUrlParams)
     });   
 }
 
-function getCookie(cname) {
+function getCookie(cname)
+{
     let name = cname + "=";    
     let ca = listDecodedURICookies();
     for(let i = 0; i <ca.length; i++) {
@@ -164,12 +165,14 @@ function getCookie(cname) {
     return "";
 }
 
-function listDecodedURICookies(){
+function listDecodedURICookies()
+{
     let decodedCookie = decodeURIComponent(document.cookie);
     return decodedCookie.split(';');
 }
 
-function setCookieMins(cname, cvalue, expireMins) {
+function setCookieMins(cname, cvalue, expireMins)
+{
     const d = new Date();
     d.setTime(d.getTime() + (expireMins*60*1000));
     let expires = "expires="+ d.toUTCString();
@@ -187,8 +190,8 @@ function setCookieMins(cname, cvalue, expireMins) {
     console.log(`set/update cookie: ${cname}=${cvalue} (${expires})`);
 }
 
-function setupConnection(type){
-    
+function setupConnection(type)
+{    
     // Once the window has loaded then setup will start
     // Makes sure all required files are loaded before starting
 
@@ -197,10 +200,12 @@ function setupConnection(type){
     });    
 }
 
-function vote(userDecision){
+function vote(userDecision)
+{
     Socket.emit('vote');
 }
 
-function static(){
+function static()
+{
     Socket.emit('static');
 }

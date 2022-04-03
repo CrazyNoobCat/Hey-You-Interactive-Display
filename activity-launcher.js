@@ -687,14 +687,6 @@ io.on('connection', (socket, host) => {
 
                 display = findHostDisplayByRoomID(controller.getRoomID());
                 display.numOfControllers++; // Increase controller count for new room by one.
-
-		/*
-                var currentTime = new Date();
-                if (currentTime - ServerEpochStartTime < onStartReloadWindowMSecs) {
-                    controller.message('reload');
-                }
-		*/
-
             }
 	    else {
                 // Could send error since there is no valid display for the controller //////////////////////////
@@ -720,13 +712,6 @@ io.on('connection', (socket, host) => {
 		let roomID   = display.getRoomID();
                 socket.join(roomID);
 
-		/*
-                if (Date.now() - display.getLastInteraction() > 10000) { // ****
-                    io.to(socket.id).emit("reload");
-                    display.updateLastInteractionTime();
-                } // 10 seconds // ****
-		*/
-		
                 newConnection = false;
                 break;
             }
@@ -754,15 +739,7 @@ io.on('connection', (socket, host) => {
             display.setCookieMins('roomID',roomID,defaultCookieTimeoutMins)
 
             //io.to(socket.id).emit("reload"); // This is instead done once the name is set
-            display.updateLastInteractionTime();
-            
-/*
-            var currentTime = new Date();
-            if (currentTime - ServerEpochStartTime < onStartReloadWindowMSecs) {
-                display.message('reload');
-            }
-*/
-	    
+            display.updateLastInteractionTime();            	    
         }
     }
     else {
