@@ -9,8 +9,9 @@ const { v4: uuidv4 } = require('uuid');
 const { Server }     = require("socket.io");
 const { Console }    = require('console');
 
-const Connection = require('./Connection');
-const RoomNames  = require('./RoomNames')
+const Connection       = require('./Connection');
+const RoomNames        = require('./RoomNames')
+const SlideshowGenJSON = require('./SlideshowGenJSON');
 
 //
 // Timeout Constants
@@ -189,7 +190,7 @@ function sendActivityFile(res, path, fileName, activityLabel)
     } 
     else {
         res.sendStatus(404);
-        console.error("sendActivityFile() Activity: '" + activityLabel +"' Failed file retrival: " + fileName + "(File not found)");
+        console.error("sendActivityFile() Activity: '" + activityLabel +"' Failed file retrival: " + fileName + " (File not found)");
     }
     
 }
@@ -506,6 +507,55 @@ app.get('/scripts/:fileName', (req, res) => {
 	sendActivityFile(res, fullDefaultActivityFileName, fileName, defaultActivityLabel);
     }       
 });
+
+
+
+app.get('/:slideDeck/slidesOverview.json', (req,res) => {
+
+    let slideDeck = req.params.slideDeck;
+    //let fileName = "/"+slideDeck+"/slidesOverview.json";
+    let fileName = req.path;
+
+    // opportunity to generate (or update) slidesOverview.json
+    // if not present on the filesystem (or else has changed)
+    
+    // ...
+    
+    let activity = getActivity(req)
+
+    let foundActivityLabel = null;
+    let fullFoundActivityFileName = null;
+
+    // Refactor below into a function, and then call is her and in get(*) below // ****
+
+    if (activity != undefined) {
+	let activityPublicDir = activityLocation + activity + publicDirectory;
+	let defaultPublicDir  = __dirname + publicDirectory;
+
+	let activityLabel = getActivityLabel(activity);	
+	let fullActivityFileName = activityPublicDir + fileName;
+	
+	if (fs.existsSync(fullActivityFileName)) {
+	    foundActivityLabel = activityLabel;
+	    fullFoundActivityFileName = fullActivityFileName;
+	}
+	else {
+	    foundActivityLabel = defaultActivityLabel;
+	    fullFoundActivityFileName = defaultPublicDir + fileName;
+	}	    
+    }
+    else {
+	let defaultActivityPublicDir  = __dirname + publicDirectory;
+	
+	foundActivityLabel = defaultActivityLabel;
+	fullFoundActivityFileName = defaultActivityPublicDir + fileName;
+    }
+
+    sendActivityFile(res, fullFoundActivityFileName, fileName, foundActivityLabel);
+    
+});
+
+
 
 // '/disconnected' is really an alias to /error, but is a preferred URL to show to the use
 // in certain situations
