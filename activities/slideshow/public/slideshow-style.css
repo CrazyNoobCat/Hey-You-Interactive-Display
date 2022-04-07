@@ -19,7 +19,8 @@
     width:  var(--slideshow-width);
     height: var(--slideshow-height);
     
-    margin:   40px auto 0;
+    /* margin:   40px auto 0 auto; */
+    margin:   15px auto 15px auto;
     overflow: visible;
 }
 
@@ -44,7 +45,16 @@
     list-style:none;
 }
 
-.progress-bar { 
+.progress-bar-top { 
+    position: absolute;
+    top:      -5px;
+    width:  var(--slideshow-width);
+    height:    5px;
+    
+    background:#000;
+}
+
+.progress-bar-bottom { 
     position: relative;
     top:      -5px;
     width:  var(--slideshow-width);

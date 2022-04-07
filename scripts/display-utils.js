@@ -127,10 +127,13 @@ function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomName
     
     $('#'+roomIdElemId).html($img);
     
-    messageHTML = 'Or visit on your phone:<br />';
+    //messageHTML = 'Or visit<br />';
+    messageHTML = 'Take control via ';
     messageHTML += '<span style="white-space: nowrap;">';
-    messageHTML +=   '<img width="16" height="16" src="icons/globe-solid.svg" style="padding-right: 3px;"/>';
-    messageHTML +=   '<span style="color: #e03031; font-size: 85%; font-style: italic;">https://' + displayHost + '/join/' + roomNameSafe + '</span>';
+    //messageHTML +=   '<img width="16" height="16" src="icons/globe-solid.svg" style="padding-right: 3px;"/>';
+
+    //messageHTML +=   '<span style="color: #e03031; font-size: 85%; font-style: italic;">https://' + displayHost + '/join/' + roomNameSafe + '</span>';
+    messageHTML +=   '<span style="color: #e03031; font-size: 100%; font-style: italic;">' + displayHost + '/join/' + roomNameSafe + '</span>';
     messageHTML += '</span>';
     
     $('#'+roomNameElemId).html(messageHTML);

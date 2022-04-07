@@ -71,8 +71,9 @@
 	  displayRoomURL(displayHost,roomName,"join-room-url-left");
 	  displayRoomURL(displayHost,roomName,"join-room-url-right");
 	  */
-	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
-	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
+	  //displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
+	  //displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
+	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-center","join-room-url-center");
       } 
 
       function socketUpdate(e, ...args)
@@ -137,6 +138,12 @@
       
       <div id="content-showslide">
     	<div id="showslide">
+	  <div style="position: absolute; right: 0px; top: 0px; z-index: 6;">
+	    <div id="join-qrcode-div-center" style="position: relative; width: 160px; height: 160px; margin-left: auto; margin-right: auto;">
+	      <div id="join-qrcode-center" class="center" styleXX="position: absolute; bottom: 0; right: 0;"></div>
+	    </div>
+	  </div>
+
           <div id="mask">
             <ul>
               <li id="currentslide-li" style="z-index: 0;">
@@ -148,25 +155,41 @@
               </li>
             </ul>
 	  </div>
-	  <div id="progress-bar" class="progress-bar" style="display: none"></div>
+	  <div id="progress-bar" class="progress-bar-top" style="display: none"></div>
         </div>
       </div>
-      
     </div>
-    
+      
+
+    <!--
     <div id="join-left-container" style="min-width: 310px; display: block; position: absolute; left:   20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
       <div id="join-qrcode-div-left" style="position: relative; height: 260px;">
 	<div id="join-qrcode-left" style="position: absolute; bottom: 0; left: 0;"></div>
       </div>
       <h3 id="join-room-url-left" style="position: relative; background-color: #faaa33d0; padding: 4px;"></h3>
     </div>
+    
     <div id="join-right-container" style="min-width: 310px; display: block; position: absolute; right: 20px; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
       <div id="join-qrcode-div-right" style="position: relative; height: 260px;">
 	<div id="join-qrcode-right" style="position: absolute; bottom: 0; right: 0;"></div>
       </div>      
       <h3 id="join-room-url-right" style="position: relative; background-color: #faaa33d0; padding: 4px;"></h3>
     </div>
+    -->
+    
 
+    <div id="join-center-container" style="min-width: 310px; display: block; position: absolute; bottom: 4px; z-index: 3; background-color: transparent; padding: 6px;">
+      <h3 id="join-room-url-center" class="center" style="position: relative; background-color: #faaa33d0; padding: 4px; margin: 0;"></h3>
+    </div>
+
+    
+    <!--
+    <div class="center" style="width: 50%; z-index: 1;">
+      <div id="qrcode" style="position: relative; z-index: 2;">
+      </div>
+    </div>
+    -->
+    
     <footer>
       <script src="/scripts/receiver.js"></script>
     </footer>
