@@ -6,7 +6,14 @@ Details written here larged based off:
 
     https://github.com/astrada/google-drive-ocamlfuse/wiki/Installation
 
-* For Default Debian Google Compute Engine (GCE) VM
+To set up a Shared (Team) Drive, specific instructions at:
+
+    https://github.com/astrada/google-drive-ocamlfuse/wiki/Team-Drives
+
+See section below on the specific Team Drive setup used at Waikato.
+
+
+* Preamble: For Default Debian Google Compute Engine (GCE) VM
 
 Found that the libc, and some other low-level libraries, were
 too new to work with the apt-get approach.  This led to the
@@ -113,9 +120,96 @@ To dismount the drive:
     usermount -u ~/google-drive
 
 
+## Specific @Waikato setup
+
+At the time of writing, @waikato.ac.nz are Google accounts, however
+not all Google services are available from these types of accounts,
+but by being the Corporate style of account does support things like
+Team Drive.
+
+In contrast, a privately setup Google account, does support more services,
+however, private accounts miss out of things like Team Drives and Google
+File Stream.
+
+This has lead to the follow configuration of operating the Hey You web
+server with a Google Drive that presents as a networked drive using
+google-drive-ocamlfuse.
+
+The 'heyyouwaikato@gmail.com' forms the backbone to the project.  This
+account has been signed up as a Google Cast Developer ($5), for example,
+as it was found that an @waikato.ac.nz one was not able to sign up
+
+The Gory Details: The initial steps to sign up work, but at the
+  payment step the process got stuck -- no actual error message
+  produced, but it was not possible to get the page to activate its
+  'next' button that remained grayed out until a valid payment was
+  made.  This was intrepretted as an, albeit particular weird, version
+  of the @waikato.ac.nz accounts are able to access the complete set
+  of services Google has.  After switching to heyyouwaikato@gmail.com,
+  the same process, with the same credit card details, worked without
+  a hitch.
+
+
+In the 'heyyouwaikato' account:
+
+  * 'Hey-You-Interactive-Display' was created as a new project;
+  * The Google Drive API was enabled for this projet;
+  * A consent screen was setup
+  * The 'heyyouwaikato' user was was added as a developer
+
+To be able to have a Team Drive that can be shared with others
+at the Uni, in the davidb@waikato.ac.nz Google account the
+following drive was created:
+
+  Hey-You-Interactive-Display
+
+And shared with the heyyouwaikato@gmail.com account.
+
+Back on the Debian 10 Linux server, the process for authorizing
+the mounting of a drive from 'heyyouwaikato' was followed.
+The label 'heyYouTeamDrive' was used for this configuration,
+and /home/heyyou/Hey-You-Slides-Drive the directory for the
+mount point.
+
+### Troubleshooting
+
+Note, if you do a quick test as this point to mount the drive, then
+what you get is the heyyouwaikato's regular files.  As detailed in the
+google-drive-ocamlfuse Team Drive document, you need to modify:
+
+    ~/.gdfuse/heyYouTeamDrive/config
+
+to the Team Drive id.
+
+This detail is mentioned, as one of the issues you might encounter
+is that google-drive-ocamlfuse is likely to cache the files
+from the frist test, and so even if you follow the correct
+procedure for changing over the the Team Drive (having unmounted
+first, added in Team Drive id, then remounted, then you might
+still see the original 'heyyouwaikato' personal files.  This
+was tracked down to a caching issue.  Cyling through
+the process again,after unmounting the disk, remove the
+~/.gdfuse/heyYouTeamDrive/cache, before the mount
+command.
+
+Another error enountered was that at the point of mounting
+the disk, an read/write IO error is reported.  If this
+occurs, go back to console.cloud.google.com and check
+that the correct account (the heyyouwaikato one in this case)
+has the Google API Drive enabled.
 
 
 ## Some notes taken while following the 'apt-get' approach
+
+[The following instructions should be a faster/easier way to get
+ going, however, for the Debian 10 machine we were using,
+ incompatibilities were encountered with the libc and other core
+ libraries.  The google-drive-ocamlfuse site recommended installing
+ an older version of there software, which might help, but there
+ wasn't sufficient detail on how to do that.  The apt command for
+ listing versions of packages seemed to show there was only
+ one version of this package from the repository it know about
+ anyway.]
 
 For Debian, you need to install 'add-apt-repository' first, whereas
 Ubuntu already has this installed:
