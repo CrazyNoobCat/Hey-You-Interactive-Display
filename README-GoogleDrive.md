@@ -198,6 +198,31 @@ occurs, go back to console.cloud.google.com and check
 that the correct account (the heyyouwaikato one in this case)
 has the Google API Drive enabled.
 
+## .profile setup for ocaml and google-drive-ocamlfuse
+
+
+The following was added into ~/.profile.  While still
+logged in, in one window, test in a fresh terminal
+window to make sure it works correctly, otherwise
+you might end up in a situation where you can
+no longer log in!
+
+Added to the end of ~/.profile:
+
+    echo ""
+    echo "****"
+    echo "* Adding in opam to your environment"
+    eval $(opam env)
+    echo "****"
+
+    echo ""
+    echo "  To mount the shared Google Team Drive, enter:"
+    echo "    google-drive-ocamlfuse -label heyYouTeamDrive /home/heyyou/Hey-You-Slides-Drive"
+    echo ""
+    echo "  To unmount:"
+    echo "    fusermount -u Hey-You-Slides-Drive/"
+    echo ""
+
 
 ## Some notes taken while following the 'apt-get' approach
 
