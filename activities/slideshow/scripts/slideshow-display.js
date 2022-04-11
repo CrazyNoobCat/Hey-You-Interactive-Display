@@ -34,7 +34,7 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 {
     //console.log("activateSlideshow() called!");
     
-    slideDir = "/" + slideshowName;
+    slideDir = "/slides/" + slideshowName;
 
     slideDeck = slidesOverviewJSON.slides;
     numSlides = slideDeck.length;
@@ -119,7 +119,7 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 
 function loadSlideshow(slideshowName)
 {
-    $.getJSON("/"+slideshowName+"/slidesOverview.json")
+    $.getJSON("/slides/"+slideshowName+"/slidesOverview.json")
 	.done(function(jsondata) {
 	    activateSlideshow(slideshowName,jsondata)
 	})
