@@ -1,0 +1,16 @@
+{
+    "Timeout": {
+	"controllerCookieMins"  :     4, 
+	"defaultCookieMins"     :     5, 
+	"staticCookieValidMins" :   120, 
+
+	"checkControllerMSecs"  :  5000, 
+	"checkDisplayMSecs"     : 30000  
+    },
+
+    "isBehindProxy": false,
+
+    "Directory": {
+	"slideRoot": "/slides"
+    }
+}

@@ -9,27 +9,38 @@ const { v4: uuidv4 } = require('uuid');
 const { Server }     = require("socket.io");
 const { Console }    = require('console');
 
+
 const Connection       = require('./Connection');
+const GlobalSettings   = require('./GlobalSettings');
 const RoomNames        = require('./RoomNames')
 const SlideshowGenJSON = require('./SlideshowGenJSON');
 
-//
-// Timeout Constants
-//
-const controllerTimeoutMins       =  4;        // Number of mins a controller will be displayed for, with no interactivity
-const defaultCookieTimeoutMins    =  5;        // Number of mins a controller cookie will last for
-const staticCookieValidMins       =  2 * 60;   // Valid for 2 hours by default
 
-const checkControllerTimeoutMSecs =  5 * 1000; // The time between scans, checking for remaining active controllers
-const checkDisplayTimeoutMSecs    = 30 * 1000; // The time between scans, checking that a display is still present
+let gs = new GlobalSettings();
 
+if (!gs.initialized()) {
+    console.error("Error encountered configuring global settings to server. Terminating!");
+    process.exit();
+}
+
+//
+// Various Settings-based Constants
+//
+const controllerTimeoutMins       = gs.get('Timeout.controllerCookieMins');  // Number of mins a controller will be displayed for, with no interactivity
+const defaultCookieTimeoutMins    = gs.get('Timeout.defaultCookieMins');     // Number of mins a controller cookie will last for
+const staticCookieValidMins       = gs.get('Timeout.staticCookieValidMins'); // Valid for 2 hours by default
+
+const checkControllerTimeoutMSecs = gs.get('Timeout.checkControllerMSecs');   // The time between scans, checking for remaining active controllers
+const checkDisplayTimeoutMSecs    = gs.get('Timeout.checkDisplayMSecs');      // The time between scans, checking that a display is still present
+
+const IsBehindProxy               = gs.get('isBehindProxy');       // If running behind a public-facing web server such as Apache2, then set to true
+const SlideDirRoot                = gs.get('Directory.slideRoot'); // typically '/slides' by default. Useful to change for Google Drive mounted dir
+
+// Derived values
 const controllerTimeoutMSecs      = controllerTimeoutMins    * 60 * 1000;
 const defaultCookieTimeoutMSecs   = defaultCookieTimeoutMins * 60 * 1000;
 
-// Other constants you might be interested in tweaking, depending on your installation
-
-const isBehindHttpsProxy = true;
-
+    
 //
 // Get web-server and web-sockets instantiated
 //
@@ -316,7 +327,7 @@ if (cmdline_args[0] == "-console") {
 }
 
 
-if (isBehindHttpsProxy) {
+if (IsBehindProxy) {
     console.log("Server is set to operate behind a secure (https) proxy");
     //
     // Based on discussion at:
@@ -510,11 +521,14 @@ app.get('/scripts/:fileName', (req, res) => {
 
 
 
-app.get('/:slideDeck/slidesOverview.json', (req,res) => {
+
+app.get('/slides/:slideDeck/:file', (req,res) => {
 
     let slideDeck = req.params.slideDeck;
-    //let fileName = "/"+slideDeck+"/slidesOverview.json";
-    let fileName = req.path;
+    let file      = req.params.file;
+    
+    let fileName = SlideDirRoot+"/"+slideDeck+"/" + file;
+    //let fileName = req.path;
 
     // opportunity to generate (or update) slidesOverview.json
     // if not present on the filesystem (or else has changed)
@@ -603,6 +617,43 @@ app.get('/qrcode', (req, res) => {
     qrcode.pipe(res);
 });
 
+app.get('/getSlideshowList', (req,res) => {
+
+    let activitySlideshowPublicDir = activityLocation + "/slideshow" + publicDirectory;    
+    let fullSlideDirRoot = activitySlideshowPublicDir + "/" + SlideDirRoot;
+
+    let slideshowDirs = [];
+
+    let returnJSON = null;
+    
+    try {
+	let files = fs.readdirSync(fullSlideDirRoot,"utf8");
+	
+	files.forEach(function (file) {
+	    let fullSlideDir = fullSlideDirRoot + "/" + file;
+		      
+	    if (fs.lstatSync(fullSlideDir).isDirectory() && !file.startsWith(".")) {
+		slideshowDirs.push(file);
+	    }
+	});
+
+	returnJSON = { "status": "ok", "slideshows": slideshowDirs };
+    }
+    catch (err) {
+	let err_message = "Failed to read directory: " + fullSlideDirRoot;
+	
+	console.error(err_message);
+	console.error();
+	console.error(err);
+
+	returnJSON = { "status": "failed", "error": err_message };
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify(returnJSON));    	   
+});
+
+    
 app.get('/getSessionID', (req, res) => {
         
     let sess = req.session;

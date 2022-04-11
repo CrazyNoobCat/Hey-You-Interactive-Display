@@ -29,7 +29,66 @@
           console.log("Socket finished loading");
       }
 
+      function appendSlideshowElement(slideshow)
+      {
+	  // Static example of element to be built
+	  /*
+	    <a class="controller-item" onclick="selectActivity('/slideshow','slidedeck=waikato-uni-backgrounds')">
+	      <div class="fb-container">
+	        <div class="fb-alignleft"><img src="icons/projector-screen.svg" /></div>	  
+	        <div class="fb-fillright">Our Campuses Slideshow</div>
+	      </div>
+	    </a>
+	  */
+
+	  var selectActivityCall = "selectActivity('/slideshow','slidedeck="+slideshow+"')";
+
+	  var $a_elem = $("<a>").addClass("controller-item").attr("onclick",selectActivityCall);
+
+	  var $fb_container  = $("<div>").addClass("fb-container");
+	  var $fb_alignleft  = $("<div>").addClass("fb-alignleft").html('<img src="icons/projector-screen.svg" />');
+	  var $fb_alignright = $("<div>").addClass("fb-fillright").html(slideshow);
+
+	  $a_elem.append($fb_container.append($fb_alignleft,$fb_alignright));
+
+	  $('#slideshows-div').append($a_elem);
+	  
+      }
+      
       // Any page specific functions go here ...
+      $(document).ready(function() {
+
+	  var request = $.ajax({
+	      method: "GET",
+	      url:    "/getSlideshowList",
+	      dataType: "json"
+	  });
+
+	  request.done(function(jsonData) {
+	      console.log( "/getSlideshowList JSON data returned: " + JSON.stringify(jsonData) );
+	      var status = jsonData.status;
+	      if (status == "ok") {
+		  var slideshows = jsonData.slideshows;
+
+		  for (var i=0; i<slideshows.length; i++) {
+		      var slideshow = slideshows[i];
+		      appendSlideshowElement(slideshow);
+		  }
+
+		  $('#slideshows-div').fadeIn();		  
+	      }
+	      else {
+		  console.error("Failed to retrieve slideshow list");
+		  console.error("Error: " + jsonData.error);
+		  console.error("No slideshows to list on the controller");		  
+	      }
+	  });
+	  
+	  request.fail(function(jqXHR,textStatus) {
+	      alert( "/getSlideshowList request failed: " + textStatus );
+	  });    	  
+
+      });
       
     </script>
   </head>
@@ -47,6 +106,10 @@
 	  <h1 class="heading">Select an app to run on the display:</h1>
 	</div>
 
+	<div id="slideshows-div" style="display: none;">
+	</div>
+
+	<!--
 	<a class="controller-item" onclick="selectActivity('/slideshow','slidedeck=waikato-uni-backgrounds')">
 	  <div class="fb-container">
 	    <div class="fb-alignleft"><img src="icons/projector-screen.svg" /></div>	  
@@ -60,7 +123,8 @@
 	    <div class="fb-fillright">About Smoke and Mirrors</div>
 	  </div>
 	</a>
-
+	-->
+	
 	<!--
 	<a class="controller-item" onclick="selectActivity('/slideshow','slidedeck=waikato-uni-panoramas')">
 	  <div class="fb-container">
