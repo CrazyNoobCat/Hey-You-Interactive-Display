@@ -1,7 +1,7 @@
 {
     "name": "hey-you-interactive-display",
     "version": "0.0.3",
-    "description": "Hey You Interactive Display",
+    "description": "Code base for the Smoke and Mirrors project: Hey There, Interact with Me!",
     "dependencies": {
 	"express": "^4.17.1",
 	"uuid": "^8.3.2",

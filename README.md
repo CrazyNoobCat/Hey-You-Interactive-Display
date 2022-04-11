@@ -1,15 +1,15 @@
 # Hey-You-Interactive-Display
 
-The Hey You server is written in NodeJS. Binaries (Linux and Windows)
+The Hey There server is written in NodeJS. Binaries (Linux and Windows)
 for this are bundled in the 'cli-packages' directory.  These
-binaries represent the minimum version of NodeJS that Hey You
+binaries represent the minimum version of NodeJS that Hey There
 has been tested with.  If you already have a NodeJS on your
 system you are welcome to use that instead (as long as it
 meets the minimum version number).
 
 The following instructions are written for working the Linux bundled
 version of NodeJS in cli-packages.  Adapt as necessary for your
-installation.  Hey You has also been successfully installed
+installation.  Hey There has also been successfully installed
 on Windows using Cygwin.
 
 In 'cli-packagtes' untar (Linux) [or unzip on Cygwin] the relevant file,
@@ -24,14 +24,14 @@ common-place issues.  If everything checks out, then you environment
 is set up to run both NodeJS (the binary 'node' is now on your PATH)
 and its package manager, 'npm'.
 
-To install the NodeJS packages used by Hey You enter:
+To install the NodeJS packages used by Hey There enter:
 
     npm install
 
 This is a one-time setup set, and does not need to be repeated
 subsequently.
 
-You can start the Hey You server with:
+You can start the Hey There server with:
 
     ./heyyou-start-server.sh
 
@@ -39,7 +39,7 @@ which logs output to:
 
     heyyou-server.log
 
-For production use, Hey You can be setup to run as a system installed
+For production use, Hey There can be setup to run as a system installed
 service using 'systemctl'.  See the README file in the 'service.d'
 directory for more details.
 
@@ -67,7 +67,7 @@ Debian ...
     which will display a page with a QR code on it
 
   * Note: we are using a desktop browser here just for testing
-    purposes.  Typically the Hey You Activity Home Page is launched on a
+    purposes.  Typically the Hey There Activity Home Page is launched on a
     display screen through ChromeCast
   
 Connect as an end-user to try out the install:
@@ -80,7 +80,7 @@ Connect as an end-user to try out the install:
 
 **Chromecast Setup**
 
-To operate Hey You on the Chromecast device, you need to sign up
+To operate Hey There on the Chromecast device, you need to sign up
 as a Google Cast developer.
 
     https://cast.google.com/publish/#/overview
@@ -93,7 +93,7 @@ in, and so ended up using a privately created account
 Once you have paid the fee, you can register your Chromecast device in
 your account.  Next create a Chromecast App, named for example:
 
-  My Hey You Chromecast App
+  My Hey There Chromecast App
 
 For "Receiver Application URL" set this to be:
 
@@ -109,7 +109,7 @@ the computer where you deploy the app from to be logged
 in to the same account as the account the Chromecast
 device uses.
 
-You're now ready to deploy the Hey You Chromecast App!
+You're now ready to deploy the Hey There Chromecast App!
 
 Still logged in to the Google account where you have
 registered the Chromecast device and app, visit Caactool:
@@ -145,10 +145,10 @@ were not able to find anything.  By removing the Chromecast
 Icon from the top bar, what the system appears to be trying
 to tell you is that there are no know Chromecast devices that
 it can see that are prepared to accept the deplaoyment of
-the Hey You Chromecast App.
+the Hey There Chromecast App.
 
 
-*Hey You Messaging over WebSockets*
+*Hey There Messaging over WebSockets*
 
 **Display Emit Codes**
 
