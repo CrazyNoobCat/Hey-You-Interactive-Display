@@ -526,7 +526,7 @@ app.get('/:slideDeck/slidesOverview.json', (req,res) => {
     let foundActivityLabel = null;
     let fullFoundActivityFileName = null;
 
-    // Refactor below into a function, and then call is her and in get(*) below // ****
+    // Refactor below into a function, and then call it here and in get(*) below // ****
 
     if (activity != undefined) {
 	let activityPublicDir = activityLocation + activity + publicDirectory;
