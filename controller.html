@@ -41,13 +41,15 @@
 	    </a>
 	  */
 
+	  var slideshowName = slideshow.replace(/-/g, ' ').replace(/_/g, ' ');
+	  
 	  var selectActivityCall = "selectActivity('/slideshow','slidedeck="+slideshow+"')";
 
 	  var $a_elem = $("<a>").addClass("controller-item").attr("onclick",selectActivityCall);
 
 	  var $fb_container  = $("<div>").addClass("fb-container");
 	  var $fb_alignleft  = $("<div>").addClass("fb-alignleft").html('<img src="icons/projector-screen.svg" />');
-	  var $fb_alignright = $("<div>").addClass("fb-fillright").html(slideshow);
+	  var $fb_alignright = $("<div>").addClass("fb-fillright").html(slideshowName);
 
 	  $a_elem.append($fb_container.append($fb_alignleft,$fb_alignright));
 
@@ -65,17 +67,18 @@
 	  });
 
 	  request.done(function(jsonData) {
-	      console.log( "/getSlideshowList JSON data returned: " + JSON.stringify(jsonData) );
+	      //console.log( "/getSlideshowList JSON data returned: " + JSON.stringify(jsonData) );
 	      var status = jsonData.status;
 	      if (status == "ok") {
-		  var slideshows = jsonData.slideshows;
+		  var slideshows = jsonData.slideshows.sort();
 
 		  for (var i=0; i<slideshows.length; i++) {
 		      var slideshow = slideshows[i];
 		      appendSlideshowElement(slideshow);
 		  }
 
-		  $('#slideshows-div').fadeIn();		  
+		  $('#slideshows-loading').fadeOut();
+		  $('#slideshows-div').fadeIn();
 	      }
 	      else {
 		  console.error("Failed to retrieve slideshow list");
@@ -106,34 +109,18 @@
 	  <h1 class="heading">Select an app to run on the display:</h1>
 	</div>
 
-	<div id="slideshows-div" style="display: none;">
+	<div style="position: relative; min-height: 24px; width: 100%;">
+	  <div id="slideshows-loading" style="position: absolute; top: 6px; width: 100%; margin-top; 12px; margin-bottom: 12px;">
+	    <div class="controller-item">
+	      <div class="fb-container">
+		<div class="fb-alignleft"></div>
+	      <div class="fb-fillright">Loading slideshow(s) ...</div>
+	      </div>
+	    </div>
+	  </div>
+	  <div id="slideshows-div" style="display: none;"></div>
 	</div>
-
-	<!--
-	<a class="controller-item" onclick="selectActivity('/slideshow','slidedeck=waikato-uni-backgrounds')">
-	  <div class="fb-container">
-	    <div class="fb-alignleft"><img src="icons/projector-screen.svg" /></div>	  
-	    <div class="fb-fillright">Our Campuses Slideshow</div>
-	  </div>
-	</a>
 	
-	<a class="controller-item" onclick="selectActivity('/slideshow','slidedeck=smoke-and-mirrors-sampler')">
-	  <div class="fb-container">
-	    <div class="fb-alignleft"><img src="icons/projector-screen.svg" /></div>	  
-	    <div class="fb-fillright">About Smoke and Mirrors</div>
-	  </div>
-	</a>
-	-->
-	
-	<!--
-	<a class="controller-item" onclick="selectActivity('/slideshow','slidedeck=waikato-uni-panoramas')">
-	  <div class="fb-container">
-	    <div class="fb-alignleft"><img src="icons/projector-screen.svg" /></div>	  
-	    <div class="fb-fillright">University Panoramas</div>
-	  </div>
-	</a>
-	-->
-
 	<!--
 	<a class="controller-item" onclick="selectActivity('/navigator')">
 	  <div class="fb-container">

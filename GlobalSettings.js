@@ -1,24 +1,48 @@
 const fs = require('fs');
 
-const globalSettingsFilename = "etc/activity-launcher-conf.json";
+
 
 class GlobalSettings
 {    
     #settingsLookup = null;
     
-    constructor()
+    constructor(settingsFilename)
     {
-
-	try {
-	    const settingsJSON = fs.readFileSync(globalSettingsFilename, "utf8");
-	    const settingsLookup = JSON.parse(settingsJSON);
-
-	    this.#settingsLookup = settingsLookup;
+	let readInFilename   = null;
+	let writeOutFilename = null;
+	
+	if (fs.existsSync(settingsFilename)) {
+	    readInFilename = settingsFilename;
 	}
-	catch (err) {
-	    console.error("Failed to process activity-launcher configuration file: " + globalSettingsFilename);
-	    console.error();
-	    console.error(err)
+	else {
+	    // look for '.in' version
+	    if (fs.existsSync(settingsFilename+".in")) {
+		readInFilename = settingsFilename + ".in";
+		writeOutFilename = settingsFilename;
+	    }
+	    else {
+		console.error("Failed to find configuration file: " + settingsFilename);
+		console.error("Failed to find template configuration file: " + settingsFilename+".in");
+	    }
+	}
+		
+	if (readInFilename != null) {	
+
+	    try {
+		const settingsJSON = fs.readFileSync(readInFilename, "utf8");
+		const settingsLookup = JSON.parse(settingsJSON);
+		
+		this.#settingsLookup = settingsLookup;
+
+		if (writeOutFilename != null) {
+		    fs.writeFileSync(writeOutFilename,settingsJSON, "utf8");
+		}		
+	    }
+	    catch (err) {
+		console.error("Failed to process activity-launcher configuration file: " + readInFilename);
+		console.error();
+		console.error(err)
+	    }
 	}
     }
 

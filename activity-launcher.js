@@ -16,7 +16,7 @@ const RoomNames        = require('./RoomNames')
 const SlideshowGenJSON = require('./SlideshowGenJSON');
 
 
-let gs = new GlobalSettings();
+let gs = new GlobalSettings("etc/activity-launcher-conf.json");
 
 if (!gs.initialized()) {
     console.error("Error encountered configuring global settings to server. Terminating!");
