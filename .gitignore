@@ -2,6 +2,7 @@
 heyyou-server.log
 heyyou-server.pid
 service.d/heyyou.service
+/etc/activity-launcher-conf.json
 /cli-packages/node-v16.13.2-win-x64
 /cli-packages/node-v16.13.2-linux-x64
 *~
