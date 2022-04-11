@@ -46,23 +46,47 @@
 	  padding-bottom: 6px;
       }
 
-      @media screen and (max-device-width: 800px) {
+      body {
+	  background-color: #faaa33;
+	  margin-top: 0;
+	  margin-bottom: 0;
+	  margin-left: auto;
+	  margin-right: auto;
+	  max-width: 1280px;
+	  padding-left: 280px;
+	  padding-right: 280px;
+      }
+	  
+      @media screen and (max-width: 1280px) {
 	  .uowlogo {
 	      display: none;
 	  }
+	  body {
+	      padding-left: 180px;
+	      padding-right: 180px;
+	  }
+	  
+      }
+
+      @media screen and (max-width: 1024px) {
+	  body {
+	      padding-left: 0;
+	      padding-right: 0;
+	  }
+	  
       }
       
     </style>
   </head>
 
-  <body style="background-color: #faaa33; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; max-width: 1280px;">
+  <body>
     <div class="uowlogo" style="position: fixed; right: 0; bottom: 0; padding-right: 24px; padding-bottom: 12px; width: 240px;">
       <img src="icons/uni_logo_white.svg"/>
     </div>
     <div class="uowlogo" style="position: fixed; left: 0; bottom: 0; padding-left: 24px; padding-bottom: 12px; width: 240px;">
       <img src="icons/uni_logo_white.svg"/>
     </div>
-    <div style="background-color: #ffff; min-height: 100vh; max-width: 100%;">
+    <div style="background-color: #ffffff; min-height: 100vh; max-width: 100%;">
       <div style="background-color: #ffffff; min-height: 100vh; max-width: 800px; margin-left: auto; margin-right: auto;">
 	<div style="width: 100%; padding-top: 12px;">
 	  <!-- 
