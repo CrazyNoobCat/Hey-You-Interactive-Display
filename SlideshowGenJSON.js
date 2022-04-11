@@ -71,7 +71,7 @@ class SlideshowGenJSON
 	catch (err) {
 	    console.error("Failed to read directory: " + inputDir);
 	    console.error();
-	    console.error(err)
+	    console.error(err);
 	}
 	
 	return slideImageRecs;	
