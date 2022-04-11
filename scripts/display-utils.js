@@ -35,7 +35,7 @@ function computeQRDimMaximizeHeight(viewportWidth,viewportHeight)
     var qrDim = 0;
     
     if (viewportHeight <= viewportWidth) {
-	// Need to make sure Hey You logo + QR code (and the jiggling text above, and URL below)
+	// Need to make sure Hey There logo + QR code (and the jiggling text above, and URL below)
 	// all fit
 	
 	// => allow 20% space for text top and bottom, then equally split remaining space

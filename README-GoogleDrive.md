@@ -131,7 +131,7 @@ In contrast, a privately setup Google account, does support more services,
 however, private accounts miss out of things like Team Drives and Google
 File Stream.
 
-This has lead to the follow configuration of operating the Hey You web
+This has lead to the follow configuration of operating the Hey There web
 server with a Google Drive that presents as a networked drive using
 google-drive-ocamlfuse.
 

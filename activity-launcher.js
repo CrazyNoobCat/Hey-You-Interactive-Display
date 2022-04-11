@@ -56,7 +56,7 @@ const publicDirectory = "/public";
 
 const roomNames = new RoomNames('etc/room-names-dynamic.txt','etc/room-names-preallocated.json');
 
-// The general setup of Hey You is as follows:
+// The general setup of Hey There is as follows:
 //  
 //   1. A 'display' starts by showing the home page to the activity-launcher
 //
@@ -209,7 +209,7 @@ function sendActivityFile(res, path, fileName, activityLabel)
 
 function getVisitorSocketIPAddress(socket)
 {
-    // In Hey You, we use 'visitor' when the in-coming connection could be either a
+    // In Hey There, we use 'visitor' when the in-coming connection could be either a
     // display or controller
     
     // The following is the recommended way to get a connecting client's IP address

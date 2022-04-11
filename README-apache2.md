@@ -1,5 +1,5 @@
 
-This README file covers how to run Hey You, Interact With Me! through
+This README file covers how to run Hey There, Interact with Me! through
 a public facing Apache2 web server.
 
 The details are written for a Debian 10 server (spun up as a Google
