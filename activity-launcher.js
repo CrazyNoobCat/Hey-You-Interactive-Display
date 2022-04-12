@@ -1,4 +1,5 @@
 const fs      = require('fs');
+const path    = require('path');
 const express = require('express');
 const session = require('express-session');
 const http    = require('http');
@@ -191,6 +192,42 @@ function getActivity(req)
 function getActivityLabel(activity)
 {
     return (activity == defaultActivity) ? defaultActivityLabel : activity;
+}
+
+function resolveActivityFile(req,fileName,strict=false)
+{
+    let activity = getActivity(req)
+
+    let foundActivityLabel = null;
+    let fullFoundActivityFileName = null;
+
+    if (activity != undefined) {
+	let activityPublicDir = activityLocation + activity + publicDirectory;
+	let defaultPublicDir  = __dirname + publicDirectory;
+
+	let activityLabel = getActivityLabel(activity);	
+	let fullActivityFileName = activityPublicDir + fileName;
+	
+	if (fs.existsSync(fullActivityFileName)) {
+	    foundActivityLabel = activityLabel;
+	    fullFoundActivityFileName = fullActivityFileName;
+	}
+	else {
+	    if (!strict) {
+		foundActivityLabel = defaultActivityLabel;
+		fullFoundActivityFileName = defaultPublicDir + fileName;
+	    }
+	}	    
+    }
+    else {
+	let defaultActivityPublicDir  = __dirname + publicDirectory;
+	
+	foundActivityLabel = defaultActivityLabel;
+	fullFoundActivityFileName = defaultActivityPublicDir + fileName;
+    }
+
+    return [ foundActivityLabel, fullFoundActivityFileName ];
+
 }
 
 function sendActivityFile(res, path, fileName, activityLabel)
@@ -530,18 +567,23 @@ app.get('/slides/:slideDeck/:file', (req,res) => {
     let fileName = SlideDirRoot+"/"+slideDeck+"/" + file;
     //let fileName = req.path;
 
-    // opportunity to generate (or update) slidesOverview.json
-    // if not present on the filesystem (or else has changed)
-    
-    // ...
-    
+
+    /*
     let activity = getActivity(req)
 
     let foundActivityLabel = null;
     let fullFoundActivityFileName = null;
-
+    */
+    
     // Refactor below into a function, and then call it here and in get(*) below // ****
 
+    // strict=true param to strict location of file to be within the file-system
+    // area of the current activity    
+    let resolvedVals = resolveActivityFile(req,fileName,true); 
+
+    let foundActivityLabel        = resolvedVals[0];
+    let fullFoundActivityFileName = resolvedVals[1];
+/*    
     if (activity != undefined) {
 	let activityPublicDir = activityLocation + activity + publicDirectory;
 	let defaultPublicDir  = __dirname + publicDirectory;
@@ -564,8 +606,28 @@ app.get('/slides/:slideDeck/:file', (req,res) => {
 	foundActivityLabel = defaultActivityLabel;
 	fullFoundActivityFileName = defaultActivityPublicDir + fileName;
     }
+*/
 
-    sendActivityFile(res, fullFoundActivityFileName, fileName, foundActivityLabel);
+    // opportunity to generate (or update) slidesOverview.json
+    // if not present on the filesystem (or else has changed)
+
+    if (fileName = "slidesOverview.json") {
+	if (!fs.existsSync(fullFoundActivityFileName)) {
+	    let fullFoundActivityDir = path.dirname(fullFoundActivityFileName);
+	    
+	    let slideshowFromFileSystem = new SlideshowGenJSON(fullFoundActivityDir);	    
+	    let slidesOverviewJSON = slideshowFromFileSystem.generateSlidesOverview();
+
+	    res.setHeader("Content-Type", "application/json");
+	    res.end(JSON.stringify(slidesOverviewJSON));
+	}
+	else {
+	    sendActivityFile(res, fullFoundActivityFileName, fileName, foundActivityLabel);
+	}
+    }
+    else {
+	sendActivityFile(res, fullFoundActivityFileName, fileName, foundActivityLabel);
+    }
     
 });
 

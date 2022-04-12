@@ -10,7 +10,7 @@ class SlideshowGenJSON
 
     #overwriteExisting = false;
     
-    constructor(inputDir, options)
+    constructor(inputDir, options = { overwriteExisting: false } )
     {
 	this.#inputDir       = inputDir;
 
