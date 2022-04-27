@@ -1,0 +1,54 @@
+#!/bin/bash
+
+ver=$1
+
+gdfuse_config_file=".gdfuse/heyYouTeamDrive$ver/config"
+
+if [ -f "$gdfuse_config_file" ] ; then
+    echo "" >&2
+    echo "The gdfuse config file:" >&2
+    echo "    $gdfuse_config_file" >&2
+    echo "already exists" >&2
+    echo "" >&2
+    echo "Refusing to run google-drive-ocamlfuse command" >&2
+    echo "" >&2
+    exit 1
+fi
+
+google-drive-ocamlfuse \
+    -headless  \
+    -label heyYouTeamDrive$ver \
+    -id XXXXXXXXXXX-XXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com \
+    -secret XXXXXX-XXXXXX-XXXXXXXXXXXXXX
+
+
+if [ $? = 0 ] ; then
+    echo ""
+    echo "In:"
+    echo "    .gdfuse/heyYouTeamDrive$ver/config"
+    echo ""
+    echo "Setting team_drive_id to the Hey-You-Interactive-Display shared drive:"
+    echo "    team_drive_id=0ACSoHNeibrh0Uk9PVA"
+    
+    sed --in-place 's/^team_drive_id=$/team_drive_id=0ACSoHNeibrh0Uk9PVA/' $gdfuse_config_file
+
+    if [ $? = 0 ] ; then
+	echo ""
+	echo "To mount the Google Drive, run:"
+	echo "    ./GOOGLE-DRIVE--HEYYOU-SHARED-DIRVE-MOUNT.sh $ver"
+	echo ""	
+    else
+	echo "" >&2
+	echo "Error occured running sed" >&2
+        echo "" >&2
+    fi
+    
+else
+    echo "" >&2
+    echo "Error occured running google-drive-ocamlfuse" >&2
+    echo "-> Did not run sed on $gdfuse_config_file to edit the team_dirve_id value:"
+    echo "" >&2    
+fi	
+
+echo ""
+
