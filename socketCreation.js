@@ -1,7 +1,3 @@
-// Set up socket io
-//const script = document.createElement('script');
-//script.src = "/socket.io/socket.io.js";
-//document.head.appendChild(script);
 
 const DisplayCookieTimeoutMins   = 10;
 
@@ -23,7 +19,7 @@ function getVisitorID(type)
 {
     var request = $.ajax({
 	method: "GET",
-	url:    "/getSessionID",
+	url:    "getSessionID",
 	dataType: "json"
     });
 
