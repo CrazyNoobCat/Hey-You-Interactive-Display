@@ -425,7 +425,7 @@ app.get('/join/:roomIdOrName', (req, res) => {
     }  
     else {
 	// If room doesn't exit
-        res.redirect("/error/Unable to find that Display-id or Display-name");
+        res.redirect("/error/Unable to find Display-id or Display-name " + req.params.roomIdOrName);
     }    
 });
 
