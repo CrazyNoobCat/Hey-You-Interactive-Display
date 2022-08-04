@@ -39,7 +39,7 @@ class SlideshowGenJSON
 		
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Groups_and_Ranges
 	    
-		let reSlideNumFS =  /^Slide(?<slideNumFS>\d+)\.(?<slideExt>png|gif|jpg|jpeg)$/is;
+		let reSlideNumFS =  /^Slide\s*(?<slideNumFS>\d+)\.(?<slideExt>png|gif|jpg|jpeg)$/is;
 		let slideMatch = reSlideNumFS.exec(file);
 		
 		if (slideMatch) {
