@@ -213,7 +213,14 @@ function resolveActivityFile(req,fileName,strict=false)
 	    fullFoundActivityFileName = fullActivityFileName;
 	}
 	else {
-	    if (!strict) {
+	    if (strict) {
+		// Under strict conditions, while the file does not exist
+		// we still want to capture where on the file-system we looked
+		foundActivityLabel = activityLabel;
+		fullFoundActivityFileName = fullActivityFileName;
+	    }
+	    else {
+		// If not strict, assume they are in the default area
 		foundActivityLabel = defaultActivityLabel;
 		fullFoundActivityFileName = defaultPublicDir + fileName;
 	    }
@@ -981,9 +988,11 @@ io.on('connection', (socket, host) => {
 	    
             switch (event) {   
                 case "heartbeat":
-                    display = findDisplayBySocketID(socket.id)
-                    display.updateLastInteractionTime();
-                    display.failedConsecutiveHeartbeat = 0;
+                    display = findDisplayBySocketID(socket.id); // **** need to check 'display' is not undefined on next line
+		    if (display != undefined) {
+			display.updateLastInteractionTime();
+			display.failedConsecutiveHeartbeat = 0;
+		    }		
                     break;
 
                 case "selectActivity":
@@ -1027,7 +1036,7 @@ io.on('connection', (socket, host) => {
                     display = findDisplayBySocketID(socket.id);
 
                     // If no name could be found then assign new room name, else send current room name
-                if (display.getRoomName() == undefined) {
+                    if (display.getRoomName() == undefined) {
 		        var forIPaddress = getVisitorSocketIPAddress(socket)
 			let roomName = roomNames.nextFree(forIPaddress);
                         display.setAndSendRoomName(roomName);
