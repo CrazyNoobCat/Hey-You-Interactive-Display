@@ -4,7 +4,8 @@ var ViewportYDim = window.innerHeight;
 
 var SlideMaxXDim = (ViewportXDim <= 1300) ? ViewportXDim * 0.9 : ViewportXDim * 0.95;
 var SlideMaxYDim = (ViewportXDim <= 1300) ? ViewportYDim * 0.9 : ViewportYDim * 0.95;
-var QRDim = Math.floor(ViewportXDim * 0.10);
+//var QRDim = Math.floor(ViewportXDim * 0.10);
+var QRDim = 120;
 
 // State variables for slideshow activity
 var currentSlidePos = 0;
