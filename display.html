@@ -69,11 +69,14 @@
 	
 
 	const randomArrayEntry = (array) => array[Math.floor(Math.random()*array.length)];
+	//const randomArrayEntry = (array) => array[1];	
 	
 	var randomActivities = [
 	    { "activity": "/slideshow", "optUrlParams": "slidedeck=Our-Campuses-Slideshow",    "loadingLabel": "Campus Photos Slideshow"},
-	    { "activity": "/slideshow", "optUrlParams": "slidedeck=About-Smoke-and-Mirrors" ,  "loadingLabel": "About Smoke and Mirrors Projects"},
-	    { "activity": "/bullrush",  "optUrlParams": null,                                  "loadingLabel": "Bullrush multiplayer game"}
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=CMS-Events" ,               "loadingLabel": "School Events"},
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=CMS-Events" ,               "loadingLabel": "School Events"},
+	    { "activity": "/slideshow", "optUrlParams": "slidedeck=About-Smoke-and-Mirrors" ,  "loadingLabel": "About Smoke and Mirrors Projects"}
+	    //{ "activity": "/bullrush",  "optUrlParams": null,                                  "loadingLabel": "Bullrush multiplayer game"}
 	];
 
 	// https://www.indifferentlanguages.com/words/i%27m_bored#region-6
@@ -106,6 +109,8 @@
 	    $('#qrcode-loading').hide();
 	    $('#qrcode').animate({ opacity: 0 }, 600)
 
+	    //console.log(`***** calling WS displaySelectActivity: RoomID=${RoomID}, newActivity=${newActivity}, optUrlParams=${optUrlParams}`);  
+		
 	    setTimeout(function() {
 		Socket.emit("displaySelectActivity", RoomID, newActivity,optUrlParams);
 	    }, 6 * 1000); 
@@ -122,10 +127,14 @@
 	    $('#qrcode-loading').width(QRDim);
 	    $('#qrcode-loading').height(QRDim);
 
-	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, IAmBoredTimeoutMSecs);	    
+            
+	    launchRandomActivityTimeout = setTimeout(launchRandomActivity, IAmBoredTimeoutMSecs);
+
+	    // Faster 'I'm board' cycle for testing
+	    //launchRandomActivityTimeout = setTimeout(launchRandomActivity, 10000);	    
 	});
 	
-	// All displays need to defined a socketLoaded() function,
+	// All displays need to define a socketLoaded() function,
 	// and call socketConnection("display") to kick things off
 	
 	setupConnection("display");

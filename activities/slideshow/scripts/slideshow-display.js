@@ -120,9 +120,17 @@ function loadSlideshow(slideshowName)
 {        
     slideDir = "/slides/" + slideshowName;
 
+    // The following call goes through the RESTful API, and will
+    // generate a JSON data-structure on the fly if one is not
+    // present on the file-system
     $.getJSON(slideDir+"/slidesOverview.json")
 	.done(function(jsondata) {
-	    activateSlideshow(slideshowName,jsondata)
+	    if (jsondata.slides.length > 0) {
+		activateSlideshow(slideshowName,jsondata);
+	    }
+	    else {
+		displayReset();
+	    }
 	})
 	.fail(function( jqxhr, textStatus, error ) {
 	    var err = textStatus + ", " + error;

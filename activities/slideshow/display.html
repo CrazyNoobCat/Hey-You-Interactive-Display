@@ -74,6 +74,24 @@
 	  //displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
 	  //displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
 	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-center","join-room-url-center");
+
+
+	  // One critical path to loading a slideshow is one where
+	  // there turn out to be no slides to load.  This triggers
+	  // a DisplayReset(), which in turn makes use of Socket
+	  //
+	  // => Need to make sure we have a valid 'Socket' before staring
+	  // the loadSlideshow()
+	  //
+	  // If the DOM is already ready by this point, the jQuery call
+	  // provided function immediately 
+	  
+	  $(document).ready(function() {
+	      var urlParams = getURLParams();
+	      
+	      var slideshowName = urlParams["slidedeck"] || "waikato-uni-panoramas";	  
+	      loadSlideshow(slideshowName);
+	  });
       } 
 
       function socketUpdate(e, ...args)
@@ -116,13 +134,6 @@
           Socket.emit('displayReset');
       }
 
-      $(document).ready(function() {
-	  var urlParams = getURLParams();
-
-	  var slideshowName = urlParams["slidedeck"] || "waikato-uni-panoramas";	  
-	  loadSlideshow(slideshowName);
-      });
-      
       // All displays need to defined a socketLoaded() function,
       // and call socketConnection("display") to kick things off
       setupConnection("display");
