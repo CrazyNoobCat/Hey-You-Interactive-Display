@@ -39,6 +39,13 @@ which logs output to:
 
     heyyou-server.log
 
+And runs on port 3000 by default.
+
+If you want to change the port the NodeJS server uses, this can
+be done by setting the environment variable:
+
+  HEYYOU_PORT
+
 For production use, Hey There can be setup to run as a system installed
 service using 'systemctl'.  See the README file in the 'service.d'
 directory for more details.

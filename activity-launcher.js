@@ -52,7 +52,7 @@ const io     = new Server(server);
 var   sessionOptions = { secret: 'keyboard cat', // ****
 			 cookie: {} }
 
-const httpPort = process.env.PORT || 3000;
+const httpPort = process.env.HEYYOU_PORT || 3000;
 const publicDirectory = "/public";
 
 const roomNames = new RoomNames('etc/room-names-dynamic.txt','etc/room-names-preallocated.json');
