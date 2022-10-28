@@ -16,6 +16,10 @@ const GlobalSettings   = require('./GlobalSettings');
 const RoomNames        = require('./RoomNames')
 const SlideshowGenJSON = require('./SlideshowGenJSON');
 
+// Add date+timestamps in front of console messages
+require('console-stamp')(console, { 
+    format: ':date(yyyy/mm/dd HH:MM:ss.l) :label' 
+} );
 
 let gs = new GlobalSettings("etc/activity-launcher-conf.json");
 
@@ -47,12 +51,17 @@ const defaultCookieTimeoutMSecs   = defaultCookieTimeoutMins * 60 * 1000;
 //
 const app    = express();
 const server = http.createServer(app);
-const io     = new Server(server);
+const io     = new Server(server); // new io()
 
 var   sessionOptions = { secret: 'keyboard cat', // ****
+			 resave: false, 
+			 saveUninitialized: false,
 			 cookie: {} }
 
-const httpPort = process.env.HEYYOU_PORT || 3000;
+const httpHost = process.env.HEYYOU_LOCAL_HOST || "localhost";
+const httpPort = process.env.HEYYOU_LOCAL_PORT || 3000;
+const httpLocalServer = "http://" + httpHost + ":" + httpPort;
+
 const publicDirectory = "/public";
 
 const roomNames = new RoomNames('etc/room-names-dynamic.txt','etc/room-names-preallocated.json');
@@ -269,9 +278,19 @@ function getVisitorSocketIPAddress(socket)
 
     // For more details, see:
     //   https://stackoverflow.com/questions/6458083/get-the-clients-ip-address-in-socket-io
+    //let ipAddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]
 
-    let ipAddress = socket.handshake.headers['x-forwarded-for'].split(',')[0]
-
+    let ipAddress = null;
+    
+    let forwarded_header = socket.handshake.headers['x-forwarded-for'];
+    
+    if (forwarded_header != undefined) {
+	ipAddress = forwarded_header.split(',')[0];
+    }
+    else {
+	ipAddress = socket.request.connection.remoteAddress;
+    }
+    
     return ipAddress;
 }
 
@@ -401,6 +420,9 @@ sessionOptions.genid =  function(req) {
 app.use(session(sessionOptions));
 
 
+//app.use(express.static(__dirname + '/node_modules/socket.io/client-dist'));
+
+
 //
 // To support a dedicated list of Chromecast around the devices being served fix IPs
 // we need to register the MAC addresses of the Chromecast's with the DHCP server
@@ -418,7 +440,7 @@ app.get('/join/:roomIdOrName', (req, res) => {
 
 	// Create a cookie which only works on this site and lasts for the default timeout
         res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
-        res.redirect('/controller'); // Prevents making a second cookie for a javascript file
+        res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
         console.log("New device joined with roomID: " + roomID);
     }
     else if ((display = findHostDisplayByName(req.params.roomIdOrName)) != undefined) {	
@@ -427,12 +449,12 @@ app.get('/join/:roomIdOrName', (req, res) => {
 
         // Create a cookie which only works on this site and lasts for the default timeout
 	res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
-        res.redirect('/controller'); // Prevents making a second cookie for a javascript file
+        res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
         console.log("New device joined with roomName: " + roomName);
     }  
     else {
 	// If room doesn't exit
-        res.redirect("/error/Unable to find Display-id or Display-name " + req.params.roomIdOrName);
+        res.redirect(httpLocalServer+"/error/Unable to find Display-id or Display-name " + req.params.roomIdOrName);
     }    
 });
 
@@ -468,17 +490,18 @@ app.get('/controller', (req, res) => {
 	    let staticActivity = getCookie(req,"staticActivity");
 
 	    if ((roomID == undefined) && (staticActivity == undefined)) {
-		res.redirect("/disconnected/No active display connection found.  This can be caused by controller inactivity. Scan the QR Code again to rejoin");
+		res.redirect("disconnected/No active display connection found.  This can be caused by controller inactivity. Scan the QR Code again to rejoin");
 	    }
 	    else {
-		res.redirect("/error/No valid Display-id or Standalone App-id found. Try scanning an new QR Code.");
+		res.redirect("error/No valid Display-id or Standalone App-id found. Try scanning an new QR Code.");
 	    }
         }
     }    
 });
 
 app.get('/display-reset', (req, res) => {
-    res.redirect("/display-home");
+    //res.redirect(httpLocalServer+"/display-home");
+    res.redirect("display-home");
 });
     
 // A "circuit-breaker" URL => disconnect all controllers, and return the HTML page for the top-level/default activity display
@@ -500,16 +523,18 @@ app.get('/display-home', (req, res) => {
     }
 
     
-    console.log("/display-home serving up fresh default activity display.html to controller IP: " + req.ip);
+    console.log("/display-home serving up fresh default activity display.html to requesting IP: " + req.ip);
+    //console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
     sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
 });
 
 app.get('/activity', (req, res) => {
-    res.redirect("/display");
+    res.redirect("display");
 });
 	
 app.get('/display', (req, res) => {
     // If there is a valid activity then direct display to that activity else go to default activity
+    //console.log("Responding to /display GET request");
     let activity = getActivity(req);
     
     if (activity != undefined) {
@@ -532,8 +557,8 @@ app.get('/display', (req, res) => {
         }
     }
     else {
-	console.log("/activity serving up default activity display.html to display IP: " + req.ip);
-	console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
+	console.log("/activity serving up default activity display.html to requesting IP: " + req.ip);
+	//console.log("[For the curious, the request header IPs field is set to: " + req.ips +"]");
         sendActivityFile(res, __dirname + defaultActivity +'/display.html', '/display.html', defaultActivityLabel); // This is for new displays
     }   
 });
@@ -644,7 +669,7 @@ app.get('/slides/:slideDeck/:file', (req,res) => {
 // in certain situations
 app.get('*/disconnected/:error', (req, res) => {
     res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))});
-    res.redirect('/disconnected');
+    res.redirect(httpLocalServer+'/disconnected');
 });
 
 app.get('/disconnected', (req, res) => {
@@ -653,7 +678,7 @@ app.get('/disconnected', (req, res) => {
 
 app.get('*/error/:error', (req, res) => {
     res.cookie('error', req.params.error, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))});
-    res.redirect('/error');
+    res.redirect(httpLocalServer+'/error');
 });
 
 app.get('/error', (req, res) => {
@@ -1186,7 +1211,9 @@ io.on('connection', (socket, host) => {
 });
 
 server.listen(httpPort, () => {
-    console.log('listening on *:' + httpPort);
+    console.log('For all interfaces, listening on port:' + httpPort);
+
+    console.log('Local server:' + httpLocalServer);
 });
 
 

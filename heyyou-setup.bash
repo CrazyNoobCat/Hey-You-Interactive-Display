@@ -1,11 +1,39 @@
 
+# Edit the following if you want to change the default values used
+# Otherwise consider commenting out this block, and uncommenting
+# the "For Developer Testing" below it
+
+#export HEYYOU_LOCAL_HOST=localhost
+#export HEYYOU_LOCAL_PORT=3000
+## The following by being empty, default to browser root level
+#export HEYYOU_EXTERNAL_PREFIX=
+#export HEYYOU_EXTERNAL_WSPREFIX=
+
+# For Developer Testing:
+#  (a) on a different port (for localhost) and
+#  (b) using a different URL prefix (when externally accessed via proxy server)) 
+#
+export HEYYOU_LOCAL_HOST=localhost
+export HEYYOU_LOCAL_PORT=4000
+export HEYYOU_EXTERNAL_PREFIX=/heyyou-dev
+export HEYYOU_EXTERNAL_WSPREFIX=$HEYYOU_EXTERNAL_PREFIX
+#export HEYYOU_EXTERNAL_WSPREFIX=/wsheyyou-dev
+
+echo ""
+echo "Hey You Server Settings:"
+echo "  Local connection: http://$HEYOU_LOCAL_HOST:$HEYOU_LOCAL_PORT"
+if [ "x$HEYYOU_EXTERNAL_PREFIX" != "x" ] ; then
+    echo "  External http/https URL prefix: $HEYOU_EXTERNAL_PREFIX"
+fi
+if [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x" ] && [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x$HEYYOUR_EXTERNAL_WSPREFIX" ] ; then
+    echo "  External Web-Socket URL prefix: $HEYOU_EXTERNAL_PREFIX"
+fi
+echo ""
+   
 nodejs_package=node-v16.13.2
 
-
 os_full_lc=`uname -s | tr '[:upper:]' '[:lower:]'`
-
 os_root=${os_full_lc%%_*}
-
 
 if [ "x$os_root" = "xlinux" ] ; then
     nodejs_package=$nodejs_package-linux-x64
