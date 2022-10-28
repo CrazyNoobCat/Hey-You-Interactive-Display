@@ -10,7 +10,7 @@
     <!--
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
     -->
-    <link rel="stylesheet" href="/inconsolata.css">
+    <link rel="stylesheet" href="inconsolata.css">
     
     <style>
       :root {
@@ -26,13 +26,13 @@
     <!--<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>    
 
-    <script type="text/javascript" src="/scripts/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>    
-    <script type="text/javascript" src="/socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
+    <script type="text/javascript" src="scripts/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>    
+    <script type="text/javascript" src="socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
 
-    <script type="text/javascript" src="/scripts/display-utils.js"></script>
-    <script type="text/javascript" src="/scripts/bullrush-utils.js"></script>
-    <script type="text/javascript" src="/scripts/bullrush-display.js"></script>
+    <script type="text/javascript" src="scripts/display-utils.js"></script>
+    <script type="text/javascript" src="scripts/bullrush-utils.js"></script>
+    <script type="text/javascript" src="scripts/bullrush-display.js"></script>
 	
     <script>
       function socketLoaded(anyListener)
@@ -41,14 +41,17 @@
           Socket.emit("displayLoaded");   
 
 	  var QRDim = 200; // if changing this value, also need to update the 'width: 200px' below for <div id="join-qrcode" />
-	  var displayHost = self.location.host;
+
+	  var displayHost     = window.location.host;
+	  var displayPathname = window.location.pathname;
+
+	  var displayPrefix    = displayPathname.substring(0, displayPathname.lastIndexOf("/"));	  
+	  var displayPrefixURL = displayHost + displayPrefix;
+	  
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
-	  //displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode");
-	  //displayRoomURL(displayHost,roomName,"join-room-url");
-
-	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode","join-room-url");
+	  displayJoinURL(displayPrefixURL,roomID,roomName, QRDim,"join-qrcode","join-room-url");
 	  
       }            
       
@@ -124,7 +127,7 @@
 
     
     <footer>
-      <script src="/scripts/receiver.js"></script>
+      <script src="scripts/receiver.js"></script>
     </footer>
   </body>
 </html>

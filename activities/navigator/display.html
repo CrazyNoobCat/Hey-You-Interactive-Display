@@ -10,9 +10,9 @@
     <!--
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
     -->
-    <link rel="stylesheet" href="/inconsolata.css">
+    <link rel="stylesheet" href="inconsolata.css">
     
-    <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
+    <!-- <link rel="manifest" href="manifest.webmanifest"> -->
 
     <style>
       body {
@@ -23,20 +23,20 @@
       }      
     </style>
 
-    <link rel="stylesheet" type="text/css" href="display-util.css"/>
+    <link rel="stylesheet" type="text/css" href="display-util.css" />
     
     <!-- Cast Debug Logger -->
     <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
-    <script type="text/javascript" src="/scripts/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>    
-    <script type="text/javascript" src="/socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
+    <script type="text/javascript" src="scripts/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>    
+    <script type="text/javascript" src="socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
 
     
 
-    <script type="text/javascript" src="/scripts/display-utils.js"></script>
-    <script type="text/javascript" src="/scripts/navigator-display.js"></script>
+    <script type="text/javascript" src="scripts/display-utils.js"></script>
+    <script type="text/javascript" src="scripts/navigator-display.js"></script>
     
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
     <script>
@@ -46,20 +46,17 @@
           Socket.onAny(anyListener); // Turns on the any listener
           Socket.emit("displayLoaded"); 
 
-          var displayHost = self.location.host;
+          var displayHost     = window.location.host;
+	  var displayPathname = window.location.pathname;
+
+	  var displayPrefix    = displayPathname.substring(0, displayPathname.lastIndexOf("/"));	  
+	  var displayPrefixURL = displayHost + displayPrefix;
+	  
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
-	  /*
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
-	  
-	  displayRoomURL(displayHost,roomName,"join-room-url-left");
-	  displayRoomURL(displayHost,roomName,"join-room-url-right");
-	  */
-	  
-	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
-	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
+	  displayJoinURL(displayPrefixURL,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
+	  displayJoinURL(displayPrefixURL,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
 	  
       } 
 
@@ -89,9 +86,9 @@
 		<h1>Navigator App Currently In Development</h1>
       </div>
       <div style="width: 90%;">
-	    <img style="width: 100%; padding: 20px;" src="/uow-panoramas/slide3.jpg" />
-	    <img style="width: 100%; padding: 20px;" src="/uow-panoramas/slide14.jpg" />
-	    <img style="width: 100%; padding: 20px;" src="/uow-panoramas/slide18.jpg" />
+	    <img style="width: 100%; padding: 20px;" src="uow-panoramas/slide3.jpg" />
+	    <img style="width: 100%; padding: 20px;" src="uow-panoramas/slide14.jpg" />
+	    <img style="width: 100%; padding: 20px;" src="uow-panoramas/slide18.jpg" />
       </div>
     </div>
     
@@ -109,7 +106,7 @@
     </div>
 
     <footer>
-      <script src="/scripts/receiver.js"></script>
+      <script src="scripts/receiver.js"></script>
     </footer>
 
   </body>
