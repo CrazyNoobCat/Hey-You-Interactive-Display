@@ -67,43 +67,7 @@ function computeQRDimMaximizeHeight(viewportWidth,viewportHeight)
     return qrDim;
 }
 
- /*   
-function displayRoomQRCode(displayHost,roomID,qrDim,elemId)
-{
-    // For the QR code, work directly with the roomID
-    var full_room_id = displayHost + '/join/' + roomID;
-
-    var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + full_room_id + '&size=' + qrDim +'x' + qrDim;
-    //var url = '/qrcode/?data=' + full_room_id + '&size=' + qrDim;
-    
-    var $img = $('<img>').attr('src',url);
-    $img.on("load", function() {
-	$img.fadeIn(1000);
-    });
-    $img.css("display","none"); // The on-load() callback above then fades it in!
-    
-    $('#'+elemId).html($img);
-}
-
-function displayRoomURL(displayHost,roomName, elemId)
-{
-    // For roomURL we work with the roomName to give a nicer URL to type in
-    // This is subsequently mapped to the roomID URL by the server
-    
-    messageHTML = 'Or visit on your phone:<br />';
-    messageHTML += '<span style="white-space: nowrap;">';
-    //messageHTML +=   '<span class="globe-icon-bg" style="padding-right: 3px;"></span>';
-    messageHTML +=   '<img width="16" height="16" src="icons/globe-solid.svg" style="padding-right: 3px;"/>';
-    messageHTML +=   '<span style="color: #e03031; font-size: 85%; font-style: italic;">https://' + displayHost + '/join/' + roomName + '</span>';
-    //messageHTML +=   '<span style="color: #e03031">' + displayHost + '/join/' + roomName + '</span>';
-    messageHTML += '</span>';
-    
-    $('#'+elemId).html(messageHTML);
-}
- */
-
-
-function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomNameElemId)
+function displayJoinURL(displayPrefixURL,roomID,roomName, qrDim,roomIdElemId,roomNameElemId)
 {
     // Fallback to 'roomID' if 'roomName' for some reason is not set
     //console.log("**** displayJoinURL() roomID = " + roomID + " roomName = " + roomName);
@@ -111,10 +75,11 @@ function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomName
     //var roomNameSafe = ((roomName != undefined) && (roomName != "")) ? roomName : roomID;
     var roomNameSafe = (roomName != "") ? roomName : roomID;
     
-    var joinRoomURL = displayHost + '/join/' + roomNameSafe;
-
-    //var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + joinRoomURL + '&size=' + qrDim +'x' + qrDim;
-    var url = '/qrcode/?data=' + joinRoomURL + '&size=' + qrDim;
+    var joinRoomURL = displayPrefixURL + '/join/' + roomNameSafe;
+    var joinRoomURLEncoded = encodeURIComponent(joinRoomURL)
+    
+    //var url = '/qrcode/?data=' + joinRoomURLEncoded + '&size=' + qrDim;
+    var url = 'qrcode/?data=' + joinRoomURLEncoded + '&size=' + qrDim;
     
     var $img = $('<img>').attr('src',url);
     $img.css("width", "100%");
@@ -127,13 +92,9 @@ function displayJoinURL(displayHost,roomID,roomName, qrDim,roomIdElemId,roomName
     
     $('#'+roomIdElemId).html($img);
     
-    //messageHTML = 'Or visit<br />';
     messageHTML = 'Take control via ';
     messageHTML += '<span style="white-space: nowrap;">';
-    //messageHTML +=   '<img width="16" height="16" src="icons/globe-solid.svg" style="padding-right: 3px;"/>';
-
-    //messageHTML +=   '<span style="color: #e03031; font-size: 85%; font-style: italic;">https://' + displayHost + '/join/' + roomNameSafe + '</span>';
-    messageHTML +=   '<span style="color: #e03031; font-size: 100%; font-style: italic;">' + displayHost + '/join/' + roomNameSafe + '</span>';
+    messageHTML +=   '<span style="color: #e03031; font-size: 100%; font-style: italic;">' + displayPrefixURL + '/join/' + roomNameSafe + '</span>';
     messageHTML += '</span>';
     
     $('#'+roomNameElemId).html(messageHTML);
