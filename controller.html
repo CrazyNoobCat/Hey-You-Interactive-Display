@@ -62,12 +62,12 @@
 
 	  var request = $.ajax({
 	      method: "GET",
-	      url:    "/getSlideshowList",
+	      url:    "getSlideshowList",
 	      dataType: "json"
 	  });
 
 	  request.done(function(jsonData) {
-	      //console.log( "/getSlideshowList JSON data returned: " + JSON.stringify(jsonData) );
+	      //console.log( "getSlideshowList JSON data returned: " + JSON.stringify(jsonData) );
 	      var status = jsonData.status;
 	      if (status == "ok") {
 		  var slideshows = jsonData.slideshows.sort();
@@ -88,7 +88,7 @@
 	  });
 	  
 	  request.fail(function(jqXHR,textStatus) {
-	      alert( "/getSlideshowList request failed: " + textStatus );
+	      alert( "getSlideshowList request failed: " + textStatus );
 	  });    	  
 
       });

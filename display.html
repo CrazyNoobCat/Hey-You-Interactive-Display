@@ -38,29 +38,30 @@
 	// Custom socketLoaded() for top-level activity launcher	
 	function socketLoaded(anyListener)
 	{
-	    var displayHost = self.location.host;
+	    var displayHost     = window.location.host;
+	    var displayPathname = window.location.pathname;
+
+	    var displayPrefix    = displayPathname.substring(0, displayPathname.lastIndexOf("/"));	    
+	    var displayPrefixURL = displayHost + displayPrefix;
+	    
 	    var roomID = getCookie('roomID');
 
-	    console.log("socketLoaded(): Display hostname: " + displayHost);
+	    console.log("socketLoaded(): Display prefix URL: " + displayPrefixURL);
 	    console.log("socketLoaded(): Room ID: " + roomID);
 	    
 	    Socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
 		console.log("**** setNewCookieMins() " + cName + " = " + cContent);
 		if (cName == "roomName") {
-		    //displayRoomURL(displayHost,cContent,"join-room-url");
 		    var roomName = cContent;
-		    displayJoinURL(displayHost,roomID,roomName, QRDim,"qrcode","join-room-url");
+		    displayJoinURL(displayPrefixURL,roomID,roomName, QRDim,"qrcode","join-room-url");
 		}
 	    });
-	    
-	    //displayRoomQRCode(displayHost,roomID,QRDim,"qrcode");
 	    
 	    if (getCookie('roomName') != "") {
 		console.log("socketLoaded(): roomName = " + getCookie('roomName'));
 		
 		var roomName = getCookie('roomName');
-		//displayRoomURL(displayHost,roomName,"join-room-url");
-		displayJoinURL(displayHost,roomID,roomName, QRDim,"qrcode","join-room-url");
+		displayJoinURL(displayPrefixURL,roomID,roomName, QRDim,"qrcode","join-room-url");
 	    }
 	    else {
 		console.log("socketLoaded(): roomName not defined");
@@ -72,9 +73,9 @@
 	//const randomArrayEntry = (array) => array[1];	
 	
 	var randomActivities = [
-	    { "activity": "/slideshow", "optUrlParams": "slidedeck=Our-Campuses-Slideshow",    "loadingLabel": "Campus Photos Slideshow"},
-	    { "activity": "/slideshow", "optUrlParams": "slidedeck=CMS-Events" ,               "loadingLabel": "School Events"},
-	    { "activity": "/slideshow", "optUrlParams": "slidedeck=CMS-Events" ,               "loadingLabel": "School Events"},
+	    //{ "activity": "/slideshow", "optUrlParams": "slidedeck=Our-Campuses-Slideshow",    "loadingLabel": "Campus Photos Slideshow"},
+	    //{ "activity": "/slideshow", "optUrlParams": "slidedeck=CMS-Events" ,               "loadingLabel": "School Events"},
+	    //{ "activity": "/slideshow", "optUrlParams": "slidedeck=CMS-Events" ,               "loadingLabel": "School Events"},
 	    { "activity": "/slideshow", "optUrlParams": "slidedeck=About-Smoke-and-Mirrors" ,  "loadingLabel": "About Smoke and Mirrors Projects"}
 	    //{ "activity": "/bullrush",  "optUrlParams": null,                                  "loadingLabel": "Bullrush multiplayer game"}
 	];
@@ -103,7 +104,11 @@
 	    var loadingLabel = randomActivity.loadingLabel;
 
 	    var randomIAB = randomArrayEntry(multilingualIAB);
-	    var boredMessage = randomIAB + " Loading '" + loadingLabel + "' ...";
+
+	    let date_and_time_now = new Date().toLocaleString();
+	    var boredMessage = randomIAB + " Loading '" + loadingLabel + "'";
+	    //boredMessage += " (" + date_and_time_now + ")";
+	    boredMessage += " ...";
 	    
 	    $('#join-room-url').html(boredMessage);
 	    $('#qrcode-loading').hide();
