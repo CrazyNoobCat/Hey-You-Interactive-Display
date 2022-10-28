@@ -1,9 +1,19 @@
 
+//const PROXY_URL_PREFIX   = "/heyyou-dev";
+//const WSPROXY_URL_PREFIX = "/wsheyyou-dev";
+
+var _browserPathname = window.location.pathname;
+var _browserPrefix   = _browserPathname.substring(0, _browserPathname.lastIndexOf("/"));	    
+
+const PROXY_URL_PREFIX   = _browserPrefix;
+const WSPROXY_URL_PREFIX = _browserPrefix;;
+
 const DisplayCookieTimeoutMins   = 10;
 
 var RoomID;
 var Socket;
 
+/*
 // Get the visitor identifier when you need it.
 function getVisitorIDOpenFP(type)
 {
@@ -14,12 +24,15 @@ function getVisitorIDOpenFP(type)
     .then(fp => fp.get())
     .then(result => startSocket(result.visitorId, type))    
 }
+*/
 
 function getVisitorID(type)
 {
+    let full_href = PROXY_URL_PREFIX + "/getSessionID";
+    
     var request = $.ajax({
 	method: "GET",
-	url:    "getSessionID",
+	url:    full_href,
 	dataType: "json"
     });
 
@@ -30,7 +43,7 @@ function getVisitorID(type)
     });
 
     request.fail(function(jqXHR,textStatus) {
-	alert( "/getSessionID request failed: " + textStatus );
+	alert( full_href +" request failed: " + textStatus );
     });    
 }
     
@@ -49,7 +62,10 @@ function startSocket(visitorID, type)
     }
 
     var url = window.location.host;
+
     Socket = io(url , {
+	path: WSPROXY_URL_PREFIX + "/socket.io",
+	transports: ["websocket"],
         query: {
             "data"         : type,
             "controllerID" : visitorID,
@@ -59,22 +75,27 @@ function startSocket(visitorID, type)
 
     Socket.on('reload', (optUrlParams) => {
         if (type == "display") {
-	    let full_href = "/display";
+	    let full_href = PROXY_URL_PREFIX + "/display";
 	    if (optUrlParams !== null) {
 		full_href += "?" + optUrlParams;
 	    }
             window.location.href = full_href;
 	}
         else {
-            window.location.href = '/controller';
+	    let full_href = PROXY_URL_PREFIX + "/controller";
+            window.location.href = full_href;
 	}
     }); 
 
     Socket.on('reconnect', () => {
-        if (type == "display")
-            window.location.href = '/display';
-        else
-            window.location.href = '/controller';
+        if (type == "display") {
+	    let full_href = PROXY_URL_PREFIX + "/display";
+            window.location.href = full_href;
+	}
+        else {
+	    let full_href = PROXY_URL_PREFIX + "/controller";
+            window.location.href = full_href;
+	}
     }); 
 
     Socket.on('loadPage', (page) => {
@@ -85,14 +106,16 @@ function startSocket(visitorID, type)
         // Could go to an HTML page instead
         console.log("Disconnected: " + message);
         setCookieMins('roomID','',0); // Cookie expires instantly
-        window.location.href = '/disconnected/'+ message;
+	let full_href = PROXY_URL_PREFIX + "/disconnected/" + message;
+        window.location.href = full_href;
     });
 
     Socket.on('error', (message)=> {
         // Could go to an HTML page instead
         console.log("Error: " + message);
         setCookieMins('roomID','',0); // Cookie expires instantly
-        window.location.href = '/error/'+ message;
+	let full_href = PROXY_URL_PREFIX + "/error/" + message;
+        window.location.href = full_href;
     });
 
     Socket.on('extendRoom', (durationMins) => {
@@ -141,7 +164,8 @@ function selectActivity(activity,optUrlParams)
         
     Socket.emit("selectActivity", RoomID, activity, optUrlParams, (response) => {
         console.log("Redirecting to " + activity);
-        window.location.pathname = '/controller'; // Consider passing on the optUrlParms to the controller web page also?
+	let full_href = PROXY_URL_PREFIX + "/controller";
+        window.location.pathname = full_href; // Consider passing on the optUrlParms to the controller web page also?
     });   
 }
 
