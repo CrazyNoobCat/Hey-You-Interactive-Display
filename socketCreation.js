@@ -63,9 +63,14 @@ function startSocket(visitorID, type)
 
     var url = window.location.host;
 
+    // Specifying 'transports' below is done to Explicitly force socket.io
+    // to work with Web Sockets, so we can tell straightaway
+    // if there is an issue, otherwise it auto-falls back to http, meaning
+    // it is harder to spot the ws:// isn't working!
+    
     Socket = io(url , {
 	path: WSPROXY_URL_PREFIX + "/socket.io",
-	transports: ["websocket"],
+	transports: ["websocket"], 
         query: {
             "data"         : type,
             "controllerID" : visitorID,
