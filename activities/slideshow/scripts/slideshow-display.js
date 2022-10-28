@@ -116,9 +116,10 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
     doSlideTransition(localSlideDuration,localSlideTransition);
 }
 
-function loadSlideshow(slideshowName)
+function loadSlideshow(displayPrefix,slideshowName)
 {        
-    slideDir = "/slides/" + slideshowName;
+    //slideDir = "/slides/" + slideshowName;
+    slideDir = displayPrefix + "/slides/" + slideshowName;
 
     // The following call goes through the RESTful API, and will
     // generate a JSON data-structure on the fly if one is not

@@ -10,9 +10,9 @@
     <!--
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
     -->
-    <link rel="stylesheet" href="/inconsolata.css">
+    <link rel="stylesheet" href="inconsolata.css">
 
-    <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
+    <!-- <link rel="manifest" href="manifest.webmanifest"> -->
 
     <style>
       :root {
@@ -36,21 +36,21 @@
 
     </style>
 
-    <link rel="stylesheet" type="text/css" href="display-util.css"/>
-    <link rel="stylesheet" type="text/css" href="slideshow-animation.css"/>
-    <link rel="stylesheet" type="text/css" href="slideshow-style.css"/>
+    <link rel="stylesheet" type="text/css" href="display-util.css" />
+    <link rel="stylesheet" type="text/css" href="slideshow-animation.css" />
+    <link rel="stylesheet" type="text/css" href="slideshow-style.css" />
 
     <!-- Cast Debug Logger -->
     <!--<script src="//www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js"></script>-->
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 
-    <script type="text/javascript" src="/scripts/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>    
-    <script type="text/javascript" src="/socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
+    <script type="text/javascript" src="scripts/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>    
+    <script type="text/javascript" src="socketCreation.js"></script>  <!-- Assigns 'Socket' as a global variable -->
 
 
-    <script type="text/javascript" src="/scripts/display-utils.js"></script>
-    <script type="text/javascript" src="/scripts/slideshow-display.js"></script>
+    <script type="text/javascript" src="scripts/display-utils.js"></script>
+    <script type="text/javascript" src="scripts/slideshow-display.js"></script>
     
     <!-- Main script for website can be loaded here, should contain a socketUpdate function-->
     <script>
@@ -60,20 +60,16 @@
           Socket.onAny(anyListener); // Turns on the any listener
           Socket.emit("displayLoaded"); 
 
-          var displayHost = self.location.host;
+          var displayHost     = window.location.host;
+	  var displayPathname = window.location.pathname;
+
+	  var displayPrefix    = displayPathname.substring(0, displayPathname.lastIndexOf("/"));	  
+	  var displayPrefixURL = displayHost + displayPrefix;
+
 	  var roomID    = getCookie('roomID');
 	  var roomName  = getCookie('roomName');
 
-	  /*
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-left");
-	  displayRoomQRCode(displayHost,roomID,QRDim,"join-qrcode-right");
-	  
-	  displayRoomURL(displayHost,roomName,"join-room-url-left");
-	  displayRoomURL(displayHost,roomName,"join-room-url-right");
-	  */
-	  //displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-left", "join-room-url-left");
-	  //displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-right","join-room-url-right");
-	  displayJoinURL(displayHost,roomID,roomName, QRDim,"join-qrcode-center","join-room-url-center");
+	  displayJoinURL(displayPrefixURL,roomID,roomName, QRDim,"join-qrcode-center","join-room-url-center");
 
 
 	  // One critical path to loading a slideshow is one where
@@ -89,8 +85,11 @@
 	  $(document).ready(function() {
 	      var urlParams = getURLParams();
 	      
-	      var slideshowName = urlParams["slidedeck"] || "waikato-uni-panoramas";	  
-	      loadSlideshow(slideshowName);
+	      var slideshowName = urlParams["slidedeck"] || "About-Smoke-and-Mirrors";
+
+	      var displayPathname = window.location.pathname;
+	      var displayPrefix    = displayPathname.substring(0, displayPathname.lastIndexOf("/"));
+	      loadSlideshow(displayPrefix,slideshowName);
 	  });
       } 
 
@@ -158,11 +157,11 @@
           <div id="mask">
             <ul>
               <li id="currentslide-li" style="z-index: 0;">
-		<img id="currentslide-img" style="display: none;"/>
+		<img id="currentslide-img" style="display: none;" />
               </li>
 	      
               <li id="overlayslide-li" style="z-index: -1;">
-		<img id="overlayslide-img" style="display: none;"/>
+		<img id="overlayslide-img" style="display: none;" />
               </li>
             </ul>
 	  </div>
@@ -202,7 +201,7 @@
     -->
     
     <footer>
-      <script src="/scripts/receiver.js"></script>
+      <script src="scripts/receiver.js"></script>
     </footer>
 
   </body>
