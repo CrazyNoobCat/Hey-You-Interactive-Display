@@ -3,6 +3,7 @@ const path    = require('path');
 const express = require('express');
 const session = require('express-session');
 const http    = require('http');
+const cors    = require('cors');
 
 const qr      = require('qr-image'); 
 
@@ -419,6 +420,8 @@ sessionOptions.genid =  function(req) {
 
 app.use(session(sessionOptions));
 
+console.log("Allowing CORS access");
+app.use(cors());
 
 //app.use(express.static(__dirname + '/node_modules/socket.io/client-dist'));
 
@@ -443,19 +446,22 @@ app.get('/join/:roomIdOrName', (req, res) => {
         res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
         console.log("New device joined with roomID: " + roomID);
     }
-    else if ((display = findHostDisplayByName(req.params.roomIdOrName)) != undefined) {	
-	let roomName = req.params.roomIdOrName;
-	let roomID   = display.getDeviceID();
-
-        // Create a cookie which only works on this site and lasts for the default timeout
-	res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
-        res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
-        console.log("New device joined with roomName: " + roomName);
-    }  
     else {
-	// If room doesn't exit
-        res.redirect(httpLocalServer+"/error/Unable to find Display-id or Display-name " + req.params.roomIdOrName);
-    }    
+	let display = findHostDisplayByName(req.params.roomIdOrName);	
+	if (display != undefined) {	
+	    let roomName = req.params.roomIdOrName;
+	    let roomID   = display.getDeviceID();
+	    
+            // Create a cookie which only works on this site and lasts for the default timeout
+	    res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
+            res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
+            console.log("New device joined with roomName: " + roomName);
+	}  
+	else {
+	    // If room doesn't exit
+            res.redirect(httpLocalServer+"/error/Unable to find Display-id or Display-name " + req.params.roomIdOrName);
+	}
+    }
 });
 
 
@@ -643,7 +649,7 @@ app.get('/slides/:slideDeck/:file', (req,res) => {
     // opportunity to generate (or update) slidesOverview.json
     // if not present on the filesystem (or else has changed)
 
-    if (fileName = "slidesOverview.json") {
+    if (file == "slidesOverview.json") {
 	if (!fs.existsSync(fullFoundActivityFileName)) {
 	    let fullFoundActivityDir = path.dirname(fullFoundActivityFileName);
 	    
@@ -774,10 +780,13 @@ app.get('/', (req, res) => {
 
 
 app.get('*', (req, res) => {
+    //console.log(`app.get(*): req.path=${req.path}`);
+    
     // Send a file if it can be found inside either the public folder for the activity for the controller or generic public folder
     // Requests from non-controller files will be redirected to an error page
     let activity = getActivity(req);
-
+    //console.log(`app.get(*): activity=${activity}`);
+    
     // ****
     // Not clear why req.params.roomName was being check for in the following if-statement,
     // as it is then never used.  As written it could allow an undefined activity through
@@ -917,6 +926,8 @@ io.on('connection', (socket, host) => {
             let display = new Connection(io,socket,defaultActivity,controllerTimeoutMSecs);
 
             console.log("New Display: \t" + display.connectionInformation());
+	    let visitor_ip = getVisitorSocketIPAddress(socket);
+	    console.log("  Client IP: \t" +visitor_ip);
 	    
             // Add the new display to the list of displays
             displays.push(display);
@@ -1211,9 +1222,9 @@ io.on('connection', (socket, host) => {
 });
 
 server.listen(httpPort, () => {
-    console.log('For all interfaces, listening on port:' + httpPort);
+    console.log('For all interfaces, listening on port: ' + httpPort);
 
-    console.log('Local server:' + httpLocalServer);
+    console.log('Local server: ' + httpLocalServer);
 });
 
 
