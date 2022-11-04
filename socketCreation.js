@@ -119,7 +119,7 @@ function startSocket(visitorID, type)
     });
 
     Socket.on('extendRoom', (durationMins) => {
-        console.log("Cookie duration extended for roomID and roomName (if defined)");
+        console.log("Cookie duration extended for roomID and (if defined) roomName");
         let cookieContent = getCookie('roomID');
         setCookieMins('roomID',cookieContent, durationMins); // Extend cookie duration by above duration
         cookieContent = getCookie('roomName');
@@ -130,7 +130,7 @@ function startSocket(visitorID, type)
 
     Socket.on('heartbeat', () => {
         Socket.emit('heartbeat');
-        console.log("heartbeat");
+        console.log("emitting heartbeat");
     });
 
     Socket.on('setNewCookieMins', (cName, cContent, cDurationMins) => {
@@ -138,7 +138,7 @@ function startSocket(visitorID, type)
     });
 
     const anyListener = (...args) => {
-        console.log(...args);
+        console.log("anyListener() calling socketUpdate() with args:" + args.join(","));
         socketUpdate(...args); // This function must exist otherwise sockets will not work
     } // Off by default
 
@@ -207,7 +207,7 @@ function setCookieMins(cname, cvalue, expireMins)
     cookie += expires + "; path=/";
 
     document.cookie = cookie
-    console.log(`set/update cookie: ${cname}=${cvalue} (${expires})`);
+    console.log(`  set/update cookie: ${cname}=${cvalue} (${expires})`);
 }
 
 function setupConnection(type)
