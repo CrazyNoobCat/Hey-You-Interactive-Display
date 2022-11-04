@@ -4,6 +4,7 @@
     "description": "Code base for the Smoke and Mirrors project: Hey There, Interact with Me!",
     "dependencies": {
         "console-stamp": "^3.0.6",
+        "cors": "^2.8.5",
         "express": "^4.17.1",
         "express-session": "^1.17.2",
         "image-size": "^1.0.1",
