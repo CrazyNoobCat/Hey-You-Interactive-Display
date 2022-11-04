@@ -3,21 +3,21 @@
 # Otherwise consider commenting out this block, and uncommenting
 # the "For Developer Testing" below it
 
-#export HEYYOU_LOCAL_HOST=localhost
-#export HEYYOU_LOCAL_PORT=3000
-## The following by being empty, default to browser root level
-#export HEYYOU_EXTERNAL_PREFIX=
-#export HEYYOU_EXTERNAL_WSPREFIX=
+export HEYYOU_LOCAL_HOST=localhost
+export HEYYOU_LOCAL_PORT=3000
+# The following by being empty, default to browser root level
+export HEYYOU_EXTERNAL_PREFIX=
+export HEYYOU_EXTERNAL_WSPREFIX=
 
 # For Developer Testing:
 #  (a) on a different port (for localhost) and
 #  (b) using a different URL prefix (when externally accessed via proxy server)) 
 #
-export HEYYOU_LOCAL_HOST=localhost
-export HEYYOU_LOCAL_PORT=4000
-export HEYYOU_EXTERNAL_PREFIX=/heyyou-dev
-export HEYYOU_EXTERNAL_WSPREFIX=$HEYYOU_EXTERNAL_PREFIX
-#export HEYYOU_EXTERNAL_WSPREFIX=/wsheyyou-dev
+#export HEYYOU_LOCAL_HOST=localhost
+#export HEYYOU_LOCAL_PORT=4000
+#export HEYYOU_EXTERNAL_PREFIX=/heyyou-dev
+#export HEYYOU_EXTERNAL_WSPREFIX=$HEYYOU_EXTERNAL_PREFIX
+##export HEYYOU_EXTERNAL_WSPREFIX=/wsheyyou-dev
 
 echo ""
 echo "Hey You Server Settings:"
