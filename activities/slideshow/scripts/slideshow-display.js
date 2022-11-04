@@ -117,7 +117,8 @@ function activateSlideshow(slideshowName,slidesOverviewJSON)
 }
 
 function loadSlideshow(displayPrefix,slideshowName)
-{        
+{
+    console.log(`loadSlideshow(): displayPrefix=${displayPrefix}, slideshowName=${slideshowName}`);
     //slideDir = "/slides/" + slideshowName;
     slideDir = displayPrefix + "/slides/" + slideshowName;
 
