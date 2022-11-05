@@ -2,6 +2,7 @@ const fs      = require('fs');
 const path    = require('path');
 const express = require('express');
 const session = require('express-session');
+const cors    = require('cors');
 const http    = require('http');
 const cors    = require('cors');
 
@@ -190,11 +191,15 @@ function getStaticActivity(req)
 
 function getActivity(req)
 {
-    let display = findHostDisplayByRoomID(getCookie(req,"roomID"));
+    let roomID = getCookie(req,"roomID");
+    let display = findHostDisplayByRoomID(roomID);
     if (display != undefined) {
 	let activity = display.getCurrentActivity();
         return activity;
     }
+
+    //console.log("**** Failed to find display for cookie retrieved roomID: " + roomID);
+    //console.log(req);
     
     return undefined;
 }
@@ -1133,6 +1138,7 @@ io.on('connection', (socket, host) => {
 		    var optUrlParams = args[2];
                     var callback     = args[3];
 
+		console.log(`ws cmd=displaySelectActivity: roomID=${roomID}, newActivity=${newActivity} optUrlParams=${optUrlParams}`);
                     if (newActivity == "/") {
 			newActivity = defaultActivity;                    
 		    }
