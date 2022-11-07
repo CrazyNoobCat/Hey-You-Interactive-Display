@@ -5,6 +5,7 @@
 //var IAmBoredTimeoutMSecs = 15 * 1000;
 //var IAmBoredTimeoutMSecs = 2 * 60 * 1000; // 2 mins
 var IAmBoredTimeoutMSecs = 45 * 1000; // 45 secs
+//var IAmBoredTimeoutMSecs = 60 * 60 * 1000; // 1 hour!
 
 
 function getURLParams()
@@ -79,7 +80,6 @@ function displayJoinURL(displayPrefixURL,roomID,roomName, qrDim,roomIdElemId,roo
     var joinRoomURL = displayPrefixURL + '/join/' + roomNameSafe;
     var joinRoomURLEncoded = encodeURIComponent(joinRoomURL)
     
-    //var url = '/qrcode/?data=' + joinRoomURLEncoded + '&size=' + qrDim;
     var url = 'qrcode/?data=' + joinRoomURLEncoded + '&size=' + qrDim;
     
     var $img = $('<img>').attr('src',url);
