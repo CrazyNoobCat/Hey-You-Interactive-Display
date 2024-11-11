@@ -1,5 +1,5 @@
 /node_modules
-heyyou-server.log
+heyyou-server.log*
 heyyou-server.pid
 service.d/heyyou.service
 /etc/activity-launcher-conf.json
