@@ -440,14 +440,14 @@ app.use(cors());
 /* Restful HTTP responses triggered by incoming GET requests */
 
 app.get('/join/:roomIdOrName', (req, res) => {
-    console.log("Room join request: " + req.params.roomIdOrName);
+    console.log("Room join request: '" + req.params.roomIdOrName + "'");
     if (findHostDisplayByRoomID(req.params.roomIdOrName) != undefined) {
 	let roomID = req.params.roomIdOrName;
 
 	// Create a cookie which only works on this site and lasts for the default timeout
         res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
         res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
-        console.log("New device joined with roomID: " + roomID);
+        console.log("New device joined with roomID: '" + roomID + "'");
     }
     else {
 	let display = findHostDisplayByName(req.params.roomIdOrName);	
@@ -458,7 +458,7 @@ app.get('/join/:roomIdOrName', (req, res) => {
             // Create a cookie which only works on this site and lasts for the default timeout
 	    res.cookie('roomID', roomID, {sameSite: true, expires: new Date(Date.now() + (defaultCookieTimeoutMSecs))}); 
             res.redirect(httpLocalServer+'/controller'); // Prevents making a second cookie for a javascript file
-            console.log("New device joined with roomName: " + roomName);
+            console.log("New device joined with roomName: '" + roomName +"'");
 	}  
 	else {
 	    // If room doesn't exit
