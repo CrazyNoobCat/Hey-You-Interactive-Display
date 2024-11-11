@@ -125,7 +125,11 @@ function loadSlideshow(displayPrefix,slideshowName)
     // The following call goes through the RESTful API, and will
     // generate a JSON data-structure on the fly if one is not
     // present on the file-system
-    $.getJSON(slideDir+"/slidesOverview.json")
+
+    // Used to be a locally formed URL, but when testing in the Tizen TV web simulator
+    // (through an iframe) this was insufficient to work => build full/absolute URL
+    var slide_overview_url = window.location.protocol + "//" + window.location.hostname + slideDir+"/slidesOverview.json";
+    $.getJSON(slide_overview_url)
 	.done(function(jsondata) {
 	    if (jsondata.slides.length > 0) {
 		activateSlideshow(slideshowName,jsondata);
@@ -137,7 +141,7 @@ function loadSlideshow(displayPrefix,slideshowName)
 	.fail(function( jqxhr, textStatus, error ) {
 	    var err = textStatus + ", " + error;
 	    console.error( "Request Failed: " + err );
-	    alert( "Request Failed: " + err );
+	    alert( "loadSlideshow("+slide_overview_url + ") request failed: " + err );
 	});
 }
 
