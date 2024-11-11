@@ -25,7 +25,7 @@ echo "  Local connection: http://$HEYYOU_LOCAL_HOST:$HEYYOU_LOCAL_PORT"
 if [ "x$HEYYOU_EXTERNAL_PREFIX" != "x" ] ; then
     echo "  External http/https URL prefix: $HEYYOU_EXTERNAL_PREFIX"
 fi
-if [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x" ] && [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x$HEYYOUR_EXTERNAL_WSPREFIX" ] ; then
+if [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x" ] && [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x$HEYYOU_EXTERNAL_WSPREFIX" ] ; then
     echo "  External Web-Socket URL prefix: $HEYYOU_EXTERNAL_PREFIX"
 fi
 echo ""
