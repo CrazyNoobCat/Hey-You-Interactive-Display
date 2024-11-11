@@ -128,7 +128,8 @@ function loadSlideshow(displayPrefix,slideshowName)
 
     // Used to be a locally formed URL, but when testing in the Tizen TV web simulator
     // (through an iframe) this was insufficient to work => build full/absolute URL
-    var slide_overview_url = window.location.protocol + "//" + window.location.hostname + slideDir+"/slidesOverview.json";
+    
+    var slide_overview_url = window.location.protocol + "//" + window.location.host + slideDir+"/slidesOverview.json";
     $.getJSON(slide_overview_url)
 	.done(function(jsondata) {
 	    if (jsondata.slides.length > 0) {
