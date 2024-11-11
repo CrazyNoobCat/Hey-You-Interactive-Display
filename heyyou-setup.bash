@@ -30,7 +30,7 @@ if [ "x$HEYYOU_EXTERNAL_WSPREFIX" != "x" ] && [ "x$HEYYOU_EXTERNAL_WSPREFIX" != 
 fi
 echo ""
    
-nodejs_package=node-v16.13.2
+nodejs_package=node-v22.11.0
 
 os_full_lc=`uname -s | tr '[:upper:]' '[:lower:]'`
 os_root=${os_full_lc%%_*}
